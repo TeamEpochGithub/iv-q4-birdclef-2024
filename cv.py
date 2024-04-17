@@ -92,10 +92,8 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     # splitter_data = setup_splitter_data()
     logger.info("Using splitter to split data into train and test sets.")
 
-
     if not isinstance(y, np.ndarray):
         raise TypeError("y should be a numpy array")
-
 
     oof_predictions = np.zeros(y.shape, dtype=np.float64)
 
