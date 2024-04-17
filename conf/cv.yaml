@@ -1,0 +1,25 @@
+defaults:
+  - base_cv
+  - hydra/logging
+  - model: run # Add models or ensembles
+  - wandb: train
+
+###############
+#             #
+#    PATHS    #
+#             #
+###############
+processed_path: data/processed
+raw_path: data/raw
+cache_path: data/cache
+data_path: data/raw/train_data/dummy.npy
+
+scorer:
+  _target_: src.scoring.accuracy.Accuracy # Add scorer
+  name: accuracy
+splitter:
+  _target_: sklearn.model_selection.KFold
+  n_splits: 6
+  shuffle: false
+allow_multiple_instances: true
+save_folds: true
