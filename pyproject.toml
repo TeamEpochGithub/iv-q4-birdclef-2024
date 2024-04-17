@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 py-modules = ["dashboard", "external", "src", "cv", "run_dashboard", "submit", "train"]
 
 [project]
-name = "apoch"
+name = "q4-bird-clef"
 version = "0.0.1"
 description = "Team Epoch's base application for competing in machine learning competitions"
 license = { file = "LICENSE" }
