@@ -39,7 +39,7 @@ def run_train(cfg: DictConfig) -> None:
 
 def run_train_cfg(cfg: DictConfig) -> None:
     """Train a model pipeline with a train-test split."""
-    print_section_separator("Q? - 'competition' - Training")
+    print_section_separator("Q4 - BirdCLEF - Training")
 
     import coloredlogs
 
