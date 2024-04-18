@@ -15,8 +15,8 @@ cache_path: data/cache
 data_path: data/raw/train_data/dummy.npy
 
 scorer:
-  _target_: src.scoring.accuracy.Accuracy # Add scorer
-  name: accuracy
+  _target_: src.scoring.rocauc.ROCAUC # Add scorer
+  name: rocauc
 splitter:
   _target_: sklearn.model_selection.KFold
   n_splits: 6

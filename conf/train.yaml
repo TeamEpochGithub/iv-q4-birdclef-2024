@@ -19,8 +19,8 @@ data_path: data/raw/train_audio
 test_size: 0
 
 scorer:
-  _target_: src.scoring.accuracy.Accuracy # Add scorer
-  name: accuracy
+  _target_: src.scoring.rocauc.ROCAUC # Add scorer
+  name: rocauc
 splitter:
   _target_: sklearn.model_selection.KFold
   n_splits: 0 # Set to 0 if you want train full.
