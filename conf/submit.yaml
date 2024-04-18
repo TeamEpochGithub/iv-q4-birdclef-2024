@@ -11,7 +11,6 @@ defaults:
 #             #
 ###############
 
-result_path: submission
 
 # Local paths
 processed_path: data/processed
@@ -25,4 +24,3 @@ result_path: submission
 #data_path: kaggle/input/birdclef-2024/test_soundscapes/
 #species_path: kaggle/input/birdclef-2024/train_audio/
 #result_path: kaggle/working
-

@@ -1,15 +1,16 @@
-""" This file contains the function to_submission_format() which converts the output of the model to the submission format. """
+"""File contains the function to_submission_format() which converts the output of the model to the submission format."""
+
+import os
 
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-import os
-import librosa
+
 from src.utils.logger import logger
 
 
 def to_submission_format(predictions: npt.NDArray[np.float32], test_path: str, species_path: str) -> pd.DataFrame:
-    """Converts the predictions to the submission format.
+    """Convert the predictions to the submission format.
 
     :param predictions (np.ndarray): The predictions of the model.
     :param test_path (str): The path to the test data.
@@ -18,28 +19,30 @@ def to_submission_format(predictions: npt.NDArray[np.float32], test_path: str, s
     :return: The predictions in the submission format.
 
     """
-    file_list = [f for f in sorted(os.listdir(test_path))]
-    file_list = [file.split('.')[0] for file in file_list if file.endswith('.ogg')]
-    logger.info('Number of test soundscapes:', len(file_list))
+    file_list = sorted(os.listdir(test_path))
+    file_list = [file.split(".")[0] for file in file_list if file.endswith(".ogg")]
+    logger.info("Number of test soundscapes:", len(file_list))
 
     species_list = sorted(os.listdir(species_path))
 
-    #Create a dataframe with row_id and species columns.
-    assert predictions.shape[1] == len(species_list), 'Number of species in predictions does not match the number of species in the dataset.'
-    assert predictions.shape[0] == len(file_list) * 48, 'Number of predictions does not match the number of test soundscapes.'
+    if predictions.shape[1] == len(species_list):
+        raise ValueError("Number of species in predictions does not match the number of species in the dataset.")
 
-    #Convert predictions to dataframe with species as columns and row_id as index.
+    if predictions.shape[0] == len(file_list) * 48:
+        raise ValueError("Number of predictions does not match the number of test soundscapes.")
+
+    # Convert predictions to dataframe with species as columns and row_id as index.
     submission = pd.DataFrame(predictions, columns=species_list)
-    submission['row_id'] = [f'{file}_{(i + 1) * 5}' for file in file_list for i in range(48)]
+    submission["row_id"] = [f"{file}_{(i + 1) * 5}" for file in file_list for i in range(48)]
 
     # Convert our results to csv
-    print((submission.head(50)))
+    logger.info(submission.head(50))
     return submission
 
 
-if __name__ == "__main__":
-    test_path = "data/test_soundscapes"
-    species_path = "data/species"
-    predictions = np.random.rand(48 * 3, 182)
-    to_submission_format(predictions, "../../data/raw/test_soundscapes", "../../data/raw/train_audio")
-    print("Test passed.")
+# if __name__ == "__main__":
+#     test_path = "data/test_soundscapes"
+#     species_path = "data/species"
+#     predictions = np.random.rand(48 * 3, 182)
+#     to_submission_format(predictions, "../../data/raw/test_soundscapes", "../../data/raw/train_audio")
+#     print("Test passed.")

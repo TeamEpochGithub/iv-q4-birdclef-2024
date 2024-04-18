@@ -4,7 +4,6 @@ import warnings
 from pathlib import Path
 
 import hydra
-import pandas as pd
 from epochalyst.logging.section_separator import print_section_separator
 from hydra.core.config_store import ConfigStore
 from omegaconf import DictConfig
