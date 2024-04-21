@@ -1,7 +1,7 @@
 """Common type definitions for the project."""
 from dataclasses import dataclass
+import dask.array as da
 
-import dask as da
 import pandas as pd
 
 
@@ -20,14 +20,14 @@ class XData:
 
     """
 
-    meta_2024: pd.Dataframe
-    meta_2023: pd.Dataframe | None
-    meta_2022: pd.Dataframe | None
-    meta_2021: pd.Dataframe | None
-    bird_2024: dict[str, da.Array] | None
-    bird_2023: dict[str, da.Array] | None
-    bird_2022: dict[str, da.Array] | None
-    bird_2021: dict[str, da.Array] | None
+    meta_2024: pd.DataFrame
+    meta_2023: pd.DataFrame | None = None
+    meta_2022: pd.DataFrame | None = None
+    meta_2021: pd.DataFrame | None = None
+    bird_2024: dict[str, da.Array] | None = None
+    bird_2023: dict[str, da.Array] | None = None
+    bird_2022: dict[str, da.Array] | None = None
+    bird_2021: dict[str, da.Array] | None = None
 
     def __len__(self) -> int:
         """Return the length of the meta attribute."""

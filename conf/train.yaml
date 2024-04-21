@@ -17,7 +17,7 @@ data_path: data/raw/train_audio
 metadata_path: data/raw/train_metadata.csv
 
 # Do this if you want train full.
-test_size: 0
+test_size: 0.2
 
 scorer:
   _target_: src.scoring.accuracy.Accuracy # Add scorer
