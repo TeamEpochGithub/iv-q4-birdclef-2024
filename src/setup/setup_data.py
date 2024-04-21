@@ -5,13 +5,15 @@
 """
 from typing import Any
 
-import numpy as np
+import pandas as pd
+
+from src.typing.typing import XData
 
 
 def setup_train_x_data(path: str) -> Any:  # noqa: ANN401
     """Create train x data for pipeline.
 
-    :param path: Usually raw path is a parameter
+    :param path: Metadata path
     :param cache_path: Path to save the cache
 
     :return: x data
@@ -44,7 +46,12 @@ def setup_train_x_data(path: str) -> Any:  # noqa: ANN401
     #         logger.info(f"Saved pickle cache for Audio data at: {cache_path / 'audio_cache.pkl'}")
     #
     # return audio_data
-    return np.load(path)[:, :-1]
+
+    # Load the dataframe from the path
+
+    metadata = pd.read_csv(path)
+    metadata["audioname"] = metadata["filename"].split("/")[-1].split(".")[0]
+    return XData(meta_2024=metadata)
 
 
 def setup_train_y_data(path: str) -> Any:  # noqa: ANN401
@@ -53,8 +60,9 @@ def setup_train_y_data(path: str) -> Any:  # noqa: ANN401
     :param path: Usually raw path is a parameter
     :return: y data
     """
-    # Load the numpy file from the path
-    return np.load(path)[:, -1].astype(int)
+    metadata = pd.read_csv(path)
+    metadata["audioname"] = metadata["filename"].split("/")[-1].split(".")[0]
+    return metadata
 
 
 def setup_inference_data(path: str) -> Any:  # noqa: ANN401
