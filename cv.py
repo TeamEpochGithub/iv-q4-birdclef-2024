@@ -97,7 +97,7 @@ def run_cv_cfg(cfg: DictConfig) -> None:
 
     oof_predictions = np.zeros(y.shape, dtype=np.float64)
 
-    for fold_no, (train_indices, test_indices) in enumerate(instantiate(cfg.splitter).split(y)):
+    for fold_no, (train_indices, test_indices) in enumerate(instantiate(cfg.splitter).split(y, y["primary_label"])):
         score, predictions = run_fold(fold_no, X, y, train_indices, test_indices, cfg, scorer, output_dir, cache_args)
         scores.append(score)
 

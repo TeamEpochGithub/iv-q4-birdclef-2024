@@ -50,7 +50,8 @@ def setup_train_x_data(path: str) -> Any:  # noqa: ANN401
     # Load the dataframe from the path
 
     metadata = pd.read_csv(path)
-    metadata["audioname"] = metadata["filename"].split("/")[-1].split(".")[0]
+    metadata['samplename'] = metadata.filename.map(lambda x: x.split('/')[0] + '-' + x.split('/')[-1].split('.')[0])
+
     return XData(meta_2024=metadata)
 
 
@@ -61,7 +62,7 @@ def setup_train_y_data(path: str) -> Any:  # noqa: ANN401
     :return: y data
     """
     metadata = pd.read_csv(path)
-    metadata["audioname"] = metadata["filename"].split("/")[-1].split(".")[0]
+    metadata['samplename'] = metadata.filename.map(lambda x: x.split('/')[0] + '-' + x.split('/')[-1].split('.')[0])
     return metadata
 
 
