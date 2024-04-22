@@ -79,10 +79,10 @@ def run_cv_cfg(cfg: DictConfig) -> None:
 
     X, y = None, None
     if not x_cache_exists:
-        X = setup_train_x_data(cfg.data_path)
+        X = setup_train_x_data(cfg.raw_path, cfg.metadata_path)
 
     if not y_cache_exists:
-        y = setup_train_y_data(cfg.data_path)
+        y = setup_train_y_data(cfg.metadata_path)
 
     # Instantiate scorer
     scorer = instantiate(cfg.scorer)
@@ -97,7 +97,7 @@ def run_cv_cfg(cfg: DictConfig) -> None:
 
     oof_predictions = np.zeros(y.shape, dtype=np.float64)
 
-    for fold_no, (train_indices, test_indices) in enumerate(instantiate(cfg.splitter).split(y)):
+    for fold_no, (train_indices, test_indices) in enumerate(instantiate(cfg.splitter).split(y, y["primary_label"])):
         score, predictions = run_fold(fold_no, X, y, train_indices, test_indices, cfg, scorer, output_dir, cache_args)
         scores.append(score)
 

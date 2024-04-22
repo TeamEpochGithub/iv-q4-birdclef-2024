@@ -41,7 +41,7 @@ def run_submit(cfg: DictConfig) -> None:
     model_pipeline = setup_pipeline(cfg, is_train=False)
 
     # Load the test data
-    X = setup_inference_data(cfg.data_path)
+    X = setup_inference_data(cfg.raw_path, cfg.data_path)
 
     # Predict on the test data
     logger.info("Making predictions...")

@@ -61,12 +61,12 @@ def run_train_cfg(cfg: DictConfig) -> None:
     # Cache arguments for x_sys
     processed_data_path = Path(cfg.processed_path)
     processed_data_path.mkdir(parents=True, exist_ok=True)
-    cache_args = {
-        "output_data_type": "numpy_array",
-        "storage_type": ".pkl",
-        "storage_path": f"{processed_data_path}",
-    }
-
+    # cache_args = {
+    #     "output_data_type": "numpy_array",
+    #     "storage_type": ".pkl",
+    #     "storage_path": f"{processed_data_path}",
+    # }
+    cache_args = {}  # type: ignore[var-annotated]
     # Read the data if required and split it in X, y
     x_cache_exists = model_pipeline.get_x_cache_exists(cache_args)
     y_cache_exists = model_pipeline.get_y_cache_exists(cache_args)
@@ -74,9 +74,9 @@ def run_train_cfg(cfg: DictConfig) -> None:
     X, y = None, None
     if not x_cache_exists:
         # X = setup_train_x_data(cfg.data_path, cfg.cache_path)
-        X = setup_train_x_data(cfg.data_path)
+        X = setup_train_x_data(cfg.raw_path, cfg.metadata_path)
     if not y_cache_exists:
-        y = setup_train_y_data(cfg.data_path)
+        y = setup_train_y_data(cfg.metadata_path)
 
     # For this simple splitter, we only need y.
     if cfg.test_size == 0:
@@ -87,7 +87,7 @@ def run_train_cfg(cfg: DictConfig) -> None:
         fold = -1
     else:
         logger.info("Using splitter to split data into train and test sets.")
-        train_indices, test_indices = next(instantiate(cfg.splitter).split(y))
+        train_indices, test_indices = next(instantiate(cfg.splitter).split(y, y["primary_label"]))  # type: ignore[index]
         fold = 0
 
     logger.info(f"Train/Test size: {len(train_indices)}/{len(test_indices)}")

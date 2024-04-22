@@ -3,7 +3,9 @@ defaults:
   - _self_
 
 x_sys:
-
+  steps:
+    - _target_: src.modules.transformation.nan_to_zero.NanToZero
+      years: ["2024"]
 y_sys:
 
 train_sys:

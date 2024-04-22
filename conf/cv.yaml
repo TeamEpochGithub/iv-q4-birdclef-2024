@@ -18,8 +18,9 @@ scorer:
   _target_: src.scoring.rocauc.ROCAUC # Add scorer
   name: rocauc
 splitter:
-  _target_: sklearn.model_selection.KFold
-  n_splits: 6
-  shuffle: false
+  _target_: sklearn.model_selection.StratifiedKFold
+  n_splits: 5 # Set to 0 if you want train full.
+  shuffle: true
+  random_state: 42
 allow_multiple_instances: true
 save_folds: true
