@@ -23,29 +23,28 @@ def setup_train_x_data(raw_path: str, path_2024: str) -> Any:  # noqa: ANN401
 
     :return: x data
     """
-    # TODO Load dataset from previous years (Bird 2023 and earlier)
+    # TODO(someone?): Load dataset from previous years (Bird 2023 and earlier)
 
     # Load the dataframe from the path (Bird 2024)
     metadata_2024 = pd.read_csv(path_2024)
-    metadata_2024['samplename'] = metadata_2024.filename.map(lambda x: x.split('/')[0] + '-' + x.split('/')[-1].split('.')[0])
+    metadata_2024["samplename"] = metadata_2024.filename.map(lambda x: x.split("/")[0] + "-" + x.split("/")[-1].split(".")[0])
 
     # Load the bird_2024 data
     filenames_2024 = metadata_2024.filename
     filenames_2024 = [raw_path + filename for filename in filenames_2024]
 
-    bird_2024 = []
-    # Load the bird_2024 data lazily
-    for i in range(len(filenames_2024)):
-        bird_2024.append(load_audio(filenames_2024[i]))
-
-    bird_2024 = np.array(bird_2024)
+    bird_2024 = np.array([load_audio(filename) for filename in filenames_2024])
 
     return XData(meta_2024=metadata_2024, bird_2024=bird_2024)
 
 
 @delayed
 def load_audio(path: str) -> npt.NDArray[np.float32]:
-    """Load audio data lazily using librosa"""
+    """Load audio data lazily using librosa.
+
+    :param path: Path to the audio file
+    :return: Audio data
+    """
     return librosa.load(path, sr=32000, dtype=np.float32)[0]
 
 
@@ -56,17 +55,19 @@ def setup_train_y_data(path: str) -> Any:  # noqa: ANN401
     :return: y data
     """
     metadata = pd.read_csv(path)
-    metadata['samplename'] = metadata.filename.map(lambda x: x.split('/')[0] + '-' + x.split('/')[-1].split('.')[0])
+    metadata["samplename"] = metadata.filename.map(lambda x: x.split("/")[0] + "-" + x.split("/")[-1].split(".")[0])
     return metadata
 
 
-def setup_inference_data(path: str) -> Any:  # noqa: ANN401
+def setup_inference_data(raw_path: str, path: str) -> Any:  # noqa: ANN401
     """Create data for inference with pipeline.
 
+    :param raw_path: Raw path
     :param path: Usually raw path is a parameter
     :return: Inference data
     """
-    return setup_train_x_data(path)
+    #
+    return setup_train_x_data(raw_path, path)
 
 
 def setup_splitter_data() -> Any:  # noqa: ANN401

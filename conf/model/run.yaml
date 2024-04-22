@@ -4,9 +4,8 @@ defaults:
 
 x_sys:
   steps:
-    - _target_: src.modules.transformation.load_data.LoadXData
-      bird_2024: data/raw/train_audio/
-
+    - _target_: src.modules.transformation.nan_to_zero.NanToZero
+      years: ["2024"]
 y_sys:
 
 train_sys:

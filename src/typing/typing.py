@@ -1,5 +1,6 @@
 """Common type definitions for the project."""
 from dataclasses import dataclass
+from typing import Any
 
 import numpy.typing as npt
 import pandas as pd
@@ -23,10 +24,10 @@ class XData:
     meta_2023: pd.DataFrame | None = None
     meta_2022: pd.DataFrame | None = None
     meta_2021: pd.DataFrame | None = None
-    bird_2024: npt.NDArray[object] | None = None
-    bird_2023: npt.NDArray[object] | None = None
-    bird_2022: npt.NDArray[object] | None = None
-    bird_2021: npt.NDArray[object] | None = None
+    bird_2024: npt.NDArray[Any] | None = None
+    bird_2023: npt.NDArray[Any] | None = None
+    bird_2022: npt.NDArray[Any] | None = None
+    bird_2021: npt.NDArray[Any] | None = None
 
     def __repr__(self) -> str:
         """Return a string representation of the object."""

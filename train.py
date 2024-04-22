@@ -5,8 +5,8 @@ from contextlib import nullcontext
 from pathlib import Path
 
 import hydra
-from distributed import Client
 import wandb
+from distributed import Client
 from epochalyst.logging.section_separator import print_section_separator
 from hydra.core.config_store import ConfigStore
 from hydra.utils import instantiate
@@ -89,7 +89,7 @@ def run_train_cfg(cfg: DictConfig) -> None:
         fold = -1
     else:
         logger.info("Using splitter to split data into train and test sets.")
-        train_indices, test_indices = next(instantiate(cfg.splitter).split(y, y["primary_label"]))
+        train_indices, test_indices = next(instantiate(cfg.splitter).split(y, y["primary_label"]))  # type: ignore[index]
         fold = 0
 
     logger.info(f"Train/Test size: {len(train_indices)}/{len(test_indices)}")
