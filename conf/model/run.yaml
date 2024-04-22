@@ -3,6 +3,9 @@ defaults:
   - _self_
 
 x_sys:
+  steps:
+    - _target_: src.modules.transformation.load_data.LoadXData
+      bird_2024: data/raw/train_audio/
 
 y_sys:
 
