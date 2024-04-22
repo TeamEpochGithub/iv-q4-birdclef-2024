@@ -1,4 +1,5 @@
 """Example transformation block for the transformation pipeline."""
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
@@ -9,6 +10,7 @@ from src.modules.transformation.verbose_transformation_block import VerboseTrans
 from src.typing.typing import XData
 
 
+@dataclass
 class NanToZero(VerboseTransformationBlock):
     """An example transformation block for the transformation pipeline."""
 

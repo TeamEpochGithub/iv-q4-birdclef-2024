@@ -6,7 +6,6 @@ from pathlib import Path
 
 import hydra
 import wandb
-from distributed import Client
 from epochalyst.logging.section_separator import print_section_separator
 from hydra.core.config_store import ConfigStore
 from hydra.utils import instantiate
@@ -34,8 +33,7 @@ def run_train(cfg: DictConfig) -> None:
     """Train a model pipeline with a train-test split. Entry point for Hydra which loads the config file."""
     # Run the train config with an optional lock
     optional_lock = Lock if not cfg.allow_multiple_instances else nullcontext
-    with optional_lock(), Client() as client:
-        logger.info(f"Client: {client}")
+    with optional_lock():
         run_train_cfg(cfg)
 
 
@@ -63,12 +61,12 @@ def run_train_cfg(cfg: DictConfig) -> None:
     # Cache arguments for x_sys
     processed_data_path = Path(cfg.processed_path)
     processed_data_path.mkdir(parents=True, exist_ok=True)
-    cache_args = {
-        "output_data_type": "numpy_array",
-        "storage_type": ".pkl",
-        "storage_path": f"{processed_data_path}",
-    }
-
+    # cache_args = {
+    #     "output_data_type": "numpy_array",
+    #     "storage_type": ".pkl",
+    #     "storage_path": f"{processed_data_path}",
+    # }
+    cache_args = {}  # type: ignore[var-annotated]
     # Read the data if required and split it in X, y
     x_cache_exists = model_pipeline.get_x_cache_exists(cache_args)
     y_cache_exists = model_pipeline.get_y_cache_exists(cache_args)
