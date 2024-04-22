@@ -79,7 +79,7 @@ def run_cv_cfg(cfg: DictConfig) -> None:
 
     X, y = None, None
     if not x_cache_exists:
-        X = setup_train_x_data(cfg.metadata_path)
+        X = setup_train_x_data(cfg.raw_path, cfg.metadata_path)
 
     if not y_cache_exists:
         y = setup_train_y_data(cfg.metadata_path)
@@ -119,15 +119,15 @@ def run_cv_cfg(cfg: DictConfig) -> None:
 
 
 def run_fold(
-    fold_no: int,
-    X: Any,  # noqa: ANN401
-    y: Any,  # noqa: ANN401
-    train_indices: list[int],
-    test_indices: list[int],
-    cfg: DictConfig,
-    scorer: Scorer,
-    output_dir: Path,
-    cache_args: dict[str, Any],
+        fold_no: int,
+        X: Any,  # noqa: ANN401
+        y: Any,  # noqa: ANN401
+        train_indices: list[int],
+        test_indices: list[int],
+        cfg: DictConfig,
+        scorer: Scorer,
+        output_dir: Path,
+        cache_args: dict[str, Any],
 ) -> tuple[float, Any]:
     """Run a single fold of the cross validation.
 
