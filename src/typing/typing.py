@@ -32,3 +32,25 @@ class XData:
     def __repr__(self) -> str:
         """Return a string representation of the object."""
         return "XData"
+
+    def __getitem__(self, key) -> "XData":
+        sliced_meta_2024 = self.meta_2024.iloc[key]
+        sliced_bird_2024 = self.bird_2024[key]
+        sliced_meta_2023 = self.meta_2023.iloc[key]
+        sliced_bird_2023 = self.bird_2023[key]
+        sliced_meta_2022 = self.meta_2022.iloc[key]
+        sliced_bird_2022 = self.bird_2022[key]
+        sliced_meta_2021 = self.meta_2021.iloc[key]
+        sliced_bird_2021 = self.bird_2021[key]
+        return XData(
+            meta_2024=sliced_meta_2024,
+            meta_2023=sliced_meta_2023,
+            meta_2022=sliced_meta_2022,
+            meta_2021=sliced_meta_2021,
+            bird_2024=sliced_bird_2024,
+            bird_2023=sliced_bird_2023,
+            bird_2022=sliced_bird_2022,
+            bird_2021=sliced_bird_2021
+        )
+
+
