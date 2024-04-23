@@ -25,8 +25,8 @@ class ROCAUC(Scorer):
         :return: The ROC AUC score.
         """
         # Convert both solution and submission to a dataframe
-        solution = pd.DataFrame(y_true)
-        submission = pd.DataFrame(y_pred)
+        solution = y_true
+        submission = pd.DataFrame(np.clip(y_pred,0,1), columns=solution.columns)
 
         if not pd.api.types.is_numeric_dtype(submission.values):
             bad_dtypes = {x: submission[x].dtype for x in submission.columns if not pd.api.types.is_numeric_dtype(submission[x])}

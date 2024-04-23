@@ -27,18 +27,20 @@ class MainTrainer(TorchTrainer, Logger):
             wandb.log_artifact(model_artifact)
 
     def create_datasets(self, x: XData, y:YData, train_indices: list[int], test_indices: list[int]):
+        # TODO rename to xtrain and ytrain etc.
         train_data = x[train_indices]
         train_labels = y.label_2024.iloc[train_indices]
         
         test_data = x[test_indices]
         test_labels = y.label_2024.iloc[test_indices]
 
-        train_dataset = DaskDataset(train_data, train_labels, year=self.year, **self.dataset_args)
+        train_dataset = DaskDataset(X=train_data, y=train_labels, year=self.year, **self.dataset_args)
         if test_indices is not None:
             test_dataset_args = self.dataset_args.copy()
-            del test_dataset_args["augmentations_1d"]
-            del test_dataset_args["augmentations_2d"]
-            test_dataset = DaskDataset(test_data, test_labels, year=self.year, **test_dataset_args)
+            # TODO fix this
+            # test_dataset_args["aug_1d"] = None
+            # test_dataset_args["aug_2d"] = None
+            test_dataset = DaskDataset(X=test_data, y=test_labels, year=self.year, **test_dataset_args)
         else:
             test_dataset = None
 

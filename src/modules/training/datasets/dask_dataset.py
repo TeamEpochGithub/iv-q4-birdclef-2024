@@ -7,6 +7,7 @@ from typing import Any
 import dask
 import numpy as np
 import numpy.typing as npt
+import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
@@ -20,10 +21,13 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
     labeler: Callable 
     sampler: Callable
     X: XData | None = None
-    y: YData | None = None
+    # TODO make this work with YData
+    y: pd.DataFrame | None = None
     year: str = "2024"
     to_2d: Callable | None = None
     filter_: Callable | None = None
+    aug_1d = None
+    aug_2d = None   
 
 
     def __post_init__(self):
@@ -40,32 +44,33 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
     def __len__(self) -> int:
         """Get the length of the dataset."""
         # Trick the dataloader into thinking the dataset is smaller than it is
-        return len(getattr(self.y, f"label_{self.year}"))
+        return len(self.y)
 
     def __getitems__(self, indices: list[int]) -> tuple[Any, Any]:
         """Get multiple items from the dataset and apply augmentations if necessary."""
         # TODO Use label .index thing
         # Get a window from each sample 
-        x_window = self.sampler(getattr(self.X, f"bird_{self.year}")[indices])
+        x_window = []
+        for i in indices:
+            x_window.append(self.sampler(getattr(self.X, f"bird_{self.year}")[i]))
 
         x_batch = dask.compute(*x_window)
         x_batch = np.stack(x_batch, axis=0)
         x_tensor = torch.from_numpy(x_batch)
-        # TODO convert to numpy and fix this
         
-        y_batch = getattr(self.y, f"labels_2024").iloc[indices]
+        y_batch = self.y.iloc[indices]
         y_batch = y_batch.to_numpy()
         y_tensor = torch.from_numpy(y_batch)
 
         # Apply augmentations if necessary
-        if self.augmentations_1d is not None:
-            x_tensor, y_tensor = self.augmentations_1d(x_tensor.to("cuda"), y_tensor.to("cuda"))
+        if self.aug_1d is not None:
+            x_tensor, y_tensor = self.aug_1d(x_tensor.to("cuda"), y_tensor.to("cuda"))
         # Convert to 2D if method is specified
         if self.to_2d is not None:
             x_tensor = self.to_2d(x_tensor)
             # Only apply 2D augmentations if converted to 2D
-            if self.augmentations_2d is not None:
-                x_tensor, y_tensor = self.augmentations_2d(x_tensor, y_tensor)        
+            if self.aug_2d is not None:
+                x_tensor, y_tensor = self.aug_2d(x_tensor, y_tensor)        
 
 
         return x_tensor, y_tensor

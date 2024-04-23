@@ -9,5 +9,5 @@ class Reshape:
     shape: list[int]
 
     def __call__(self, input: torch.Tensor):
-        # TODO will implement later for now to test functionality left as no op
-        return input
+        
+        return input.reshape(input.shape[0], 1, *self.shape)

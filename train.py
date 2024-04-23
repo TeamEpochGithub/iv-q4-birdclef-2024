@@ -74,7 +74,7 @@ def run_train_cfg(cfg: DictConfig) -> None:
     X = None
     if not x_cache_exists:
         # X = setup_train_x_data(cfg.data_path, cfg.cache_path)
-        X = setup_train_x_data(cfg.raw_path, cfg.metadata_path)
+        X = setup_train_x_data(cfg.data_path, cfg.metadata_path)
 
     # If not cache exists, we need to load the data
     y = setup_train_y_data(cfg.metadata_path)
@@ -102,7 +102,7 @@ def run_train_cfg(cfg: DictConfig) -> None:
     if len(test_indices) > 0:
         print_section_separator("Scoring")
         scorer = instantiate(cfg.scorer)
-        score = scorer(y.meta_2024[test_indices], predictions[test_indices])
+        score = scorer(y.label_2024.iloc[test_indices], predictions)
         logger.info(f"Score: {score}")
 
         if wandb.run:
