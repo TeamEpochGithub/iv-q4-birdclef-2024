@@ -4,8 +4,8 @@ from dataclasses import dataclass
 import torch
 
 @dataclass
-class PSDFilter:
-    threshold: 1
+class PSDLabeler:
+    threshold = 1
 
     def __call__(self, x, y):
         # Compute the power

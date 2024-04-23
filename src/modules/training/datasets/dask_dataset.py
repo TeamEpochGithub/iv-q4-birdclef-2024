@@ -10,20 +10,21 @@ import numpy.typing as npt
 import torch
 from torch.utils.data import Dataset
 
-from src.typing.typing import XData
+from src.typing.typing import XData, YData
 
 
 @dataclass
 class DaskDataset(Dataset):  # type: ignore[type-arg]
     """Dask dataset to convert the data to spectrograms."""
 
+    labeler: Callable 
+    sampler: Callable
     X: XData | None = None
     y: YData | None = None
     year: str = "2024"
-    sampler: Callable
     to_2d: Callable | None = None
     filter_: Callable | None = None
-    labeler: Callable 
+
 
     def __post_init__(self):
         # ie. keep grade >= 4, 

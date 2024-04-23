@@ -1,5 +1,5 @@
 """Module for example training block."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 import pandas as pd
@@ -10,14 +10,14 @@ from src.modules.logging.logger import Logger
 from src.modules.training.datasets.dask_dataset import DaskDataset
 import numpy as np
 
-from src.typing.typing import XData
-from src.modules.training.datasets.sampler.crop_or_pad import CropOrPad
+from src.typing.typing import XData, YData
 
 @dataclass
 class MainTrainer(TorchTrainer, Logger):
     """Main training block."""
+    dataset_args: dict[str, Any] = field(default_factory=dict)
     year: str = '2024'
-    dataset_args: dict[str, Any]
+    
 
     def save_model_to_external(self) -> None:
         """Save the model to external storage."""
@@ -26,12 +26,12 @@ class MainTrainer(TorchTrainer, Logger):
             model_artifact.add_file(f"{self._model_directory}/{self.get_hash()}.pt")
             wandb.log_artifact(model_artifact)
 
-    def create_datasets(self, x: XData, y:pd.DataFrame, train_indices: dict[str,list[int]], test_indices: dict[str,list[int]]):
-        train_data = x[train_indices[self.year]]
-        train_labels = y.iloc[train_indices[self.year]]
+    def create_datasets(self, x: XData, y:YData, train_indices: list[int], test_indices: list[int]):
+        train_data = x[train_indices]
+        train_labels = y.label_2024.iloc[train_indices]
         
-        test_data = x[test_indices[self.year]]
-        test_labels = y.iloc[test_indices[self.year]]
+        test_data = x[test_indices]
+        test_labels = y.label_2024.iloc[test_indices]
 
         train_dataset = DaskDataset(train_data, train_labels, year=self.year, **self.dataset_args)
         if test_indices is not None:

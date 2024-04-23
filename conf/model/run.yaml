@@ -11,6 +11,16 @@ y_sys:
 train_sys:
   steps:
     - _target_: src.modules.training.main_trainer.MainTrainer
+      year: "2024"
+      dataset_args:
+        sampler: 
+          _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
+          length: 160000
+        to_2d:
+          _target_: src.modules.training.datasets.to_2d.reshape.Reshape
+          shape: [400,400]
+        labeler:
+          _target_: src.modules.training.datasets.labeler.psd_labeler.PSDLabeler
       n_folds: 2 # 0 for train full,
       epochs: 20
       patience: 10
