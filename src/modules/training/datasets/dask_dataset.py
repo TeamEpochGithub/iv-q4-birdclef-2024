@@ -26,12 +26,15 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
     labeler: Callable 
 
     def __post_init__(self):
-        # If there is a filter filter self.y
+        # ie. keep grade >= 4, 
         if self.filter_ is not None:
             setattr(self.y, f"label_{self.year}", self.filter_(self.y)) 
-        # If using torch functions, move their parameters to cuda
+
+        # If using torch functions like Spectrogram, move their parameters to cuda
         if isinstance(self.to_2d, torch.nn.Module):
             self.to_2d = self.to_2d.to('cuda')
+
+        
 
     def __len__(self) -> int:
         """Get the length of the dataset."""
@@ -41,6 +44,7 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
     def __getitems__(self, indices: list[int]) -> tuple[Any, Any]:
         """Get multiple items from the dataset and apply augmentations if necessary."""
         # TODO Use label .index thing
+        # Get a window from each sample 
         x_window = self.sampler(getattr(self.X, f"bird_{self.year}")[indices])
 
         x_batch = dask.compute(*x_window)
