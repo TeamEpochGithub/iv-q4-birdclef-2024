@@ -50,7 +50,7 @@ def load_audio(path: str) -> npt.NDArray[np.float32]:
     return librosa.load(path, sr=32000, dtype=np.float32)[0]
 
 
-def setup_train_y_data(path: str) -> Any:  # noqa: ANN401
+def setup_train_y_data(path: str) -> YData:
     """Create train y data for pipeline.
 
     :param path: Usually raw path is a parameter
