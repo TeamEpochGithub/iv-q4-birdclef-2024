@@ -69,14 +69,15 @@ def run_train_cfg(cfg: DictConfig) -> None:
     cache_args = {}  # type: ignore[var-annotated]
     # Read the data if required and split it in X, y
     x_cache_exists = model_pipeline.get_x_cache_exists(cache_args)
-    y_cache_exists = model_pipeline.get_y_cache_exists(cache_args)
+    # y_cache_exists = model_pipeline.get_y_cache_exists(cache_args)
 
-    X, y = None, None
+    X = None
     if not x_cache_exists:
         # X = setup_train_x_data(cfg.data_path, cfg.cache_path)
         X = setup_train_x_data(cfg.raw_path, cfg.metadata_path)
-    if not y_cache_exists:
-        y = setup_train_y_data(cfg.metadata_path)
+
+    # If not cache exists, we need to load the data
+    y = setup_train_y_data(cfg.metadata_path)
 
     # For this simple splitter, we only need y.
     if cfg.test_size == 0:
@@ -87,7 +88,7 @@ def run_train_cfg(cfg: DictConfig) -> None:
         fold = -1
     else:
         logger.info("Using splitter to split data into train and test sets.")
-        train_indices, test_indices = next(instantiate(cfg.splitter).split(y, y["primary_label"]))  # type: ignore[index]
+        train_indices, test_indices = next(instantiate(cfg.splitter).split(y.meta_2024, y.meta_2024["primary_label"]))  # type: ignore[index]
         fold = 0
 
     logger.info(f"Train/Test size: {len(train_indices)}/{len(test_indices)}")
@@ -101,7 +102,7 @@ def run_train_cfg(cfg: DictConfig) -> None:
     if len(test_indices) > 0:
         print_section_separator("Scoring")
         scorer = instantiate(cfg.scorer)
-        score = scorer(y[test_indices], predictions[test_indices])
+        score = scorer(y.meta_2024[test_indices], predictions[test_indices])
         logger.info(f"Score: {score}")
 
         if wandb.run:
