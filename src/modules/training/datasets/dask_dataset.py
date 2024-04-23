@@ -23,12 +23,15 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
     sampler: Callable
     to_2d: Callable | None = None
     filter_: Callable | None = None
+    labeler: Callable 
 
     def __post_init__(self):
-        # If there is a filter
-        # If using torch functions move their parameters to cuda
-        if isinstance(self.sampler, torch.nn.Module):
-            self.sampler = self.sampler.to('cuda')
+        # If there is a filter filter self.y
+        if self.filter_ is not None:
+            setattr(self.y, f"label_{self.year}", self.filter_(self.y)) 
+        # If using torch functions, move their parameters to cuda
+        if isinstance(self.to_2d, torch.nn.Module):
+            self.to_2d = self.to_2d.to('cuda')
 
     def __len__(self) -> int:
         """Get the length of the dataset."""
