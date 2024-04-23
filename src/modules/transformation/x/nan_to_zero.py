@@ -25,8 +25,10 @@ class NanToZero(VerboseTransformationBlock):
         """
         for year in self.years:
             attribute = f"bird_{year}"
-            if hasattr(data, attribute):
-                setattr(data, attribute, self.nan_to_zero(getattr(data, attribute)))
+            # Check if the attribute exists and is not None
+            if hasattr(data, attribute) and getattr(data, attribute) is not None:
+                for i in range(len(getattr(data, attribute))):
+                    setattr(data, attribute, self.nan_to_zero(getattr(data, attribute)))
         return data
 
     @delayed
@@ -37,3 +39,13 @@ class NanToZero(VerboseTransformationBlock):
         :return: The transformed data
         """
         return np.nan_to_num(data, nan=0.0)
+
+
+if __name__ == "__main__":
+    np_test = np.array([1, 2, 3, np.nan])
+    X_test = XData(bird_2024=np_test, meta_2024=None)
+
+    block = NanToZero(years=["2024"])
+    transformed_data = block.transform(X_test)
+
+    print(transformed_data.bird_2024.compute())
