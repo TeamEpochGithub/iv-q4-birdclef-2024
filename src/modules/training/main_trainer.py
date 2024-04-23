@@ -11,7 +11,7 @@ from src.modules.training.datasets.dask_dataset import DaskDataset
 import numpy as np
 
 from src.typing.typing import XData
-from src.modules.training.datasets.crop_or_pad import CropOrPad
+from src.modules.training.datasets.sampler.crop_or_pad import CropOrPad
 
 @dataclass
 class MainTrainer(TorchTrainer, Logger):
@@ -26,17 +26,18 @@ class MainTrainer(TorchTrainer, Logger):
             model_artifact.add_file(f"{self._model_directory}/{self.get_hash()}.pt")
             wandb.log_artifact(model_artifact)
 
-    def create_datasets(self, x: XData, y:pd.DataFrame, train_indices: list[int], test_indices: list[int]):
-        train_data = x[train_indices]
-        train_labels = y.iloc[train_indices]
+    def create_datasets(self, x: XData, y:pd.DataFrame, train_indices: dict[str,list[int]], test_indices: dict[str,list[int]]):
+        train_data = x[train_indices[self.year]]
+        train_labels = y.iloc[train_indices[self.year]]
         
-        test_data = x[test_indices]
-        test_labels = y.iloc[test_indices]
+        test_data = x[test_indices[self.year]]
+        test_labels = y.iloc[test_indices[self.year]]
 
         train_dataset = DaskDataset(train_data, train_labels, year=self.year, **self.dataset_args)
         if test_indices is not None:
             test_dataset_args = self.dataset_args.copy()
-            del test_dataset_args["augmentations"]
+            del test_dataset_args["augmentations_1d"]
+            del test_dataset_args["augmentations_2d"]
             test_dataset = DaskDataset(test_data, test_labels, year=self.year, **test_dataset_args)
         else:
             test_dataset = None
