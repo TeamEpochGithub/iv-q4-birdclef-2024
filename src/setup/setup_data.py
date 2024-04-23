@@ -3,6 +3,7 @@
 - Since these methods are very competition specific none have been implemented here yet.
 - Usually you'll have one data setup for training and another for making submissions.
 """
+import ast
 from typing import Any
 
 import librosa
@@ -11,7 +12,8 @@ import numpy.typing as npt
 import pandas as pd
 from dask import delayed
 
-from src.typing.typing import XData
+from src.typing.typing import XData, YData
+from src.utils.logger import logger
 
 
 def setup_train_x_data(raw_path: str, path_2024: str) -> Any:  # noqa: ANN401
@@ -52,11 +54,30 @@ def setup_train_y_data(path: str) -> Any:  # noqa: ANN401
     """Create train y data for pipeline.
 
     :param path: Usually raw path is a parameter
-    :return: y data
+    :return: YData object
     """
     metadata = pd.read_csv(path)
     metadata["samplename"] = metadata.filename.map(lambda x: x.split("/")[0] + "-" + x.split("/")[-1].split(".")[0])
-    return metadata
+
+    # Get all unique primary labels
+    primary_labels_dict = {bird: index for index, bird in enumerate(metadata.primary_label.unique())}
+
+    # For each row in the metadata, create a one-hot encoded dataframe for the primary labels using dummies
+    one_hot = pd.get_dummies(metadata.primary_label).astype(np.float32)
+
+    errors = []
+    for i, secondary_labels in enumerate(metadata.secondary_labels):
+        if secondary_labels == "[]":
+            continue
+        for secondary_label in ast.literal_eval(secondary_labels):
+            try:
+                one_hot.iloc[i, primary_labels_dict[secondary_label]] = 0.5
+            except KeyError:  # noqa: PERF203
+                errors.append((i, secondary_label))
+
+    logger.debug(f"Errors: {errors}")
+    logger.warning("Some secondary labels were not found in the primary labels. Check the output directory for more information.")
+    return YData(meta_2024=metadata, label_2024=one_hot)
 
 
 def setup_inference_data(raw_path: str, path: str) -> Any:  # noqa: ANN401
