@@ -41,11 +41,11 @@ class NanToZero(VerboseTransformationBlock):
         return np.nan_to_num(data, nan=0.0)
 
 
-if __name__ == "__main__":
-    np_test = np.array([1, 2, 3, np.nan])
-    X_test = XData(bird_2024=np_test, meta_2024=None)
-
-    block = NanToZero(years=["2024"])
-    transformed_data = block.transform(X_test)
-
-    print(transformed_data.bird_2024.compute())
+# if __name__ == "__main__":
+#     np_test = np.array([[1, 2, np.nan], [4, 5, 6], [7, 8, 9]])
+#     X_test = XData(bird_2024=np_test, meta_2024=None)
+#
+#     block = NanToZero(years=["2024"])
+#     transformed_data = block.transform(X_test)
+#
+#     print(transformed_data.bird_2024.compute())
