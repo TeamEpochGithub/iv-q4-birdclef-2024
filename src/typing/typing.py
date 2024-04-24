@@ -4,8 +4,6 @@ from typing import Any
 
 import numpy.typing as npt
 import pandas as pd
-import pandas as pd
-import numpy as np
 
 
 @dataclass
@@ -22,7 +20,7 @@ class XData:
     :param bird_2021: Audiodata of BirdClef2021
     """
 
-    meta_2024: pd.DataFrame
+    meta_2024: pd.DataFrame | None = None
     meta_2023: pd.DataFrame | None = None
     meta_2022: pd.DataFrame | None = None
     meta_2021: pd.DataFrame | None = None
@@ -31,32 +29,34 @@ class XData:
     bird_2022: npt.NDArray[Any] | None = None
     bird_2021: npt.NDArray[Any] | None = None
 
-
-
-    def __getitem__(self, indexer) -> "XData":
+    def __getitem__(self, indexer: Any) -> "XData":  # noqa: ANN401
+        """Index the data according to the indexer type."""
         if isinstance(indexer, dict):
             sliced_fileds = {}
             # Slice all the years by the appropriate indices and save to a dict
             for year in indexer:
-                if getattr(self,f"bird_{year}") is not None:
-                    sliced_fileds[f"bird_{year}"] = getattr(self,f"bird_{year}")[indexer[year]]
+                if getattr(self, f"bird_{year}") is not None:
+                    sliced_fileds[f"bird_{year}"] = getattr(self, f"bird_{year}")[indexer[year]]
                 if getattr(self, f"meta_{year}") is not None:
-                    sliced_fileds[f"meta_{year}"] = getattr(self,f"meta_{year}")[indexer[year]]
+                    sliced_fileds[f"meta_{year}"] = getattr(self, f"meta_{year}")[indexer[year]]
             return XData(**sliced_fileds)
-        elif isinstance(indexer, str):
+        if isinstance(indexer, str):
             # allow dict like indexing with keys
             return getattr(self, indexer)
 
-        else:
-            # Needed for the main trainer to instantiate datasets properly
+        # Needed for the main trainer to instantiate datasets properly
+        if self.meta_2024 is not None:
             sliced_meta_2024 = self.meta_2024.iloc[indexer]
+        if self.bird_2024 is not None:
             sliced_bird_2024 = self.bird_2024[indexer]
 
-            return XData(
-                meta_2024=sliced_meta_2024,
-                bird_2024=sliced_bird_2024
-            )
-    def __setitem__(self, key, value):
+        return XData(
+            meta_2024=sliced_meta_2024,
+            bird_2024=sliced_bird_2024,
+        )
+
+    def __setitem__(self, key: str, value: pd.DataFrame | npt.NDArray[Any] | None) -> None:
+        """Set the value of key."""
         if hasattr(self, key):
             setattr(self, key, value)
         else:
@@ -65,6 +65,7 @@ class XData:
     def __repr__(self) -> str:
         """Return a string representation of the object."""
         return "XData"
+
 
 @dataclass
 class YData:
@@ -89,32 +90,35 @@ class YData:
     label_2022: pd.DataFrame | None = None
     label_2021: pd.DataFrame | None = None
 
-    def __getitem__(self, indexer):
+    def __getitem__(self, indexer: Any) -> "YData":  # noqa: ANN401
+        """Index the data according to the indexer type."""
         if isinstance(indexer, dict):
             sliced_fileds = {}
             # Slice all the years by the appropriate indices and save to a dict
             for year in indexer:
-                if getattr(self,f"label_{year}") is not None:
-                    sliced_fileds[f"label_{year}"] = getattr(self,f"label_{year}").iloc[indexer[year]]
+                if getattr(self, f"label_{year}") is not None:
+                    sliced_fileds[f"label_{year}"] = getattr(self, f"label_{year}").iloc[indexer[year]]
                 if getattr(self, f"meta_{year}") is not None:
-                    sliced_fileds[f"meta_{year}"] = getattr(self,f"meta_{year}").iloc[indexer[year]]
+                    sliced_fileds[f"meta_{year}"] = getattr(self, f"meta_{year}").iloc[indexer[year]]
             return YData(**sliced_fileds)
-        
-        elif isinstance(indexer, str):
+
+        if isinstance(indexer, str):
             # allow dict like indexing with keys
             return getattr(self, indexer)
 
-        else:
-            # If indices are not a dict assume that we are using the 2024 data 
+        # If indices are not a dict assume that we are using the 2024 data
+        if self.meta_2024 is not None:
             sliced_meta_2024 = self.meta_2024.iloc[indexer]
+        if self.label_2024 is not None:
             sliced_label_2024 = self.label_2024.iloc[indexer]
 
-            return YData(
-                meta_2024=sliced_meta_2024,
-                label_2024=sliced_label_2024
-            )
+        return YData(
+            meta_2024=sliced_meta_2024,
+            label_2024=sliced_label_2024,
+        )
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: pd.DataFrame | npt.NDArray[Any] | None) -> None:
+        """Set the value of key."""
         if hasattr(self, key):
             setattr(self, key, value)
         else:

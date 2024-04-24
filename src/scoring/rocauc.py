@@ -16,7 +16,7 @@ class ROCAUC(Scorer):
         """Initialize the scorer with a name."""
         self.name = name
 
-    def __call__(self, y_true: np.ndarray[Any, Any], y_pred: np.ndarray[Any, Any], **kwargs: Any) -> float:
+    def __call__(self, y_true: pd.DataFrame, y_pred: np.ndarray[Any, Any], **kwargs: Any) -> float:
         """Calculate the ROC AUC score.
 
         :param y_true: The true labels.
@@ -26,7 +26,7 @@ class ROCAUC(Scorer):
         """
         # Convert both solution and submission to a dataframe
         solution = y_true
-        submission = pd.DataFrame(np.clip(y_pred,0,1), columns=solution.columns)
+        submission = pd.DataFrame(np.clip(y_pred, 0, 1), columns=solution.columns)
 
         if not pd.api.types.is_numeric_dtype(submission.values):
             bad_dtypes = {x: submission[x].dtype for x in submission.columns if not pd.api.types.is_numeric_dtype(submission[x])}

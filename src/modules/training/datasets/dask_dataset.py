@@ -1,7 +1,7 @@
 """Dask dataset module. Torch dataset that works with dask."""
 
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 import dask
@@ -18,50 +18,47 @@ from src.typing.typing import XData, YData
 class DaskDataset(Dataset):  # type: ignore[type-arg]
     """Dask dataset to convert the data to spectrograms."""
 
-    labeler: Callable 
-    sampler: Callable
+    labeler: Callable[[torch.Tensor], torch.Tensor]
+    sampler: Callable[[npt.NDArray[Any]], npt.NDArray[Any]]
     X: XData | None = None
     y: YData | None = None
     year: str = "2024"
-    to_2d: Callable | None = None
-    filter_: Callable | None = None
+    to_2d: Callable[[torch.Tensor], torch.Tensor] | None = None
+    filter_: Callable[[XData | None, YData | None, str], tuple[XData, YData]] | None = None
     aug_1d = None
-    aug_2d = None   
+    aug_2d = None
 
-
-    def __post_init__(self):
-        # ie. keep grade >= 4, 
+    def __post_init__(self) -> None:
+        """Filter the data if filter_ is specified."""
+        # ie. keep grade >= 4,
         if self.filter_ is not None:
             filtered_x, filtered_y = self.filter_(self.X, self.y, self.year)
-            self.y[f"label_{self.year}"] = filtered_y
-            self.X[f"bird_{self.year}"] = filtered_x
+            self.y[f"label_{self.year}"] = filtered_y  # type: ignore[index]
+            self.X[f"bird_{self.year}"] = filtered_x  # type: ignore[index]
 
         # If using torch functions like Spectrogram, move their parameters to cuda
         if isinstance(self.to_2d, torch.nn.Module):
-            self.to_2d = self.to_2d.to('cuda')
-
-        
+            self.to_2d = self.to_2d.to("cuda")
 
     def __len__(self) -> int:
         """Get the length of the dataset."""
-        # TODO make work with YData
-        return len(self.y[f"label_{self.year}"])
+        return len(self.X[f"bird_{self.year}"])  # type: ignore[index, arg-type]
 
     def __getitems__(self, indices: list[int]) -> tuple[Any, Any]:
         """Get multiple items from the dataset and apply augmentations if necessary."""
-        # TODO Use label .index thing
-        # Get a window from each sample 
-        x_window = []
-        for i in indices:
-            x_window.append(self.sampler(self.X[f"bird_{self.year}"][i]))
+        # Get a window from each sample
+
+        if self.X is not None:
+            x_window = [self.sampler(self.X[f"bird_{self.year}"][i]) for i in indices]  # type: ignore[arg-type]
 
         x_batch = dask.compute(*x_window)
         x_batch = np.stack(x_batch, axis=0)
         x_tensor = torch.from_numpy(x_batch)
-        
-        y_batch = self.y[f"label_{self.year}"].iloc[indices]
-        y_batch = y_batch.to_numpy()
-        y_tensor = torch.from_numpy(y_batch)
+
+        if self.y is not None and isinstance(self.y[f"label_{self.year}"], pd.DataFrame):
+            y_batch = self.y[f"label_{self.year}"].iloc[indices]  # type: ignore[union-attr, attr-defined]
+            y_batch = y_batch.to_numpy()
+            y_tensor = torch.from_numpy(y_batch)
 
         # Apply augmentations if necessary
         if self.aug_1d is not None:
@@ -71,7 +68,6 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
             x_tensor = self.to_2d(x_tensor)
             # Only apply 2D augmentations if converted to 2D
             if self.aug_2d is not None:
-                x_tensor, y_tensor = self.aug_2d(x_tensor, y_tensor)        
-
+                x_tensor, y_tensor = self.aug_2d(x_tensor, y_tensor)
 
         return x_tensor, y_tensor
