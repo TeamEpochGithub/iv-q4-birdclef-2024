@@ -3,6 +3,8 @@ from dataclasses import dataclass, field
 from typing import Any
 
 import pandas as pd
+from torch import Tensor
+from torch.utils.data import DataLoader, Dataset
 import wandb
 from epochalyst.pipeline.model.training.torch_trainer import TorchTrainer
 
@@ -17,6 +19,8 @@ class MainTrainer(TorchTrainer, Logger):
     """Main training block."""
     dataset_args: dict[str, Any] = field(default_factory=dict)
     year: str = '2024'
+    # Things like prefetch factor
+    dataloader_args: dict[str|Any] = field(default_factory=dict)
     
 
     def save_model_to_external(self) -> None:
@@ -46,3 +50,30 @@ class MainTrainer(TorchTrainer, Logger):
 
         return train_dataset, test_dataset
     
+
+    def create_dataloaders(
+        self,
+        train_dataset: Dataset[tuple[Tensor, ...]],
+        test_dataset: Dataset[tuple[Tensor, ...]],
+    ) -> tuple[DataLoader[tuple[Tensor, ...]], DataLoader[tuple[Tensor, ...]]]:
+        """Create the dataloaders for training and validation.
+
+        :param train_dataset: The training dataset.
+        :param test_dataset: The validation dataset.
+        :return: The training and validation dataloaders.
+        """
+        train_loader = DataLoader(
+            train_dataset,
+            batch_size=self.batch_size,
+            shuffle=True,
+            collate_fn=(collate_fn if hasattr(train_dataset, "__getitems__") else None), # type: ignore[arg-type]
+            **self.dataloader_args,
+        )
+        test_loader = DataLoader(
+            test_dataset,
+            batch_size=self.batch_size,
+            shuffle=False,
+            collate_fn=(collate_fn if hasattr(test_dataset, "__getitems__") else None), # type: ignore[arg-type]
+            **self.dataloader_args,
+        )
+        return train_loader, test_loader
