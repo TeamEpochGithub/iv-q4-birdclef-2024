@@ -66,7 +66,7 @@ def run_train_cfg(cfg: DictConfig) -> None:
         "storage_type": ".pkl",
         "storage_path": f"{processed_data_path}",
     }
-    #cache_args = {}  # type: ignore[var-annotated]
+    # cache_args = {}  # type: ignore[var-annotated]
     # Read the data if required and split it in X, y
     x_cache_exists = model_pipeline.get_x_cache_exists(cache_args)
     # y_cache_exists = model_pipeline.get_y_cache_exists(cache_args)

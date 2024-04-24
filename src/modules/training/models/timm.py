@@ -28,5 +28,4 @@ class Timm(EpochalystTimm):
         """
         x = super().forward(x)
         # Given my chape of (n,c), make sure each column is between 0 and 1
-        x = torch.sigmoid(x)
-        return x
+        return torch.sigmoid(x)
