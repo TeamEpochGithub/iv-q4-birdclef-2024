@@ -28,4 +28,4 @@ class Spec:
         # Create spectrograms from the input
         spec_out = self.instantiated_spec(input_data).unsqueeze(1)
 
-        return self.scale(spec_out)
+        return torch.nan_to_num(self.scale(spec_out), neginf=0, posinf=1, nan=0)
