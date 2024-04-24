@@ -5,6 +5,7 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 from dask import delayed
+from tqdm import tqdm
 
 from src.modules.transformation.verbose_transformation_block import VerboseTransformationBlock
 from src.typing.typing import XData
@@ -28,7 +29,7 @@ class NanToZero(VerboseTransformationBlock):
             # Check if the attribute exists and is not None
             if hasattr(data, attribute) and getattr(data, attribute) is not None:
                 curr_data = getattr(data, attribute)
-                for i in range(len(curr_data)):
+                for i in tqdm(range(len(curr_data)), desc=f"Transforming {attribute} to zero"):
                     curr_data[i] = self.nan_to_zero(curr_data[i])
         return data
 

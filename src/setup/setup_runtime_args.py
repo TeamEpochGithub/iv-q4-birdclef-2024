@@ -26,6 +26,8 @@ def setup_train_args(
     :param save_model_preds: Whether to save the model predictions
     :return: Dictionary containing arguments
     """
+
+    #Main trainer arguments
     main_trainer = {
         "train_indices": train_indices,
         "test_indices": test_indices,
@@ -35,17 +37,17 @@ def setup_train_args(
     if fold > -1:
         main_trainer["fold"] = fold
 
+    #Train system arguments
     train_sys = {
         "MainTrainer": main_trainer,
+        "cache_args": cache_args,
     }
 
     if save_model_preds:
         train_sys["cache_args"] = cache_args
 
     train_args = {
-        "x_sys": {
-            "cache_args": cache_args,
-        },
+        "x_sys": {},
         "y_sys": {},
         "train_sys": train_sys,
     }

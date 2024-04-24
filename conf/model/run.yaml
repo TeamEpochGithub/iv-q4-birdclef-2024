@@ -37,7 +37,7 @@ train_sys:
         persistent_workers: true
       n_folds: 2 # 0 for train full,
       epochs: 10
-      patience: 1
+      patience: 10
       batch_size: 128
       model:
         _target_: src.modules.training.models.timm.Timm
