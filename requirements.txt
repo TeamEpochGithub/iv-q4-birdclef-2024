@@ -10,6 +10,9 @@ kaggle==1.6.11
 numpy==1.26.4
 randomname==0.2.1
 tqdm==4.66.2
-wandb==0.16.4
+wandb==0.16.6
+librosa==0.10.1
+dask==2024.4.2
+dask-expr==1.0.12
 
 -e ./
