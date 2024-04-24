@@ -33,7 +33,7 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
     def __post_init__(self):
         # ie. keep grade >= 4, 
         if self.filter_ is not None:
-            setattr(self.y, f"label_{self.year}", self.filter_(self.y)) 
+            setattr(self.y, f"label_{self.year}", self.filter_(self.y, self.year)) 
 
         # If using torch functions like Spectrogram, move their parameters to cuda
         if isinstance(self.to_2d, torch.nn.Module):
@@ -43,7 +43,7 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
 
     def __len__(self) -> int:
         """Get the length of the dataset."""
-        # Trick the dataloader into thinking the dataset is smaller than it is
+        # TODO make work with YData
         return len(self.y)
 
     def __getitems__(self, indices: list[int]) -> tuple[Any, Any]:
