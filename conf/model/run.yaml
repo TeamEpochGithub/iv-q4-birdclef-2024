@@ -21,6 +21,9 @@ train_sys:
           shape: [400,400]
         labeler:
           _target_: src.modules.training.datasets.labeler.psd_labeler.PSDLabeler
+        filter_:
+          _target_: src.modules.training.datasets.filter.grade_threshold.GradeThreshold
+          threshold: 4.0
       n_folds: 2 # 0 for train full,
       epochs: 2
       patience: 10

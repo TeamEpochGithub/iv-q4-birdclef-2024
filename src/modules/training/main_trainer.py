@@ -32,19 +32,19 @@ class MainTrainer(TorchTrainer, Logger):
 
     def create_datasets(self, x: XData, y:YData, train_indices: list[int], test_indices: list[int]):
         # TODO rename to xtrain and ytrain etc.
-        train_data = x[train_indices]
-        train_labels = y.label_2024.iloc[train_indices]
+        x_train = x[train_indices]
+        y_train = y[train_indices]
         
-        test_data = x[test_indices]
-        test_labels = y.label_2024.iloc[test_indices]
+        x_test = x[test_indices]
+        y_test = y[test_indices]
 
-        train_dataset = DaskDataset(X=train_data, y=train_labels, year=self.year, **self.dataset_args)
+        train_dataset = DaskDataset(X=x_train, y=y_train, year=self.year, **self.dataset_args)
         if test_indices is not None:
             test_dataset_args = self.dataset_args.copy()
             # TODO fix this
             # test_dataset_args["aug_1d"] = None
             # test_dataset_args["aug_2d"] = None
-            test_dataset = DaskDataset(X=test_data, y=test_labels, year=self.year, **test_dataset_args)
+            test_dataset = DaskDataset(X=x_test, y=y_test, year=self.year, **test_dataset_args)
         else:
             test_dataset = None
 
@@ -77,3 +77,12 @@ class MainTrainer(TorchTrainer, Logger):
             **self.dataloader_args,
         )
         return train_loader, test_loader
+    
+def collate_fn(batch: tuple[Tensor, ...]) -> tuple[Tensor, ...]:
+    """Collate function for the dataloader.
+
+    :param batch: The batch to collate.
+    :return: Collated batch.
+    """
+    X, y = batch
+    return X, y

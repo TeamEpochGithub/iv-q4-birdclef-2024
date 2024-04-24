@@ -21,8 +21,7 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
     labeler: Callable 
     sampler: Callable
     X: XData | None = None
-    # TODO make this work with YData
-    y: pd.DataFrame | None = None
+    y: YData | None = None
     year: str = "2024"
     to_2d: Callable | None = None
     filter_: Callable | None = None
@@ -33,7 +32,9 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
     def __post_init__(self):
         # ie. keep grade >= 4, 
         if self.filter_ is not None:
-            setattr(self.y, f"label_{self.year}", self.filter_(self.y, self.year)) 
+            filtered_x, filtered_y = self.filter_(self.X, self.y, self.year)
+            setattr(self.y, f"label_{self.year}", filtered_y)
+            setattr(self.X, f"bird_{self.year}", filtered_x) 
 
         # If using torch functions like Spectrogram, move their parameters to cuda
         if isinstance(self.to_2d, torch.nn.Module):
@@ -44,7 +45,7 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
     def __len__(self) -> int:
         """Get the length of the dataset."""
         # TODO make work with YData
-        return len(self.y)
+        return len(self.y[f"label_{self.year}"])
 
     def __getitems__(self, indices: list[int]) -> tuple[Any, Any]:
         """Get multiple items from the dataset and apply augmentations if necessary."""
@@ -52,13 +53,13 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
         # Get a window from each sample 
         x_window = []
         for i in indices:
-            x_window.append(self.sampler(getattr(self.X, f"bird_{self.year}")[i]))
+            x_window.append(self.sampler(self.X[f"bird_{self.year}"][i]))
 
         x_batch = dask.compute(*x_window)
         x_batch = np.stack(x_batch, axis=0)
         x_tensor = torch.from_numpy(x_batch)
         
-        y_batch = self.y.iloc[indices]
+        y_batch = self.y[f"label_{self.year}"].iloc[indices]
         y_batch = y_batch.to_numpy()
         y_tensor = torch.from_numpy(y_batch)
 
