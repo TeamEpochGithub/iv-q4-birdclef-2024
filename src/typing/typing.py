@@ -4,6 +4,8 @@ from typing import Any
 
 import numpy.typing as npt
 import pandas as pd
+import pandas as pd
+import numpy as np
 
 
 @dataclass
@@ -33,14 +35,26 @@ class XData:
         """Return a string representation of the object."""
         return "XData"
 
-    def __getitem__(self, key) -> "XData":
-        sliced_meta_2024 = self.meta_2024.iloc[key]
-        sliced_bird_2024 = self.bird_2024[key]
+    def __getitem__(self, indices) -> "XData":
+        if isinstance(indices, dict):
+            sliced_fileds = {}
+            # Slice all the years by the appropriate indices and save to a dict
+            for year in indices:
+                if getattr(self,f"bird_{year}") is not None:
+                    sliced_fileds[f"bird_{year}"] = getattr(self,f"bird_{year}")[indices[year]]
+                if getattr(self, f"meta_{year}") is not None:
+                    sliced_fileds[f"meta_{year}"] = getattr(self,f"meta_{year}")[indices[year]]
+            return XData(**sliced_fileds)
+                
+        else:
+            # If indices are not a dict assume that we are using the 2024 data 
+            sliced_meta_2024 = self.meta_2024.iloc[indices]
+            sliced_bird_2024 = self.bird_2024[indices]
 
-        return XData(
-            meta_2024=sliced_meta_2024,
-            bird_2024=sliced_bird_2024
-        )
+            return XData(
+                meta_2024=sliced_meta_2024,
+                bird_2024=sliced_bird_2024
+            )
 
 
 
@@ -67,6 +81,67 @@ class YData:
     label_2022: npt.NDArray[Any] | None = None
     label_2021: npt.NDArray[Any] | None = None
 
+    def __getitem__(self, indices):
+        if isinstance(indices, dict):
+            sliced_fileds = {}
+            # Slice all the years by the appropriate indices and save to a dict
+            for year in indices:
+                if getattr(self,f"label_{year}") is not None:
+                    sliced_fileds[f"label_{year}"] = getattr(self,f"label_{year}")[indices[year]]
+                if getattr(self, f"meta_{year}") is not None:
+                    sliced_fileds[f"meta_{year}"] = getattr(self,f"meta_{year}")[indices[year]]
+            return XData(**sliced_fileds)
+                
+        else:
+            # If indices are not a dict assume that we are using the 2024 data 
+            sliced_meta_2024 = self.meta_2024.iloc[indices]
+            sliced_label_2024 = self.label_2024[indices]
+
+            return YData(
+                meta_2024=sliced_meta_2024,
+                label_2024=sliced_label_2024
+            )
+
+
     def __repr__(self) -> str:
         """Return a string representation of the object."""
         return "YData"
+
+# if __name__ == "__main__":
+#     # Create dummy data for metadata
+#     meta_2024_data = {
+#         'id': [1, 2, 3],
+#         'name': ['Bird1', 'Bird2', 'Bird3'],
+#         'species': ['Species1', 'Species2', 'Species3']
+#     }
+#     meta_2024 = pd.DataFrame(meta_2024_data)
+
+#     # Create dummy data for audiodata
+#     bird_2024_data = np.random.rand(3, 10)  # Assuming 3 samples with 10 features each
+#     bird_2024 = bird_2024_data.astype(np.float32)
+
+#     # Instantiate XData object with the dummy data
+#     X = XData(
+#         meta_2024=meta_2024,
+#         bird_2024=bird_2024
+#     )
+#     print(X)
+
+#         # Create dummy data for metadata
+#     meta_2024_data = {
+#         'id': [1, 2, 3],
+#         'name': ['Bird1', 'Bird2', 'Bird3'],
+#         'species': ['Species1', 'Species2', 'Species3']
+#     }
+#     meta_2024 = pd.DataFrame(meta_2024_data)
+
+#     # Create dummy data for labels
+#     label_2024_data = np.random.randint(0, 2, size=(3,182))  # Assuming 3 samples with binary labels
+#     label_2024 = label_2024_data.astype(np.int32)
+
+#     # Instantiate YData object with the dummy data
+#     Y = YData(
+#         meta_2024=meta_2024,
+#         label_2024=label_2024
+#     )
+#     print(Y)
