@@ -61,12 +61,12 @@ def run_train_cfg(cfg: DictConfig) -> None:
     # Cache arguments for x_sys
     processed_data_path = Path(cfg.processed_path)
     processed_data_path.mkdir(parents=True, exist_ok=True)
-    # cache_args = {
-    #     "output_data_type": "numpy_array",
-    #     "storage_type": ".pkl",
-    #     "storage_path": f"{processed_data_path}",
-    # }
-    cache_args = {}  # type: ignore[var-annotated]
+    cache_args = {
+        "output_data_type": "numpy_array",
+        "storage_type": ".pkl",
+        "storage_path": f"{processed_data_path}",
+    }
+    # cache_args = {}  # type: ignore[var-annotated]
     # Read the data if required and split it in X, y
     x_cache_exists = model_pipeline.get_x_cache_exists(cache_args)
     # y_cache_exists = model_pipeline.get_y_cache_exists(cache_args)
@@ -74,7 +74,7 @@ def run_train_cfg(cfg: DictConfig) -> None:
     X = None
     if not x_cache_exists:
         # X = setup_train_x_data(cfg.data_path, cfg.cache_path)
-        X = setup_train_x_data(cfg.raw_path, cfg.metadata_path)
+        X = setup_train_x_data(cfg.data_path, cfg.metadata_path)
 
     # If not cache exists, we need to load the data
     y = setup_train_y_data(cfg.metadata_path)
@@ -102,7 +102,7 @@ def run_train_cfg(cfg: DictConfig) -> None:
     if len(test_indices) > 0:
         print_section_separator("Scoring")
         scorer = instantiate(cfg.scorer)
-        score = scorer(y.meta_2024[test_indices], predictions[test_indices])
+        score = scorer(y.label_2024.iloc[test_indices], predictions, metadata=y.meta_2024.iloc[test_indices])  # type: ignore[union-attr]
         logger.info(f"Score: {score}")
 
         if wandb.run:
