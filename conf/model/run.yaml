@@ -36,14 +36,14 @@ train_sys:
         prefetch_factor: 4
         persistent_workers: true
       n_folds: 2 # 0 for train full,
-      epochs: 2
+      epochs: 5
       patience: 1
       batch_size: 128
       model:
-        _target_: epochalyst.pipeline.model.training.models.timm.Timm
+        _target_: src.modules.training.models.timm.Timm
         in_channels: 1
         out_channels: 182
-        model_name: "vgg13"
+        model_name: "efficientnet_b0"
       criterion:
         _target_: torch.nn.MSELoss
       optimizer:
