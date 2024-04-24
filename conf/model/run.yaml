@@ -36,7 +36,7 @@ train_sys:
         prefetch_factor: 4
         persistent_workers: true
       n_folds: 2 # 0 for train full,
-      epochs: 5
+      epochs: 10
       patience: 1
       batch_size: 128
       model:
