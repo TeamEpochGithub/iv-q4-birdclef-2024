@@ -31,9 +31,7 @@ class XData:
     bird_2022: npt.NDArray[Any] | None = None
     bird_2021: npt.NDArray[Any] | None = None
 
-    def __repr__(self) -> str:
-        """Return a string representation of the object."""
-        return "XData"
+
 
     def __getitem__(self, indexer) -> "XData":
         if isinstance(indexer, dict):
@@ -58,8 +56,15 @@ class XData:
                 meta_2024=sliced_meta_2024,
                 bird_2024=sliced_bird_2024
             )
+    def __setitem__(self, key, value):
+        if hasattr(self, key):
+            setattr(self, key, value)
+        else:
+            raise KeyError(f"'{key}' is not a valid attribute of YData")
 
-
+    def __repr__(self) -> str:
+        """Return a string representation of the object."""
+        return "XData"
 
 @dataclass
 class YData:
@@ -109,46 +114,12 @@ class YData:
                 label_2024=sliced_label_2024
             )
 
+    def __setitem__(self, key, value):
+        if hasattr(self, key):
+            setattr(self, key, value)
+        else:
+            raise KeyError(f"'{key}' is not a valid attribute of YData")
 
     def __repr__(self) -> str:
         """Return a string representation of the object."""
         return "YData"
-
-# if __name__ == "__main__":
-#     # Create dummy data for metadata
-#     meta_2024_data = {
-#         'id': [1, 2, 3],
-#         'name': ['Bird1', 'Bird2', 'Bird3'],
-#         'species': ['Species1', 'Species2', 'Species3']
-#     }
-#     meta_2024 = pd.DataFrame(meta_2024_data)
-
-#     # Create dummy data for audiodata
-#     bird_2024_data = np.random.rand(3, 10)  # Assuming 3 samples with 10 features each
-#     bird_2024 = bird_2024_data.astype(np.float32)
-
-#     # Instantiate XData object with the dummy data
-#     X = XData(
-#         meta_2024=meta_2024,
-#         bird_2024=bird_2024
-#     )
-#     print(X)
-
-#         # Create dummy data for metadata
-#     meta_2024_data = {
-#         'id': [1, 2, 3],
-#         'name': ['Bird1', 'Bird2', 'Bird3'],
-#         'species': ['Species1', 'Species2', 'Species3']
-#     }
-#     meta_2024 = pd.DataFrame(meta_2024_data)
-
-#     # Create dummy data for labels
-#     label_2024_data = np.random.randint(0, 2, size=(3,182))  # Assuming 3 samples with binary labels
-#     label_2024 = label_2024_data.astype(np.int32)
-
-#     # Instantiate YData object with the dummy data
-#     Y = YData(
-#         meta_2024=meta_2024,
-#         label_2024=label_2024
-#     )
-#     print(Y)

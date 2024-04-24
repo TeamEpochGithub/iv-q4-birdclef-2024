@@ -33,8 +33,8 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
         # ie. keep grade >= 4, 
         if self.filter_ is not None:
             filtered_x, filtered_y = self.filter_(self.X, self.y, self.year)
-            setattr(self.y, f"label_{self.year}", filtered_y)
-            setattr(self.X, f"bird_{self.year}", filtered_x) 
+            self.y[f"label_{self.year}"] = filtered_y
+            self.X[f"bird_{self.year}"] = filtered_x
 
         # If using torch functions like Spectrogram, move their parameters to cuda
         if isinstance(self.to_2d, torch.nn.Module):
