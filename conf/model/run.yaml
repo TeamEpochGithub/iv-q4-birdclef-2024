@@ -17,15 +17,18 @@ train_sys:
           _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
           length: 160000
         to_2d:
-          # _target_: src.modules.training.datasets.to_2d.spec.Spec
-          # spec:
-          #   _target_: functools.partial
-          #   _args_:
-          #     - _target_: hydra.utils.get_class
-          #       path: torchaudio.transforms.Spectrogram
-          # output_shape: [224,224]
-          _target_: src.modules.training.datasets.to_2d.reshape.Reshape
-          shape: [400,400]
+          _target_: src.modules.training.datasets.to_2d.spec.Spec
+          spec:
+            _target_: functools.partial
+            _args_:
+              - _target_: hydra.utils.get_class
+                path: torchaudio.transforms.MelSpectrogram #nnAudio.features.mel.MelSpectrogram
+          output_shape: [224,224]
+          # scale:
+          #   _target_: src.modules.training.datasets.to_2d.spec_normalize.SpecNormalize
+
+          # _target_: src.modules.training.datasets.to_2d.reshape.Reshape
+          # shape: [400,400]
         labeler:
           _target_: src.modules.training.datasets.labeler.psd_labeler.PSDLabeler
         filter_:

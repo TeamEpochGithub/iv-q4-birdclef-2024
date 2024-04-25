@@ -37,8 +37,8 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
             self.X[f"bird_{self.year}"] = filtered_x  # type: ignore[index]
 
         # If using torch functions like Spectrogram, move their parameters to cuda
-        if isinstance(self.to_2d, torch.nn.Module):
-            self.to_2d = self.to_2d.to("cuda")
+        # if isinstance(self.to_2d, Spec):
+        #     self.to_2d = self.to_2d.instantiated_spec.to("cuda")
 
     def __len__(self) -> int:
         """Get the length of the dataset."""
@@ -67,8 +67,10 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
             y_tensor = torch.from_numpy(y_batch)
 
         # Apply augmentations if necessary
+        # x_tensor = x_tensor.to("cuda")
+        # y_tensor = y_tensor.to("cuda")
         if self.aug_1d is not None:
-            x_tensor, y_tensor = self.aug_1d(x_tensor.to("cuda"), y_tensor.to("cuda"))
+            x_tensor, y_tensor = self.aug_1d(x_tensor, y_tensor)
         # Convert to 2D if method is specified
         if self.to_2d is not None:
             x_tensor = self.to_2d(x_tensor)
