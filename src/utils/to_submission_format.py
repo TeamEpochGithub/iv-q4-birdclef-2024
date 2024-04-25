@@ -21,28 +21,26 @@ def to_submission_format(predictions: npt.NDArray[np.float32], test_path: str, s
     """
     file_list = sorted(os.listdir(test_path))
     file_list = [file.split(".")[0] for file in file_list if file.endswith(".ogg")]
-    logger.info("Number of test soundscapes:", len(file_list))
+    logger.info(f"Number of test soundscapes: {len(file_list)} ")
 
     species_list = sorted(os.listdir(species_path))
 
-    if predictions.shape[1] == len(species_list):
+    if predictions.shape[1] != len(species_list):
         raise ValueError("Number of species in predictions does not match the number of species in the dataset.")
 
-    if predictions.shape[0] == len(file_list) * 48:
+    if predictions.shape[0] != len(file_list) * 48:
         raise ValueError("Number of predictions does not match the number of test soundscapes.")
 
     # Convert predictions to dataframe with species as columns and row_id as index.
     submission = pd.DataFrame(predictions, columns=species_list)
     submission["row_id"] = [f"{file}_{(i + 1) * 5}" for file in file_list for i in range(48)]
 
-    # Convert our results to csv
-    logger.info(submission.head(50))
     return submission
 
 
 # if __name__ == "__main__":
 #     test_path = "data/test_soundscapes"
 #     species_path = "data/species"
-#     predictions = np.random.rand(48 * 3, 182)
+#     predictions = np.random.rand(48 * 7, 182)
 #     to_submission_format(predictions, "../../data/raw/test_soundscapes", "../../data/raw/train_audio")
 #     print("Test passed.")
