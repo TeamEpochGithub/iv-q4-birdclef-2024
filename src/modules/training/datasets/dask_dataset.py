@@ -77,5 +77,3 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
                 x_tensor, y_tensor = self.aug_2d(x_tensor, y_tensor)
 
         return x_tensor, y_tensor
-
-

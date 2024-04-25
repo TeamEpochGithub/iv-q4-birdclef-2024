@@ -24,7 +24,3 @@ class SubmissionSampler:
         step = 32000 * 5
         segments = [array[i : i + step] for i in range(0, len(array), step)]
         return np.array(segments)
-
-
-
-

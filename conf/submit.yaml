@@ -23,4 +23,4 @@ defaults:
 # Kaggle paths
 data_path: kaggle/input/birdclef-2024/test_soundscapes/
 species_path: kaggle/input/birdclef-2024/train_audio/
-result_path: kaggle/working
+result_path: kaggle/working/

@@ -69,7 +69,6 @@ def setup_pred_args(pipeline: ModelPipeline | EnsemblePipeline) -> dict[str, Any
         "train_sys": {
             "MainTrainer": {
                 "batch_size": 1,
-
             },
         },
     }

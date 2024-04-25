@@ -5,7 +5,6 @@ from typing import Any
 
 import torch
 import wandb
-from epochalyst.logging.section_separator import print_section_separator
 from epochalyst.pipeline.model.training.torch_trainer import TorchTrainer
 from torch import Tensor, nn
 from torch.utils.data import DataLoader, Dataset
@@ -100,7 +99,6 @@ class MainTrainer(TorchTrainer, Logger):
         )
         return train_loader, test_loader
 
-
     def _load_model(self) -> None:
         """Load the model from the model_directory folder."""
         # Check if the model exists
@@ -113,12 +111,11 @@ class MainTrainer(TorchTrainer, Logger):
         self.log_to_terminal(
             f"Loading model from {self._model_directory}/{self.get_hash()}.pt",
         )
-        #If device is cuda, load the model to the device
+        # If device is cuda, load the model to the device
         if self.device == "cuda":
             checkpoint = torch.load(f"{self._model_directory}/{self.get_hash()}.pt")
         else:
             checkpoint = torch.load(f"{self._model_directory}/{self.get_hash()}.pt", map_location="cpu")
-
 
         # Load the weights from the checkpoint
         if isinstance(checkpoint, nn.DataParallel):
@@ -145,5 +142,3 @@ def collate_fn(batch: tuple[Tensor, ...]) -> tuple[Tensor, ...]:
     """
     X, y = batch
     return X, y
-
-

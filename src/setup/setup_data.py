@@ -88,16 +88,13 @@ def setup_inference_data(path: str) -> Any:  # noqa: ANN401
     :param path: Usually raw path is a parameter
     :return: Inference data
     """
-    #Load all files in the path that end with .ogg with glob
+    # Load all files in the path that end with .ogg with glob
     filenames = glob.glob(path + "/*.ogg")
 
     # Load the bird_2024 data
     bird_2024 = np.array([load_audio(filename) for filename in filenames])
 
     return XData(bird_2024=bird_2024)
-
-
-
 
 
 def setup_splitter_data() -> Any:  # noqa: ANN401
