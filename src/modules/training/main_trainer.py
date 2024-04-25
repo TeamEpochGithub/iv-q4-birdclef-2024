@@ -46,9 +46,8 @@ class MainTrainer(TorchTrainer, Logger):
         train_dataset = DaskDataset(X=x_train, y=y_train, year=self.year, **self.dataset_args)
         if test_indices is not None:
             test_dataset_args = self.dataset_args.copy()
-            # TODO(Tolga): fix this
-            # test_dataset_args["aug_1d"] = None
-            # test_dataset_args["aug_2d"] = None
+            test_dataset_args["aug_1d"] = None
+            test_dataset_args["aug_2d"] = None
             test_dataset = DaskDataset(X=x_test, y=y_test, year=self.year, **test_dataset_args)
         else:
             test_dataset = None

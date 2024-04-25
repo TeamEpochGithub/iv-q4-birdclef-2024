@@ -34,9 +34,29 @@ train_sys:
         filter_:
           _target_: src.modules.training.datasets.filter.grade_threshold.GradeThreshold
           threshold: 4.0
+        aug_1d:
+          _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
+          x_transforms:
+            - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomPhaseShift
+              p: 1
+              shift_limit: 0.5
+            - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomAmplitudeShift
+              p: 1
+          xy_transforms:
+            - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.CutMix1D
+              p: 1
+            - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.MixUp1D
+              p: 1
+
+        aug_2d:
+          _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
+          xy_transforms:
+            - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.CutMix
+              p: 0.5
+
       dataloader_args:
-        num_workers: 2
-        prefetch_factor: 4
+        num_workers: 16
+        prefetch_factor: 1
         persistent_workers: true
       n_folds: 2 # 0 for train full,
       epochs: 10

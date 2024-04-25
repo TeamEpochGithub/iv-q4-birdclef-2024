@@ -25,8 +25,8 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
     year: str = "2024"
     to_2d: Callable[[torch.Tensor], torch.Tensor] | None = None
     filter_: Callable[[XData | None, YData | None, str], tuple[XData, YData]] | None = None
-    aug_1d = None
-    aug_2d = None
+    aug_1d: Any = None
+    aug_2d: Any = None
 
     def __post_init__(self) -> None:
         """Filter the data if filter_ is specified."""
@@ -36,7 +36,7 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
             self.y[f"label_{self.year}"] = filtered_y  # type: ignore[index]
             self.X[f"bird_{self.year}"] = filtered_x  # type: ignore[index]
 
-        # If using torch functions like Spectrogram, move their parameters to cuda
+        # # If using torch functions like Spectrogram, move their parameters to cuda
         # if isinstance(self.to_2d, Spec):
         #     self.to_2d = self.to_2d.instantiated_spec.to("cuda")
 
@@ -49,7 +49,7 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
         # Get a window from each sample
 
         if self.X is not None:
-            x_window = [self.sampler(self.X[f"bird_{self.year}"][i]) for i in indices]  # type: ignore[arg-type]
+            x_window = [dask.delayed(self.sampler)(self.X[f"bird_{self.year}"][i]) for i in indices]  # type: ignore[arg-type]
 
         x_batch = dask.compute(*x_window)
         x_batch = np.stack(x_batch, axis=0)
@@ -60,11 +60,8 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
             y_batch = y_batch.to_numpy()
             y_tensor = torch.from_numpy(y_batch)
 
-        # Apply augmentations if necessary
-        # x_tensor = x_tensor.to("cuda")
-        # y_tensor = y_tensor.to("cuda")
         if self.aug_1d is not None:
-            x_tensor, y_tensor = self.aug_1d(x_tensor, y_tensor)
+            x_tensor, y_tensor = self.aug_1d(x_tensor.unsqueeze(1), y_tensor)
         # Convert to 2D if method is specified
         if self.to_2d is not None:
             x_tensor = self.to_2d(x_tensor)

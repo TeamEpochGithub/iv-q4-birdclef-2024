@@ -6,11 +6,11 @@
 import ast
 from typing import Any
 
+import dask
 import librosa
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from dask import delayed
 
 from src.typing.typing import XData, YData
 from src.utils.logger import logger
@@ -35,12 +35,12 @@ def setup_train_x_data(data_path: str, path_2024: str) -> Any:  # noqa: ANN401
     filenames_2024 = metadata_2024.filename
     filenames_2024 = [data_path + filename for filename in filenames_2024]
 
-    bird_2024 = np.array([load_audio(filename) for filename in filenames_2024])
+    bird_2024 = np.array([dask.delayed(load_audio)(filename) for filename in filenames_2024])
 
     return XData(meta_2024=metadata_2024, bird_2024=bird_2024)
 
 
-@delayed
+# @delayed
 def load_audio(path: str) -> npt.NDArray[np.float32]:
     """Load audio data lazily using librosa.
 

@@ -3,7 +3,6 @@ from dataclasses import dataclass
 
 import numpy as np
 import numpy.typing as npt
-from dask import delayed
 
 
 @dataclass
@@ -12,7 +11,7 @@ class CropOrPad:
 
     length: int
 
-    @delayed
+    # @delayed
     def __call__(self, array: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
         """Crop or pad based on length.
 
