@@ -26,6 +26,7 @@ train_sys:
           output_shape: [224,224]
           scale:
             _target_: src.modules.training.datasets.to_2d.spec_normalize.SpecNormalize
+
           # _target_: src.modules.training.datasets.to_2d.reshape.Reshape
           # shape: [400,400]
         labeler:

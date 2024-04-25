@@ -22,4 +22,5 @@ class SpecNormalize(nn.Module):
 
     def __call__(self, x: torch.Tensor) -> torch.Tensor:
         """Call forward method on log10 of input."""
-        return self.forward(torch.log10(x))
+        # log10 returns some -inf's replace them with zeros
+        return self.forward(torch.nan_to_num(torch.log10(x + self.eps), nan=0, neginf=-10, posinf=1))
