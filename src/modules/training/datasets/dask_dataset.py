@@ -31,7 +31,7 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
     def __post_init__(self) -> None:
         """Filter the data if filter_ is specified."""
         # ie. keep grade >= 4,
-        if self.filter_ is not None:
+        if self.filter_ is not None and self.X is not None and self.y is not None:
             filtered_x, filtered_y = self.filter_(self.X, self.y, self.year)
             self.y[f"label_{self.year}"] = filtered_y  # type: ignore[index]
             self.X[f"bird_{self.year}"] = filtered_x  # type: ignore[index]
@@ -53,7 +53,13 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
 
         x_batch = dask.compute(*x_window)
         x_batch = np.stack(x_batch, axis=0)
+
+        # If the x_batch is 3D, convert to 2D
+        if len(x_batch.shape) == 3:
+            x_batch = x_batch.reshape(x_batch.shape[0] * x_batch.shape[1], x_batch.shape[2])
+
         x_tensor = torch.from_numpy(x_batch)
+        y_tensor = None
 
         if self.y is not None and isinstance(self.y[f"label_{self.year}"], pd.DataFrame):
             y_batch = self.y[f"label_{self.year}"].iloc[indices]  # type: ignore[union-attr, attr-defined]
@@ -71,3 +77,5 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
                 x_tensor, y_tensor = self.aug_2d(x_tensor, y_tensor)
 
         return x_tensor, y_tensor
+
+
