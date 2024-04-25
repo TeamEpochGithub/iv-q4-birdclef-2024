@@ -65,15 +65,15 @@ def setup_pred_args(pipeline: ModelPipeline | EnsemblePipeline) -> dict[str, Any
     :param pipeline: Pipeline to receive arguments
     :return: Dictionary containing arguments
     """
-    # pred_args = {
-    #     "train_sys": {
-    #         "MainTrainer": {
-    #             # "batch_size": 16,
-    #             # "model_folds": cfg.model_folds,
-    #         },
-    #     },
-    # }
-    pred_args: dict[str, Any] = {}
+    pred_args: dict[str, Any] = {
+        "train_sys": {
+            "MainTrainer": {
+                "batch_size": 1,
+
+            },
+        },
+    }
+    # pred_args: dict[str, Any] = {}
 
     if isinstance(pipeline, EnsemblePipeline):
         pred_args = {
