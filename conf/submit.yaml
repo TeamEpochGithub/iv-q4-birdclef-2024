@@ -13,14 +13,14 @@ defaults:
 
 
 # Local paths
-processed_path: data/processed
-raw_path: data/raw
-cache_path: data/cache
-data_path: data/raw/test_soundscapes/
-species_path: data/raw/train_audio/
-result_path: submission
+#processed_path: data/processed
+#raw_path: data/raw
+#cache_path: data/cache
+#data_path: data/raw/test_soundscapes/
+#species_path: data/raw/train_audio/
+#result_path: submission
 
 # Kaggle paths
-#data_path: kaggle/input/birdclef-2024/test_soundscapes/
-#species_path: kaggle/input/birdclef-2024/train_audio/
-#result_path: kaggle/working
+data_path: kaggle/input/birdclef-2024/test_soundscapes/
+species_path: kaggle/input/birdclef-2024/train_audio/
+result_path: kaggle/working
