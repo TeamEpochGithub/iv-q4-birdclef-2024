@@ -3,12 +3,14 @@ from dataclasses import dataclass, field
 from typing import Any
 
 import wandb
+from epochalyst.logging.section_separator import print_section_separator
 from epochalyst.pipeline.model.training.torch_trainer import TorchTrainer
 from torch import Tensor
 from torch.utils.data import DataLoader, Dataset
 
 from src.modules.logging.logger import Logger
 from src.modules.training.datasets.dask_dataset import DaskDataset
+from src.modules.training.datasets.sampler.submission import SubmissionSampler
 from src.typing.typing import XData, YData
 
 
@@ -55,6 +57,20 @@ class MainTrainer(TorchTrainer, Logger):
 
         return train_dataset, test_dataset
 
+    def create_prediction_dataset(
+        self,
+        x: XData,
+    ) -> Dataset[tuple[Tensor, ...]]:
+        """Create the prediction dataset for submission used in custom_predict.
+
+        :param x: The input data.
+        :return: The prediction dataset.
+        """
+        pred_dataset_args = self.dataset_args.copy()
+        pred_dataset_args["sampler"] = SubmissionSampler()
+
+        return DaskDataset(X=x, year=self.year, **pred_dataset_args)
+
     def create_dataloaders(
         self,
         train_dataset: Dataset[tuple[Tensor, ...]],
@@ -83,6 +99,8 @@ class MainTrainer(TorchTrainer, Logger):
         return train_loader, test_loader
 
 
+
+
 def collate_fn(batch: tuple[Tensor, ...]) -> tuple[Tensor, ...]:
     """Collate function for the dataloader.
 
@@ -91,3 +109,5 @@ def collate_fn(batch: tuple[Tensor, ...]) -> tuple[Tensor, ...]:
     """
     X, y = batch
     return X, y
+
+
