@@ -22,10 +22,10 @@ train_sys:
             _target_: functools.partial
             _args_:
               - _target_: hydra.utils.get_class
-                path: torchaudio.transforms.Spectrogram
+                path: torchaudio.transforms.MelSpectrogram #nnAudio.features.mel.MelSpectrogram
           output_shape: [224,224]
-          scale:
-            _target_: src.modules.training.datasets.to_2d.spec_normalize.SpecNormalize
+          # scale:
+          #   _target_: src.modules.training.datasets.to_2d.spec_normalize.SpecNormalize
 
           # _target_: src.modules.training.datasets.to_2d.reshape.Reshape
           # shape: [400,400]
