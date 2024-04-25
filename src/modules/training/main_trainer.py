@@ -1,14 +1,17 @@
 """Module for example training block."""
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
+import torch
 import wandb
 from epochalyst.pipeline.model.training.torch_trainer import TorchTrainer
-from torch import Tensor
+from torch import Tensor, nn
 from torch.utils.data import DataLoader, Dataset
 
 from src.modules.logging.logger import Logger
 from src.modules.training.datasets.dask_dataset import DaskDataset
+from src.modules.training.datasets.sampler.submission import SubmissionSampler
 from src.typing.typing import XData, YData
 
 
@@ -54,6 +57,20 @@ class MainTrainer(TorchTrainer, Logger):
 
         return train_dataset, test_dataset
 
+    def create_prediction_dataset(
+        self,
+        x: XData,
+    ) -> Dataset[tuple[Tensor, ...]]:
+        """Create the prediction dataset for submission used in custom_predict.
+
+        :param x: The input data.
+        :return: The prediction dataset.
+        """
+        pred_dataset_args = self.dataset_args.copy()
+        pred_dataset_args["sampler"] = SubmissionSampler()
+
+        return DaskDataset(X=x, year=self.year, **pred_dataset_args)
+
     def create_dataloaders(
         self,
         train_dataset: Dataset[tuple[Tensor, ...]],
@@ -80,6 +97,40 @@ class MainTrainer(TorchTrainer, Logger):
             **self.dataloader_args,
         )
         return train_loader, test_loader
+
+    def _load_model(self) -> None:
+        """Load the model from the model_directory folder."""
+        # Check if the model exists
+        if not Path(f"{self._model_directory}/{self.get_hash()}.pt").exists():
+            raise FileNotFoundError(
+                f"Model not found in {self._model_directory}/{self.get_hash()}.pt",
+            )
+
+        # Load model
+        self.log_to_terminal(
+            f"Loading model from {self._model_directory}/{self.get_hash()}.pt",
+        )
+        # If device is cuda, load the model to the device
+        if self.device == "cuda":
+            checkpoint = torch.load(f"{self._model_directory}/{self.get_hash()}.pt")
+        else:
+            checkpoint = torch.load(f"{self._model_directory}/{self.get_hash()}.pt", map_location="cpu")
+
+        # Load the weights from the checkpoint
+        if isinstance(checkpoint, nn.DataParallel):
+            model = checkpoint.module
+        else:
+            model = checkpoint
+
+        # Set the current model to the loaded model
+        if isinstance(self.model, nn.DataParallel):
+            self.model.module.load_state_dict(model.state_dict())
+        else:
+            self.model.load_state_dict(model.state_dict())
+
+        self.log_to_terminal(
+            f"Model loaded from {self._model_directory}/{self.get_hash()}.pt",
+        )
 
 
 def collate_fn(batch: tuple[Tensor, ...]) -> tuple[Tensor, ...]:

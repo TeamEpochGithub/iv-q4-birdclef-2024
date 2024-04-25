@@ -41,7 +41,7 @@ def run_submit(cfg: DictConfig) -> None:
     model_pipeline = setup_pipeline(cfg, is_train=False)
 
     # Load the test data
-    X = setup_inference_data(cfg.raw_path, cfg.data_path)
+    X = setup_inference_data(cfg.data_path)
 
     # Predict on the test data
     logger.info("Making predictions...")
@@ -52,7 +52,7 @@ def run_submit(cfg: DictConfig) -> None:
     if predictions is not None:
         # Create a dataframe from the predictions
 
-        submission = to_submission_format(predictions, cfg.data_oath, cfg.species_path)
+        submission = to_submission_format(predictions, cfg.data_path, cfg.species_path)
 
         # Save submissions to path (Might be different for other platforms than Kaggle)
         result_path = Path(cfg.result_path)

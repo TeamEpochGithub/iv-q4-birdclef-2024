@@ -4,6 +4,7 @@
 - Usually you'll have one data setup for training and another for making submissions.
 """
 import ast
+import glob
 from typing import Any
 
 import dask
@@ -80,15 +81,20 @@ def setup_train_y_data(path: str) -> YData:
     return YData(meta_2024=metadata, label_2024=one_hot)
 
 
-def setup_inference_data(raw_path: str, path: str) -> Any:  # noqa: ANN401
+def setup_inference_data(path: str) -> Any:  # noqa: ANN401
     """Create data for inference with pipeline.
 
     :param raw_path: Raw path
     :param path: Usually raw path is a parameter
     :return: Inference data
     """
-    #
-    return setup_train_x_data(raw_path, path)
+    # Load all files in the path that end with .ogg with glob
+    filenames = glob.glob(path + "/*.ogg")
+
+    # Load the bird_2024 data
+    bird_2024 = np.array([load_audio(filename) for filename in filenames])
+
+    return XData(bird_2024=bird_2024)
 
 
 def setup_splitter_data() -> Any:  # noqa: ANN401
