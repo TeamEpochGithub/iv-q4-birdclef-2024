@@ -26,7 +26,7 @@ class MainTrainer(TorchTrainer, Logger):
     dataset_args: dict[str, Any] = field(default_factory=dict)
     year: str = "2024"
     # Things like prefetch factor
-    dataloader_args: dict[str, Any] = field(default_factory=dict)
+    dataloader_args: dict[str, Any] = field(default_factory=dict, repr=False)
 
     def save_model_to_external(self) -> None:
         """Save the model to external storage."""
@@ -149,15 +149,26 @@ class MainTrainer(TorchTrainer, Logger):
         self.model.eval()
         predictions = []
         # Create a new dataloader from the dataset of the input dataloader with collate_fn
-        loader = DataLoader(
-            loader.dataset,
-            batch_size=loader.batch_size,
-            shuffle=False,
-            collate_fn=(
-                collate_fn if hasattr(loader.dataset, "__getitems__") else None  # type: ignore[arg-type]
-            ),
-            **self.dataloader_args,
-        )
+
+        if self.device.type == "cuda":
+            loader = DataLoader(
+                loader.dataset,
+                batch_size=loader.batch_size,
+                shuffle=False,
+                collate_fn=(
+                    collate_fn if hasattr(loader.dataset, "__getitems__") else None  # type: ignore[arg-type]
+                ),
+                **self.dataloader_args,
+            )
+        else:  # ONNX with CPU
+            loader = DataLoader(
+                loader.dataset,
+                batch_size=loader.batch_size,
+                shuffle=False,
+                collate_fn=(
+                    collate_fn if hasattr(loader.dataset, "__getitems__") else None  # type: ignore[arg-type]
+                ),
+            )
 
         if self.device.type == "cuda":
             self.log_to_terminal("Predicting on the test data - Normal")

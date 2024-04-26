@@ -35,11 +35,11 @@ train_sys:
           _target_: src.modules.training.datasets.filter.grade_threshold.GradeThreshold
           threshold: 4.0
       dataloader_args:
-        num_workers: 16
-        prefetch_factor: 2
+        num_workers: 32
+        prefetch_factor: 7
         persistent_workers: true
       n_folds: 5 # 0 for train full,
-      epochs: 10
+      epochs: 1
       patience: 10
       batch_size: 128
       model:

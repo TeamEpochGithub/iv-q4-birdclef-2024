@@ -82,9 +82,9 @@ def update_dependencies():
         os.makedirs(DEPENDENCIES_SAVE_PATH)
 
     print('Copying the requirements.txt file and excluding -e')
-    with open(SOURCE_CODE_PATH / 'requirements.txt', 'r') as f:
+    with open(SOURCE_CODE_PATH / 'kaggle_requirements.txt', 'r') as f:
         lines = f.readlines()
-    with open(DEPENDENCIES_SAVE_PATH / 'requirements.txt', 'w') as f:
+    with open(DEPENDENCIES_SAVE_PATH / 'kaggle_requirements.txt', 'w') as f:
         for line in lines:
             if line.startswith('-e'):
                 continue
@@ -98,7 +98,7 @@ def update_dependencies():
     if not os.path.exists(DEPENDENCIES_SAVE_PATH / 'tmp'):
         os.makedirs(DEPENDENCIES_SAVE_PATH / 'tmp')
     # Run pip command
-    os.system(f'pip download -r {DEPENDENCIES_SAVE_PATH / "requirements.txt"} -d {DEPENDENCIES_SAVE_PATH / "tmp"}')
+    os.system(f'pip download -r {DEPENDENCIES_SAVE_PATH / "kaggle_requirements.txt"} -d {DEPENDENCIES_SAVE_PATH / "tmp"}')
 
     print('Zipping the downloaded dependencies')
     shutil.make_archive(DEPENDENCIES_SAVE_PATH / 'dependencies', 'zip', DEPENDENCIES_SAVE_PATH / 'tmp')
@@ -109,9 +109,9 @@ def update_dependencies():
     shutil.copy('config/dependencies.json', DEPENDENCIES_SAVE_PATH / 'dataset-metadata.json')
 
     print('Excluding --find-files in requirements.txt')
-    with open(DEPENDENCIES_SAVE_PATH / 'requirements.txt', 'r') as f:
+    with open(DEPENDENCIES_SAVE_PATH / 'kaggle_requirements.txt', 'r') as f:
         lines = f.readlines()
-    with open(DEPENDENCIES_SAVE_PATH / 'requirements.txt', 'w') as f:
+    with open(DEPENDENCIES_SAVE_PATH / 'kaggle_requirements.txt', 'w') as f:
         for line in lines:
             if line.startswith('--find-links'):
                 continue
