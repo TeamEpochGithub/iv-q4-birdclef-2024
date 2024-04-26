@@ -71,6 +71,10 @@ class MainTrainer(TorchTrainer, Logger):
         :return: The prediction dataset.
         """
         pred_dataset_args = self.dataset_args.copy()
+        if pred_dataset_args.get("aug_1d") is not None:
+            del pred_dataset_args["aug_1d"]
+        if pred_dataset_args.get("aug_2d") is not None:
+            del pred_dataset_args["aug_2d"]
         pred_dataset_args["sampler"] = SubmissionSampler()
 
         return DaskDataset(X=x, year=self.year, **pred_dataset_args)
