@@ -21,7 +21,7 @@ class SubmissionSampler:
         """
         # Raise an warning if the audio is not 4 minutes long (32000 samples per second)
         if len(array) != 32000 * 60 * 4:
-            logger.warning(f"Audio is not 4 minutes long: {len(array)} samples")
+            logger.warning(f"Audio is not 4 minutes long: {len(array) / 32000} seconds..")
         # Extract 48 segments of 5 seconds each
         step = 32000 * 5
         segments = [array[i : i + step] for i in range(0, len(array), step)]
@@ -32,16 +32,25 @@ class SubmissionSampler:
         else:
             segments[-1] = np.pad(segments[-1], (0, 160000 - len(segments[-1])), "constant")
 
+        all_segments = np.array(segments)
+
+        # If all segments are not 48, pad with zeros
+        if len(all_segments) < 48:
+            all_segments = np.pad(all_segments, ((0, 48 - len(all_segments)), (0, 0)), "constant")
+        if len(all_segments) > 48:
+            all_segments = all_segments[:48]
+
         # Check that the last segment
-        return np.array(segments)
+        return all_segments
 
 
-# Remove delayed for testing
+#
 # if __name__ == "__main__":
 #     sampler = SubmissionSampler()
-#     array = np.random.rand(32000 * 60 * 4)
+#     array = np.random.rand(32000 * 60 * 6)
 #     #Add last element with size 32199
-#     array = np.append(array, np.random.rand(150001))
 #     segments = sampler(array)
-#     print(segments)
+#     print(segments[-4])
 #     print(len(segments))
+#     #Check that each segment is 5 seconds long
+#     print([len(segment) for segment in segments])
