@@ -3,11 +3,15 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+import numpy.typing as npt
+import onnxruntime as onnxrt  # type: ignore[import-not-found]
 import torch
 import wandb
 from epochalyst.pipeline.model.training.torch_trainer import TorchTrainer
 from torch import Tensor, nn
 from torch.utils.data import DataLoader, Dataset
+from tqdm import tqdm
 
 from src.modules.logging.logger import Logger
 from src.modules.training.datasets.dask_dataset import DaskDataset
@@ -131,6 +135,67 @@ class MainTrainer(TorchTrainer, Logger):
         self.log_to_terminal(
             f"Model loaded from {self._model_directory}/{self.get_hash()}.pt",
         )
+
+    def predict_on_loader(
+        self,
+        loader: DataLoader[tuple[Tensor, ...]],
+    ) -> npt.NDArray[np.float32]:
+        """Predict on the loader.
+
+        :param loader: The loader to predict on.
+        :return: The predictions.
+        """
+        self.model.eval()
+        predictions = []
+        # Create a new dataloader from the dataset of the input dataloader with collate_fn
+        loader = DataLoader(
+            loader.dataset,
+            batch_size=loader.batch_size,
+            shuffle=False,
+            collate_fn=(
+                collate_fn if hasattr(loader.dataset, "__getitems__") else None  # type: ignore[arg-type]
+            ),
+            **self.dataloader_args,
+        )
+
+        if self.device.type == "cuda":
+            self.log_to_terminal("Predicting on the test data - Normal")
+            with torch.no_grad(), tqdm(loader, unit="batch", disable=False) as tepoch:
+                for data in tepoch:
+                    X_batch = data[0].to(self.device).float()
+
+                    y_pred = self.model(X_batch).squeeze(1).cpu().numpy()
+                    predictions.extend(y_pred)
+
+            self.log_to_terminal("Done predicting")
+            return np.array(predictions)
+        # ONNX with CPU
+        return self.onnx_predict(loader)
+
+    def onnx_predict(self, loader: DataLoader[tuple[Tensor, ...]]) -> npt.NDArray[np.float32]:
+        """Predict on the loader using ONNX.
+
+        :param loader: The loader to predict on.
+        :return: The predictions.
+        """
+        self.log_to_terminal("Predicting on the test data - ONNX")
+        # Get 1 item from the dataloader
+        input_tensor = next(iter(loader))[0].to(self.device).float()
+        input_names = ["actual_input"]
+        output_names = ["output"]
+        torch.onnx.export(self.model, input_tensor, f"{self.get_hash()}.onnx", verbose=False, input_names=input_names, output_names=output_names)
+        onnx_model = onnxrt.InferenceSession(f"{self.get_hash()}.onnx")
+        predictions = []
+        with torch.no_grad(), tqdm(loader, unit="batch", disable=False) as tepoch:
+            for data in tepoch:
+                X_batch = data[0].to(self.device).float()
+                y_pred = onnx_model.run(output_names, {input_names[0]: X_batch.numpy()})[0]
+                predictions.extend(y_pred)
+
+        self.log_to_terminal("Done predicting")
+        # Remove the saved onnx model
+        Path(f"{self.get_hash()}.onnx").unlink()
+        return np.array(predictions)
 
 
 def collate_fn(batch: tuple[Tensor, ...]) -> tuple[Tensor, ...]:
