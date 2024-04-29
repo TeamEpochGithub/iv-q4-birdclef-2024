@@ -18,6 +18,4 @@ dask==2024.4.2
 dask-expr==1.0.12
 onnx==1.16.0
 onnxruntime==1.17.3
-
-
 -e ./
