@@ -4,7 +4,7 @@ import pandas as pd
 
 og_df = pd.read_csv('data/raw/train_data/train_metadata.csv.zip')
 # download from https://www.kaggle.com/datasets/ludovick/birdclef2024-additional-mp3
-add_df = pd.read_csv('data/raw/train_data/BirdClef2024_additional.csv.zip')
+add_df = pd.read_csv('data/raw/train_data/BirdClef2024_additional.csv')
 
 # %%
 more_data = add_df[add_df['primary_label'].isin(og_df['primary_label'])]
