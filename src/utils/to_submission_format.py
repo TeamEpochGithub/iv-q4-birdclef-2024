@@ -1,5 +1,5 @@
 """File contains the function to_submission_format() which converts the output of the model to the submission format."""
-
+import glob
 import os
 
 import numpy as np
@@ -19,9 +19,11 @@ def to_submission_format(predictions: npt.NDArray[np.float32], test_path: str, s
     :return: The predictions in the submission format.
 
     """
-    file_list = sorted(os.listdir(test_path))
-    file_list = [file.split(".")[0] for file in file_list if file.endswith(".ogg")]
+    file_list = glob.glob(test_path + "/*.ogg")
+    file_list = [curr_file.split("/")[-1].split(".")[0] for curr_file in file_list]
+
     logger.info(f"Number of test soundscapes: {len(file_list)} ")
+    logger.info(f"Filenames: {file_list[:10]}...")
 
     species_list = sorted(os.listdir(species_path))
 
