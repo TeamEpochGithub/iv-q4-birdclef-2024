@@ -49,7 +49,7 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
         # Get a window from each sample
 
         if self.X is not None:
-            x_window = [dask.delayed(self.sampler)(self.X[f"bird_{self.year}"][i]) for i in indices]  # type: ignore[arg-type]
+            x_window = [self.sampler(self.X[f"bird_{self.year}"][i]) for i in indices]  # type: ignore[arg-type]
 
         x_batch = dask.compute(*x_window)
         x_batch = np.stack(x_batch, axis=0)
