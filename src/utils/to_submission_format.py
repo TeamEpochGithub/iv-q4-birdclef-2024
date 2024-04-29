@@ -34,7 +34,6 @@ def to_submission_format(predictions: npt.NDArray[np.float32], test_path: str, s
     # Convert predictions to dataframe with species as columns and row_id as index.
     submission = pd.DataFrame(predictions, columns=species_list)
     submission["row_id"] = [f"{file}_{(i + 1) * 5}" for file in file_list for i in range(48)]
-
     return submission
 
 

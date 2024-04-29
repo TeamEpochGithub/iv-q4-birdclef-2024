@@ -17,29 +17,49 @@ train_sys:
           _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
           length: 160000
         to_2d:
-          #_target_: src.modules.training.datasets.to_2d.spec.Spec
-          #spec:
-#            _target_: functools.partial
-#            _args_:
-#              - _target_: hydra.utils.get_class
-#                path: torchaudio.transforms.MelSpectrogram #nnAudio.features.mel.MelSpectrogram
-#          output_shape: [224,224]
-          # scale:
-          #   _target_: src.modules.training.datasets.to_2d.spec_normalize.SpecNormalize
+          _target_: src.modules.training.datasets.to_2d.spec.Spec
+          spec:
+           _target_: functools.partial
+           _args_:
+             - _target_: hydra.utils.get_class
+               path: torchaudio.transforms.MelSpectrogram #nnAudio.features.mel.MelSpectrogram
+          output_shape: [224,224]
+          scale:
+            _target_: src.modules.training.datasets.to_2d.spec_normalize.SpecNormalize
 
-         _target_: src.modules.training.datasets.to_2d.reshape.Reshape
-         shape: [400,400]
+        #  _target_: src.modules.training.datasets.to_2d.reshape.Reshape
+        #  shape: [400,400]
         labeler:
           _target_: src.modules.training.datasets.labeler.psd_labeler.PSDLabeler
         filter_:
           _target_: src.modules.training.datasets.filter.grade_threshold.GradeThreshold
-          threshold: 4.0
+          threshold: 0
+        aug_1d:
+          _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
+          x_transforms:
+            - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomPhaseShift
+              p: 0.5
+              shift_limit: 0.5
+            - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomAmplitudeShift
+              p: 0.5
+          xy_transforms:
+            - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.CutMix1D
+              p: 0.5
+            - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.MixUp1D
+              p: 0.5
+
+        aug_2d:
+          _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
+          xy_transforms:
+            - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.CutMix
+              p: 0.5
+
       dataloader_args:
-        num_workers: 32
-        prefetch_factor: 7
-        persistent_workers: true
+        num_workers: 16
+        prefetch_factor: 2
+        persistent_workers: True
       n_folds: 5 # 0 for train full,
-      epochs: 1
+      epochs: 4
       patience: 10
       batch_size: 128
       model:
