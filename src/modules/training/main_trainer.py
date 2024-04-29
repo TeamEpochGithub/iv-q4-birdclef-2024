@@ -53,9 +53,8 @@ class MainTrainer(TorchTrainer, Logger):
         train_dataset = DaskDataset(X=x_train, y=y_train, year=self.year, **self.dataset_args)
         if test_indices is not None:
             test_dataset_args = self.dataset_args.copy()
-            # TODO(Tolga): fix this
-            # test_dataset_args["aug_1d"] = None
-            # test_dataset_args["aug_2d"] = None
+            test_dataset_args["aug_1d"] = None
+            test_dataset_args["aug_2d"] = None
             test_dataset = DaskDataset(X=x_test, y=y_test, year=self.year, **test_dataset_args)
         else:
             test_dataset = None
@@ -72,6 +71,10 @@ class MainTrainer(TorchTrainer, Logger):
         :return: The prediction dataset.
         """
         pred_dataset_args = self.dataset_args.copy()
+        if pred_dataset_args.get("aug_1d") is not None:
+            del pred_dataset_args["aug_1d"]
+        if pred_dataset_args.get("aug_2d") is not None:
+            del pred_dataset_args["aug_2d"]
         pred_dataset_args["sampler"] = SubmissionSampler()
 
         return DaskDataset(X=x, year=self.year, **pred_dataset_args)
