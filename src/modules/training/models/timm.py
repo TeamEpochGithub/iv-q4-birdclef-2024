@@ -12,12 +12,13 @@ class Timm(nn.Module):
     :param model_name: Model to use
     """
 
-    def __init__(self, in_channels: int, out_channels: int, model_name: str) -> None:
+    def __init__(self, in_channels: int, out_channels: int, model_name: str, activation: str = "none") -> None:
         """Initialize the Timm model.
 
         :param in_channels: The number of input channels.
         :param out_channels: The number of output channels.
         :param model_name: The model to use.
+        :param activation: The activation function to use.
         """
         try:
             import timm  # type: ignore[import-not-found]
@@ -27,6 +28,7 @@ class Timm(nn.Module):
         super(Timm, self).__init__()  # noqa: UP008
         self.in_channels = in_channels
         self.out_channels = out_channels
+        self.activation = activation
 
         # If there is an internet connection, download the model with pretrained weights
         try:
@@ -43,4 +45,6 @@ class Timm(nn.Module):
         """
         x = self.model(x)
         # Apply a sigmoid
-        return torch.sigmoid(x)
+        if self.activation == "sigmoid":
+            return torch.sigmoid(x)
+        return x

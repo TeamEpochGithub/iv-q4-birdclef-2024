@@ -43,10 +43,11 @@ train_sys:
       patience: 10
       batch_size: 128
       model:
-        _target_: src.modules.training.models.timm.Timm
+        _target_: src.modules.training.models.timm.Timm #Ensure that activation is sigmoid for non Logits loss functions.
         in_channels: 1
         out_channels: 182
         model_name: "efficientnet_b0"
+        activation: "sigmoid"
       criterion:
         _target_: src.modules.training.losses.focal_loss.FocalLoss
       optimizer:
