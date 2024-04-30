@@ -1,7 +1,7 @@
 defaults:
   - base_train
   - hydra/logging
-  - model: run # Add models or ensembles
+  - model: focal # Add models or ensembles
   - wandb: train
 
 ###############
@@ -22,8 +22,8 @@ test_size: 0.2
 scorer:
   _target_: src.scoring.rocauc.ROCAUC # Add scorer
   name: rocauc
-  grade_threshold: 4.0
-  only_primary: true
+  grade_threshold: 0
+  only_primary: false
 splitter:
   _target_: sklearn.model_selection.StratifiedKFold
   n_splits: 5 # Set to 0 if you want train full.

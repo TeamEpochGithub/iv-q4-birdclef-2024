@@ -33,7 +33,7 @@ train_sys:
           _target_: src.modules.training.datasets.labeler.psd_labeler.PSDLabeler
         filter_:
           _target_: src.modules.training.datasets.filter.grade_threshold.GradeThreshold
-          threshold: 4.5
+          threshold: 0
         aug_1d:
           _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
           x_transforms:
@@ -57,7 +57,7 @@ train_sys:
         prefetch_factor: 2
         persistent_workers: True
       n_folds: 5 # 0 for train full,
-      epochs: 5
+      epochs: 50
       patience: 15
       batch_size: 64
       model:
@@ -75,7 +75,7 @@ train_sys:
         t_initial: 50
         cycle_limit: 1
       criterion:
-        _target_: src.modules.training.losses.focal_loss.FocalLoss
+        _target_: torch.nn.BCELoss
       optimizer:
         _target_: functools.partial
         _args_:
