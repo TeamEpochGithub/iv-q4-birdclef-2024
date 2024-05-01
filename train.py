@@ -74,17 +74,17 @@ def run_train_cfg(cfg: DictConfig) -> None:
     X = None
     if not x_cache_exists:
         # X = setup_train_x_data(cfg.data_path, cfg.cache_path)
-        X = setup_train_x_data(cfg.data_path, cfg.metadata_path)
+        X = setup_train_x_data(cfg.raw_path, cfg.years)
 
     # If not cache exists, we need to load the data
-    y = setup_train_y_data(cfg.metadata_path)
+    y = setup_train_y_data(cfg.raw_path, cfg.years)
 
     # For this simple splitter, we only need y.
     if cfg.test_size == 0:
         if cfg.splitter.n_splits != 0:
             raise ValueError("Test size is 0, but n_splits is not 0. Also please set n_splits to 0 if you want to run train full.")
         logger.info("Training full.")
-        train_indices, test_indices = list(range(len(X.bird_2024))), []  # type: ignore[union-attr]
+        train_indices, test_indices = list(range(len(X.bird_2024))), []  # type: ignore[arg-type, union-attr]
         fold = -1
     else:
         logger.info("Using splitter to split data into train and test sets.")

@@ -25,6 +25,7 @@ class CVConfig:
     ensemble: Any
     raw_path: str
     cache_path: str
+    years: list[int]
     data_path: str
     processed_path: str
     scorer: Any

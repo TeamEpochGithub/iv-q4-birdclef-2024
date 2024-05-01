@@ -33,7 +33,7 @@ train_sys:
           _target_: src.modules.training.datasets.labeler.psd_labeler.PSDLabeler
         filter_:
           _target_: src.modules.training.datasets.filter.grade_threshold.GradeThreshold
-          threshold: 4.5
+          threshold: 0
         aug_1d:
           _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
           x_transforms:
@@ -41,7 +41,9 @@ train_sys:
               p: 0.5
               shift_limit: 0.5
             - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomAmplitudeShift
-              p: 0.5
+              p: 0.8
+              low: 0.2
+              high: 0.8
           xy_transforms:
             - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.CutMix1D
               p: 0.5
@@ -53,9 +55,9 @@ train_sys:
             - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.CutMix
               p: 0.5
       dataloader_args:
-        num_workers: 8
-        prefetch_factor: 2
-        persistent_workers: True
+        num_workers: 16
+        prefetch_factor: 1
+        persistent_workers: false
       n_folds: 0 # 0 for train full,
       epochs: 50
       patience: 15

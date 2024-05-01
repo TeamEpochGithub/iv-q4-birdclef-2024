@@ -44,7 +44,7 @@ class XData:
             # allow dict like indexing with keys
             return getattr(self, indexer)
 
-        # Needed for the main trainer to instantiate datasets properly
+        # If nothing is specified assume we are using 2024 data
         if self.meta_2024 is not None:
             sliced_meta_2024 = self.meta_2024.iloc[indexer]
         if self.bird_2024 is not None:
@@ -60,7 +60,7 @@ class XData:
         if hasattr(self, key):
             setattr(self, key, value)
         else:
-            raise KeyError(f"'{key}' is not a valid attribute of YData")
+            raise KeyError(f"'{key}' is not a valid attribute of XData")
 
     def __repr__(self) -> str:
         """Return a string representation of the object."""
@@ -81,7 +81,7 @@ class YData:
     :param label_2021: Labels of BirdClef2021
     """
 
-    meta_2024: pd.DataFrame
+    meta_2024: pd.DataFrame | None = None
     meta_2023: pd.DataFrame | None = None
     meta_2022: pd.DataFrame | None = None
     meta_2021: pd.DataFrame | None = None
