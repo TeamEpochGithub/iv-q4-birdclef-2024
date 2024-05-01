@@ -39,7 +39,6 @@ def setup_train_args(
     # Train system arguments
     train_sys = {
         "MainTrainer": main_trainer,
-        "cache_args": cache_args,
     }
 
     if save_model_preds:

@@ -20,6 +20,7 @@ from src.setup.setup_data import setup_train_x_data, setup_train_y_data
 from src.setup.setup_pipeline import setup_pipeline
 from src.setup.setup_runtime_args import setup_train_args
 from src.setup.setup_wandb import setup_wandb
+from src.typing.typing import YData
 from src.utils.lock import Lock
 from src.utils.logger import logger
 from src.utils.set_torch_seed import set_torch_seed
@@ -75,14 +76,13 @@ def run_cv_cfg(cfg: DictConfig) -> None:
 
     # Read the data if required and split in X, y
     x_cache_exists = model_pipeline.get_x_cache_exists(cache_args)
-    y_cache_exists = model_pipeline.get_y_cache_exists(cache_args)
+    # y_cache_exists = model_pipeline.get_y_cache_exists(cache_args)
 
-    X, y = None, None
+    X = None
     if not x_cache_exists:
-        X = setup_train_x_data(cfg.raw_path, cfg.metadata_path)
+        X = setup_train_x_data(cfg.data_path, cfg.metadata_path)
 
-    if not y_cache_exists:
-        y = setup_train_y_data(cfg.metadata_path)
+    y = setup_train_y_data(cfg.metadata_path)
 
     # Instantiate scorer
     scorer = instantiate(cfg.scorer)
@@ -92,20 +92,25 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     # splitter_data = setup_splitter_data()
     logger.info("Using splitter to split data into train and test sets.")
 
-    if not isinstance(y, np.ndarray):
-        raise TypeError("y should be a numpy array")
+    if not isinstance(y, YData):
+        raise TypeError("Y Should be YData")
 
-    oof_predictions = np.zeros(y.shape, dtype=np.float64)
+    # Hardcode for 2024 for now.
+    # oof_predictions = np.zeros((len(y.meta_2024[y.meta_2024["rating"] >= cfg.scorer.grade_threshold]), 182), dtype=np.float64)
+    oof_predictions = np.zeros((len(y.meta_2024), 182), dtype=np.float64)
 
-    for fold_no, (train_indices, test_indices) in enumerate(instantiate(cfg.splitter).split(y, y["primary_label"])):
+    for fold_no, (train_indices, test_indices) in enumerate(instantiate(cfg.splitter).split(y.meta_2024, y.meta_2024["primary_label"])):
         score, predictions = run_fold(fold_no, X, y, train_indices, test_indices, cfg, scorer, output_dir, cache_args)
         scores.append(score)
 
         # Save predictions
+        test_indices = test_indices[y.meta_2024["rating"].iloc[test_indices] >= cfg.scorer.grade_threshold]
         oof_predictions[test_indices] = predictions
 
     avg_score = np.average(np.array(scores))
-    oof_score = scorer(y, oof_predictions)
+    # Remove all rows with rating < grade_threshold
+    oof_predictions = oof_predictions[y.meta_2024["rating"] >= cfg.scorer.grade_threshold]
+    oof_score = scorer(y.label_2024, oof_predictions, metadata=y.meta_2024)
 
     print_section_separator("CV - Results")
     logger.info(f"Avg Score: {avg_score}")
@@ -156,10 +161,11 @@ def run_fold(
         test_indices=test_indices,
         fold=fold_no,
         save_model=cfg.save_folds,
+        save_model_preds=False,
     )
     predictions, _ = model_pipeline.train(X, y, **train_args)
 
-    score = scorer(y[test_indices], predictions)
+    score = scorer(y.label_2024.iloc[test_indices], predictions, metadata=y.meta_2024.iloc[test_indices])
     logger.info(f"Score, fold {fold_no}: {score}")
 
     fold_dir = output_dir / str(fold_no)  # Files specific to a run can be saved here

@@ -93,7 +93,9 @@ def run_train_cfg(cfg: DictConfig) -> None:
 
     logger.info(f"Train/Test size: {len(train_indices)}/{len(test_indices)}")
     print_section_separator("Train model pipeline")
-    train_args = setup_train_args(pipeline=model_pipeline, cache_args=cache_args, train_indices=train_indices, test_indices=test_indices, save_model=True, fold=fold)
+    train_args = setup_train_args(
+        pipeline=model_pipeline, cache_args=cache_args, train_indices=train_indices, test_indices=test_indices, save_model=True, fold=fold, save_model_preds=True
+    )
     predictions, y_new = model_pipeline.train(X, y, **train_args)
 
     if y is None:
