@@ -12,7 +12,7 @@ class Timm(nn.Module):
     :param model_name: Model to use
     """
 
-    def __init__(self, in_channels: int, out_channels: int, model_name: str, activation: str = "none") -> None:
+    def __init__(self, in_channels: int, out_channels: int, model_name: str, activation: str | None = None) -> None:
         """Initialize the Timm model.
 
         :param in_channels: The number of input channels.
