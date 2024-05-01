@@ -26,7 +26,8 @@ class ROCAUC(Scorer):
 
         :return: The ROC AUC score.
         """
-        # Get metadata from the keyword arguments
+        # Get metadata from the keyword arguments if not None
+
         metadata = kwargs.get("metadata")
 
         # Check if metadata is not None
@@ -81,13 +82,16 @@ class ROCAUC(Scorer):
 #         [0.62, 0.21, 0.30, 0.04, 0.13],  # Sparrow, Crow
 #         [0.22, 0.41, 0.26, 0.51, 0.11],  # Robin (False Cardinal now 0.51)
 #         [0.82, 0.20, 0.93, 0.63, 0.13],  # Sparrow, Crow, Cardinal
-#         [0.43, 0.10, 0.11, 0.48, 0.16],  # Sparrow, Cardinal (now 0.48)
+#         [0.43, 0.10, 0.11, 0.48, 0.16],    # Sparrow, Cardinal (now 0.48)
+#         [0.43, 0.10, 0.11, 0.48, 0.16],
+#
 #     ]
 #     solution = [
 #         [1, 0, 1, 0, 0],  # Sparrow, Crow
 #         [0, 1, 0, 0, 0],  # Robin
 #         [1, 0, 1, 1, 0],  # Sparrow, Crow, Cardinal
-#         [1, 0, 0, 1, 0],  # Sparrow, Cardinal
+#         [1, 0, 0, 1, 0],
+#         [0,0,0,0,0]# Sparrow, Cardinal
 #     ]
 #     solution_pd = pd.DataFrame(solution, columns=birds).astype(np.float32)
 #     predicted_pd = np.array(predicted)
