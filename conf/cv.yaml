@@ -1,7 +1,7 @@
 defaults:
   - base_cv
   - hydra/logging
-  - model: b0_aug # Add models or ensembles
+  - model: jeffrey # Add models or ensembles
   - wandb: train
 
 ###############
@@ -19,11 +19,11 @@ metadata_path: data/raw/train_metadata.csv
 scorer:
   _target_: src.scoring.rocauc.ROCAUC # Add scorer
   name: rocauc
-  grade_threshold: 4.5
+  grade_threshold: 0
   only_primary: true
 splitter:
   _target_: sklearn.model_selection.StratifiedKFold
-  n_splits: 2 # Set to 0 if you want train full.
+  n_splits: 5 # Set to 0 if you want train full.
   shuffle: true
   random_state: 42
 allow_multiple_instances: true
