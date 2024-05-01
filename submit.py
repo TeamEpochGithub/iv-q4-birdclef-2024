@@ -54,6 +54,9 @@ def run_submit(cfg: DictConfig) -> None:
 
         submission = to_submission_format(predictions, cfg.data_path, cfg.species_path)
 
+        # Print submission head
+        logger.info(submission.head())
+
         # Save submissions to path (Might be different for other platforms than Kaggle)
         result_path = Path(cfg.result_path)
         os.makedirs(result_path, exist_ok=True)

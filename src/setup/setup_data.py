@@ -91,6 +91,8 @@ def setup_inference_data(path: str) -> Any:  # noqa: ANN401
     # Load all files in the path that end with .ogg with glob
     filenames = glob.glob(path + "/*.ogg")
 
+    logger.info(f"Filenames: {filenames[:10]}...")
+
     # Load the bird_2024 data
     bird_2024 = np.array([load_audio(filename) for filename in filenames])
 
