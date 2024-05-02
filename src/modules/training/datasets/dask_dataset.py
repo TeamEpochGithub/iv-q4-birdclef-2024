@@ -1,5 +1,4 @@
 """Dask dataset module. Torch dataset that works with dask."""
-
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
@@ -52,6 +51,7 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
             x_window = [self.sampler(self.X[f"bird_{self.year}"][i]) for i in indices]  # type: ignore[arg-type]
 
         x_batch = dask.compute(*x_window)
+
         x_batch = np.stack(x_batch, axis=0)
 
         # If the x_batch is 3D, convert to 2D

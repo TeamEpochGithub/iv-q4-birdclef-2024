@@ -1,7 +1,7 @@
 defaults:
   - base_train
   - hydra/logging
-  - model: focal # Add models or ensembles
+  - model: hugo # Add models or ensembles
   - wandb: train
 
 ###############

@@ -1,13 +1,11 @@
 defaults:
   - pipeline/default@_here_
   - _self_
-
 x_sys:
   steps:
     - _target_: src.modules.transformation.x.nan_to_zero.NanToZero
       years: ["2024"]
 y_sys:
-
 train_sys:
   steps:
     - _target_: src.modules.training.main_trainer.MainTrainer
@@ -26,14 +24,13 @@ train_sys:
           output_shape: [224,224]
           scale:
             _target_: src.modules.training.datasets.to_2d.spec_normalize.SpecNormalize
-
         #  _target_: src.modules.training.datasets.to_2d.reshape.Reshape
         #  shape: [400,400]
         labeler:
           _target_: src.modules.training.datasets.labeler.psd_labeler.PSDLabeler
         filter_:
           _target_: src.modules.training.datasets.filter.grade_threshold.GradeThreshold
-          threshold: 4.5
+          threshold: 0
         aug_1d:
           _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
           x_transforms:
@@ -53,11 +50,11 @@ train_sys:
             - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.CutMix
               p: 0.5
       dataloader_args:
-        num_workers: 8
-        prefetch_factor: 2
-        persistent_workers: True
-      n_folds: 2 # 0 for train full,
-      epochs: 1
+        num_workers: 16
+        prefetch_factor: 1
+        persistent_workers: false
+      n_folds: 5 # 0 for train full,
+      epochs: 50
       patience: 15
       batch_size: 64
       model:
