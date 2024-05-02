@@ -1,7 +1,7 @@
 defaults:
   - base_cv
   - hydra/logging
-  - model: jeffrey # Add models or ensembles
+  - model: hugo # Add models or ensembles
   - wandb: train
 
 ###############

@@ -52,11 +52,11 @@ train_sys:
             - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.CutMix
               p: 0.5
       dataloader_args:
-        num_workers: 16
-        prefetch_factor: 1
+        num_workers: 8
+        prefetch_factor: 2
         persistent_workers: false
       n_folds: 5 # 0 for train full,
-      epochs: 50
+      epochs: 1
       patience: 15
       batch_size: 64
       model:

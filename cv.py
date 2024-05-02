@@ -1,4 +1,6 @@
 """The main script for Cross Validation. Takes in the raw data, does CV and logs the results."""
+import copy
+import gc
 import os
 import warnings
 from contextlib import nullcontext
@@ -100,12 +102,16 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     oof_predictions = np.zeros((len(y.meta_2024), 182), dtype=np.float64)
 
     for fold_no, (train_indices, test_indices) in enumerate(instantiate(cfg.splitter).split(y.meta_2024, y.meta_2024["primary_label"])):
+        copy_x = copy.deepcopy(X)
+
         score, predictions = run_fold(fold_no, X, y, train_indices, test_indices, cfg, scorer, output_dir, cache_args)
         scores.append(score)
 
         # Save predictions
-        test_indices = test_indices[y.meta_2024["rating"].iloc[test_indices] >= cfg.scorer.grade_threshold]
-        oof_predictions[test_indices] = predictions
+        sliced_test = test_indices[y.meta_2024["rating"].iloc[test_indices] >= cfg.scorer.grade_threshold]
+        oof_predictions[sliced_test] = predictions
+
+        X = copy_x
 
     avg_score = np.average(np.array(scores))
     # Remove all rows with rating < grade_threshold
@@ -163,7 +169,10 @@ def run_fold(
         save_model=cfg.save_folds,
         save_model_preds=False,
     )
+
     predictions, _ = model_pipeline.train(X, y, **train_args)
+
+    gc.collect()
 
     score = scorer(y.label_2024.iloc[test_indices], predictions, metadata=y.meta_2024.iloc[test_indices])
     logger.info(f"Score, fold {fold_no}: {score}")
