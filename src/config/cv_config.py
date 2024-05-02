@@ -14,6 +14,7 @@ class CVConfig:
     :param raw_data_path: Path to the raw data.
     :param raw_target_path: Path to the raw target.
     :param processed_path: Path to put processed data.
+    :param metadata_path: Path to put metadata.
     :param scorer: Scorer object to be instantiated.
     :param wandb: Whether to log to Weights & Biases and other settings.
     :param splitter: Cross validation splitter.
@@ -28,6 +29,7 @@ class CVConfig:
     years: list[int]
     data_path: str
     processed_path: str
+    metadata_path: str
     scorer: Any
     wandb: WandBConfig
     splitter: Any
