@@ -27,6 +27,8 @@ class MainTrainer(TorchTrainer, Logger):
     year: str = "2024"
     # Things like prefetch factor
     dataloader_args: dict[str, Any] = field(default_factory=dict, repr=False)
+    # Weights for the sampler
+    weights_path: str | None = None
 
     def save_model_to_external(self) -> None:
         """Save the model to external storage."""
@@ -91,10 +93,8 @@ class MainTrainer(TorchTrainer, Logger):
         :return: The training and validation dataloaders.
         """
         # Check if weights_path exist in self.dataloader_args
-        if self.dataloader_args.get("weights_path") is not None:
+        if self.weights_path is not None:
             train_loader = self.create_training_sampler(train_dataset)
-            test_args = self.dataloader_args.copy()
-            del test_args["weights_path"]
         else:
             train_loader = DataLoader(
                 train_dataset,
@@ -109,7 +109,7 @@ class MainTrainer(TorchTrainer, Logger):
             batch_size=self.batch_size,
             shuffle=False,
             collate_fn=(collate_fn if hasattr(test_dataset, "__getitems__") else None),  # type: ignore[arg-type]
-            **test_args,
+            **self.dataloader_args,
         )
         return train_loader, test_loader
 
@@ -126,7 +126,7 @@ class MainTrainer(TorchTrainer, Logger):
         targets = torch.argmax(targets, dim=1)
 
         # Create the sampler
-        class_weights = np.load(self.dataloader_args.get("weights_path"))  # type: ignore[arg-type]
+        class_weights = np.load(self.weights_path)  # type: ignore[arg-type]
 
         sample_weights = torch.tensor([class_weights[label] for label in targets])
 
@@ -134,7 +134,6 @@ class MainTrainer(TorchTrainer, Logger):
 
         loader_args = self.dataloader_args.copy()
         loader_args["sampler"] = sampler
-        del loader_args["weights_path"]
 
         return DataLoader(
             train_dataset,
@@ -188,11 +187,8 @@ class MainTrainer(TorchTrainer, Logger):
         """
         self.model.eval()
         predictions = []
-        # Create a new dataloader from the dataset of the input dataloader with collate_fn
-        if self.dataloader_args.get("weights_path") is not None:
-            test_args = self.dataloader_args.copy()
-            del test_args["weights_path"]
 
+        # Create a new dataloader from the dataset of the input dataloader with collate_fn
         if self.device.type == "cuda":
             loader = DataLoader(
                 loader.dataset,
@@ -201,7 +197,7 @@ class MainTrainer(TorchTrainer, Logger):
                 collate_fn=(
                     collate_fn if hasattr(loader.dataset, "__getitems__") else None  # type: ignore[arg-type]
                 ),
-                **test_args,
+                **self.dataloader_args,
             )
         else:  # ONNX with CPU
             loader = DataLoader(

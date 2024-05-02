@@ -56,7 +56,6 @@ train_sys:
         num_workers: 8
         prefetch_factor: 2
         persistent_workers: True
-        weights_path: data/raw/sample_weights_2024.npy
       n_folds: 5 # 0 for train full,
       epochs: 50
       patience: 15
