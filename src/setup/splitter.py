@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -19,14 +20,15 @@ class Splitter:
             self.years.append(2024)
         self.instantiated_splitter = self.splitter(n_splits=self.n_splits, shuffle=self.shuffle, random_state=self.random_state)
 
-    def split(self, data: Any, labels: Any) -> tuple[dict[int, Any], dict[int, Any]]:
-        train_indices = {}
-        test_indices = {}
+    def split(self, data: Any, labels: Any) -> Generator[list[dict[int, Any], dict[int, Any]], list[dict[int, Any], dict[int, Any]], None]:
+        # make an empty dict for each split
+        splits: list[list[dict[int,Any], dict[int,Any]]]
+        splits = [[{}, {}] for _ in range(5)]
         for year in self.years:
-            train_indices[year] = []
-            test_indices[year] = []
-            for train_idx, test_idx in self.instantiated_splitter.split(data, labels):
-                train_indices[year].append(train_idx)
-                test_indices[year].append(test_idx)
+            year_splits = self.instantiated_splitter.split(data[f"meta_{year}"], data[f"meta_{year}"]["primary_label"])
+            for i, split in enumerate(year_splits):
+                splits[i][0][year] = split[0]
+                splits[i][1][year] = split[1]
 
-        return train_indices, test_indices
+        for split in splits:
+            yield split

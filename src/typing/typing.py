@@ -32,14 +32,14 @@ class XData:
     def __getitem__(self, indexer: Any) -> "XData":  # noqa: ANN401
         """Index the data according to the indexer type."""
         if isinstance(indexer, dict):
-            sliced_fileds = {}
+            sliced_fields = {}
             # Slice all the years by the appropriate indices and save to a dict
             for year in indexer:
                 if getattr(self, f"bird_{year}") is not None:
-                    sliced_fileds[f"bird_{year}"] = getattr(self, f"bird_{year}")[indexer[year]]
+                    sliced_fields[f"bird_{year}"] = getattr(self, f"bird_{year}")[indexer[year]]
                 if getattr(self, f"meta_{year}") is not None:
-                    sliced_fileds[f"meta_{year}"] = getattr(self, f"meta_{year}")[indexer[year]]
-            return XData(**sliced_fileds)
+                    sliced_fields[f"meta_{year}"] = getattr(self, f"meta_{year}").iloc[indexer[year]]
+            return XData(**sliced_fields)
         if isinstance(indexer, str):
             # allow dict like indexing with keys
             return getattr(self, indexer)
