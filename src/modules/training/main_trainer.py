@@ -189,6 +189,9 @@ class MainTrainer(TorchTrainer, Logger):
         self.model.eval()
         predictions = []
         # Create a new dataloader from the dataset of the input dataloader with collate_fn
+        if self.dataloader_args.get("weights_path") is not None:
+            test_args = self.dataloader_args.copy()
+            del test_args["weights_path"]
 
         if self.device.type == "cuda":
             loader = DataLoader(
@@ -198,7 +201,7 @@ class MainTrainer(TorchTrainer, Logger):
                 collate_fn=(
                     collate_fn if hasattr(loader.dataset, "__getitems__") else None  # type: ignore[arg-type]
                 ),
-                **self.dataloader_args,
+                **test_args,
             )
         else:  # ONNX with CPU
             loader = DataLoader(
