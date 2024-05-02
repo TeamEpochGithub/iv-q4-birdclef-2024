@@ -30,6 +30,16 @@ def setup_train_x_data(data_path: str, path_2024: str) -> Any:  # noqa: ANN401
 
     # Load the dataframe from the path (Bird 2024)
     metadata_2024 = pd.read_csv(path_2024)
+
+    # Calculate the sample weights for the data
+    all_primary_labels = metadata_2024.primary_label
+    sample_weights = (all_primary_labels.value_counts() / all_primary_labels.value_counts().sum()) ** (-0.5)
+    # Sort sample weights by index alphabetically
+    sample_weights = sample_weights.sort_index()
+    metadata_2024["sample_weight"] = metadata_2024.primary_label.map(sample_weights)
+    # Save the sample weights values to data/raw/sample_weights_2024.npy
+    np.save("data/raw/sample_weights_2024.npy", sample_weights.values)
+
     metadata_2024["samplename"] = metadata_2024.filename.map(lambda x: x.split("/")[0] + "-" + x.split("/")[-1].split(".")[0])
 
     # Load the bird_2024 data
