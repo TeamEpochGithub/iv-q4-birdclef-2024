@@ -77,8 +77,7 @@ train_sys:
         t_initial: 50
         cycle_limit: 1
       criterion:
-        _target_: src.modules.training.losses.weighted_loss.WeightedBCELoss
-        weights_path: data/raw/sample_weights_2024.npy
+        _target_: torch.nn.BCELoss
       optimizer:
         _target_: functools.partial
         _args_:

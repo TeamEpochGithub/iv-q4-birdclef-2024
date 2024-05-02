@@ -43,6 +43,10 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
         """Get the length of the dataset."""
         return len(self.X[f"bird_{self.year}"])  # type: ignore[index, arg-type]
 
+    def get_y(self) -> torch.Tensor:
+        """Get the labels."""
+        return torch.from_numpy(self.y[f"label_{self.year}"].to_numpy())  # type: ignore[union-attr, attr-defined, index]
+
     def __getitems__(self, indices: list[int]) -> tuple[Any, Any]:
         """Get multiple items from the dataset and apply augmentations if necessary."""
         # Get a window from each sample
