@@ -15,7 +15,7 @@ FIXES = {
 
 TRAIN_AUDIO_PATH = Path("./data/raw/train_audio/")
 
-def fix_audio_primary_labels():
+def fix_audio_primary_labels() -> None:
     """Copy the audio files with fixed primary labels to the correct directory."""
     for audio_path in FIXES.keys():
         full_audio_path = TRAIN_AUDIO_PATH / audio_path
