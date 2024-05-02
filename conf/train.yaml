@@ -18,7 +18,7 @@ data_path: data/raw/2024/train_audio/
 metadata_path: data/raw/2024/train_metadata.csv
 
 # Do this if you want train full.
-test_size: 0
+test_size: 0.2
 
 scorer:
   _target_: src.scoring.rocauc.ROCAUC # Add scorer
@@ -26,8 +26,13 @@ scorer:
   grade_threshold: 4.5
   only_primary: true
 splitter:
-  _target_: sklearn.model_selection.StratifiedKFold
-  n_splits: 0 # Set to 0 if you want train full.
+  _target_: src.setup.splitter.Splitter
+  splitter:
+    _target_: functools.partial
+    _args_:
+      - _target_: hydra.utils.get_class
+        path: sklearn.model_selection.StratifiedKFold
+  n_splits: 5 # Set to 0 if you want train full.
   shuffle: true
   random_state: 42
 allow_multiple_instances: true

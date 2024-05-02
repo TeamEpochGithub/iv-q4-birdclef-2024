@@ -30,7 +30,7 @@ def setup_train_x_data(raw_path: str, years: list[int]) -> XData:
 
     for year in years:
         metadata_path = raw_path + str(year) + "/" + "train_metadata.csv"
-        data_path = raw_path + str(year) + "train_audio/"
+        data_path = raw_path + str(year) + "/" + "train_audio/"
         metadata = pd.read_csv(metadata_path)
         metadata["samplename"] = metadata.filename.map(lambda x: x.split("/")[0] + "-" + x.split("/")[-1].split(".")[0])
 
