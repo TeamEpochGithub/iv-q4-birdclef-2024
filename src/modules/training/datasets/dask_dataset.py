@@ -31,13 +31,10 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
         """Filter the data if filter_ is specified."""
         # ie. keep grade >= 4,
         if self.filter_ is not None and self.X is not None and self.y is not None:
+            # TODO(Tolga) loop over years here
             filtered_x, filtered_y = self.filter_(self.X, self.y, self.year)
             self.y[f"label_{self.year}"] = filtered_y  # type: ignore[index]
             self.X[f"bird_{self.year}"] = filtered_x  # type: ignore[index]
-
-        # # If using torch functions like Spectrogram, move their parameters to cuda
-        # if isinstance(self.to_2d, Spec):
-        #     self.to_2d = self.to_2d.instantiated_spec.to("cuda")
 
     def __len__(self) -> int:
         """Get the length of the dataset."""

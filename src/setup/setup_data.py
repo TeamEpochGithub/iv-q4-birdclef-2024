@@ -55,7 +55,7 @@ def load_audio(path: str) -> npt.NDArray[np.float32]:
     return librosa.load(path, sr=32000, dtype=np.float32)[0]
 
 
-def setup_train_y_data(raw_path: str, years: list[int]) -> YData:
+def setup_train_y_data(raw_path: str, years: list[str]) -> YData:
     """Create train y data for pipeline.
 
     :param raw_path: path to the raw data

@@ -82,9 +82,9 @@ def run_cv_cfg(cfg: DictConfig) -> None:
 
     X = None
     if not x_cache_exists:
-        X = setup_train_x_data(cfg.data_path, cfg.metadata_path)
+        X = setup_train_x_data(cfg.raw_path, cfg.years)
 
-    y = setup_train_y_data(cfg.metadata_path)
+    y = setup_train_y_data(cfg.raw_path, cfg.years)
 
     # Instantiate scorer
     scorer = instantiate(cfg.scorer)
