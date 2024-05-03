@@ -101,7 +101,7 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     # oof_predictions = np.zeros((len(y.meta_2024[y.meta_2024["rating"] >= cfg.scorer.grade_threshold]), 182), dtype=np.float64)
     oof_predictions = np.zeros((len(y.meta_2024), 182), dtype=np.float64)
 
-    for fold_no, (train_indices, test_indices) in enumerate(instantiate(cfg.splitter).split(y.meta_2024, y.meta_2024["primary_label"])):
+    for fold_no, (train_indices, test_indices) in enumerate(instantiate(cfg.splitter).split(y)):
         copy_x = copy.deepcopy(X)
 
         score, predictions = run_fold(fold_no, X, y, train_indices, test_indices, cfg, scorer, output_dir, cache_args)

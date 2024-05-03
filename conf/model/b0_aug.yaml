@@ -42,7 +42,7 @@ train_sys:
               shift_limit: 0.5
             - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomAmplitudeShift
               p: 0.8
-              low: 1.5
+              low: 1.8
               high: 2
           xy_transforms:
             - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.CutMix1D
@@ -59,7 +59,7 @@ train_sys:
         prefetch_factor: 1
         persistent_workers: false
       n_folds: 5 # 0 for train full,
-      epochs: 50
+      epochs: 1
       patience: 14
       batch_size: 64
       model:
