@@ -1,7 +1,7 @@
 defaults:
   - base_submit
   - hydra/logging
-  - model: b0_aug_weighted # Add models or ensembles
+  - model: eca_l0 # Add models or ensembles
 
 # Use this when uploading to Kaggle
 

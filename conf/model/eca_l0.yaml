@@ -57,7 +57,7 @@ train_sys:
         prefetch_factor: 2
         persistent_workers: True
       n_folds: 5 # 0 for train full,
-      epochs: 10
+      epochs: 75
       patience: 15
       batch_size: 64
       model:
@@ -65,7 +65,7 @@ train_sys:
         in_channels: 1
         out_channels: 182
         model_name: "eca_nfnet_l0"
-        activation: none
+        activation: "sigmoid"
       scheduler:
         _target_: functools.partial
         _args_:
@@ -76,10 +76,10 @@ train_sys:
         t_initial: 50
         cycle_limit: 1
       criterion:
-        _target_: src.modules.training.losses.focal_loss.FocalLossBCE
+        _target_: torch.nn.BCELoss
       optimizer:
         _target_: functools.partial
         _args_:
           - _target_: hydra.utils.get_class
             path: torch.optim.AdamW
-        lr: 1e-3
+        lr: 1e-4
