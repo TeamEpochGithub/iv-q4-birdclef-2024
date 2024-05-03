@@ -3,6 +3,8 @@ import numpy as np
 import torch
 from torch import nn
 
+from src.utils.logger import logger
+
 
 class WeightedLoss(nn.Module):
     """Weighted BCE Loss implementation, for combating class imbalance in classification tasks."""
@@ -15,8 +17,10 @@ class WeightedLoss(nn.Module):
         """
         super().__init__()
         # Push weights to cuda
-
-        self.weights = torch.from_numpy(np.load(weights_path)).cuda()
+        try:
+            self.weights = torch.from_numpy(np.load(weights_path)).cuda()
+        except FileNotFoundError:
+            logger.warning(f"Could not find the weights file at {weights_path}. Using default weights.")
 
     # Have an abstract forward
     def forward(self, inputs: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:

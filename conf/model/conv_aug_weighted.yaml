@@ -56,8 +56,8 @@ train_sys:
         num_workers: 8
         prefetch_factor: 2
         persistent_workers: True
-      weights_path: data/raw/sample_weights_2024.npy #Set weights for the sampler
-      n_folds: 0 # 0 for train full,
+        weights_path: data/raw/sample_weights_2024.npy
+      n_folds: 5 # 0 for train full,
       epochs: 50
       patience: 15
       batch_size: 64
@@ -77,7 +77,8 @@ train_sys:
         t_initial: 50
         cycle_limit: 1
       criterion:
-        _target_: torch.nn.BCELoss
+        _target_: src.modules.training.losses.weighted_loss.WeightedBCELoss
+        weights_path: data/raw/sample_weights_2024.npy
       optimizer:
         _target_: functools.partial
         _args_:
