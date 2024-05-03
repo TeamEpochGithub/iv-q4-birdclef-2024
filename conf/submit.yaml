@@ -1,7 +1,7 @@
 defaults:
   - base_submit
   - hydra/logging
-  - model: hugo # Add models or ensembles
+  - model: b0_aug_sampled # Add models or ensembles
 
 # Use this when uploading to Kaggle
 

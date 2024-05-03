@@ -1,7 +1,7 @@
 defaults:
   - base_train
   - hydra/logging
-  - model: hugo # Add models or ensembles
+  - model: b0_aug_sampled # Add models or ensembles
   - wandb: train
 
 ###############
@@ -22,7 +22,7 @@ test_size: 0
 scorer:
   _target_: src.scoring.rocauc.ROCAUC # Add scorer
   name: rocauc
-  grade_threshold: 4.5
+  grade_threshold: 0
   only_primary: true
 splitter:
   _target_: sklearn.model_selection.StratifiedKFold
