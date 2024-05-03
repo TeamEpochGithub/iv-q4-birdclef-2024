@@ -35,5 +35,5 @@ splitter:
   n_splits: 5 # Set to 0 if you want train full.
   shuffle: true
   random_state: 42
-  years: ["union_2023_2024"]
+  years: ["2023", "2024"]
 allow_multiple_instances: true
