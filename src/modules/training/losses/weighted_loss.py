@@ -21,6 +21,7 @@ class WeightedLoss(nn.Module):
             self.weights = torch.from_numpy(np.load(weights_path)).cuda()
         except FileNotFoundError:
             logger.warning(f"Could not find the weights file at {weights_path}. Using default weights.")
+            self.weights = None  # type: ignore[assignment]
 
     # Have an abstract forward
     def forward(self, inputs: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
