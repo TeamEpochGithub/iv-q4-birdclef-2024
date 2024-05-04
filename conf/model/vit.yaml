@@ -23,7 +23,7 @@ train_sys:
            _args_:
              - _target_: hydra.utils.get_class
                path: torchaudio.transforms.MelSpectrogram #nnAudio.features.mel.MelSpectrogram
-          output_shape: [256, 256]
+          output_shape: [224, 224]
           scale:
             _target_: src.modules.training.datasets.to_2d.spec_normalize.SpecNormalize
 
@@ -56,22 +56,22 @@ train_sys:
         num_workers: 8
         prefetch_factor: 2
         persistent_workers: True
-      n_folds: 0 # 0 for train full,
+      n_folds: 5 # 0 for train full,
       epochs: 50
       patience: 15
-      batch_size: 64
+      batch_size: 256
       model:
         _target_: src.modules.training.models.timm.Timm #Ensure that activation is sigmoid for non Logits loss functions.
         in_channels: 1
         out_channels: 182
-        model_name: "eca_nfnet_l0"
+        model_name: "levit_384"
         activation: "sigmoid"
       scheduler:
         _target_: functools.partial
         _args_:
           - _target_: hydra.utils.get_class
             path: timm.scheduler.cosine_lr.CosineLRScheduler
-        warmup_t: 2
+        warmup_t: 5
         warmup_lr_init: 1e-5
         t_initial: 50
         cycle_limit: 1
@@ -82,4 +82,4 @@ train_sys:
         _args_:
           - _target_: hydra.utils.get_class
             path: torch.optim.AdamW
-        lr: 1e-4
+        lr: 5e-4

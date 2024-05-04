@@ -17,7 +17,7 @@ data_path: data/raw/train_audio/
 metadata_path: data/raw/train_metadata.csv
 
 # Do this if you want train full.
-test_size: 0.2
+test_size: 0
 
 scorer:
   _target_: src.scoring.rocauc.ROCAUC # Add scorer
@@ -26,7 +26,7 @@ scorer:
   only_primary: true
 splitter:
   _target_: sklearn.model_selection.StratifiedKFold
-  n_splits: 5  # Set to 0 if you want train full.
+  n_splits: 0  # Set to 0 if you want train full.
   shuffle: true
   random_state: 42
 allow_multiple_instances: true
