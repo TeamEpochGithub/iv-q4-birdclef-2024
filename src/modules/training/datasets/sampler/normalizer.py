@@ -23,6 +23,6 @@ class Normalizer:
         :return: the cropped or padded array.
         """
         std = array[::1000].std()
-        if std() != 0:
+        if std != 0:
             array = array / std
         return self.sampler.sample(array)
