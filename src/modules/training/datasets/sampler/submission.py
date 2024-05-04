@@ -7,24 +7,25 @@ from dask import delayed
 
 from src.utils.logger import logger
 
+from src.modules.training.datasets.sampler.sampler import Sampler
+
 
 @dataclass
-class SubmissionSampler:
+class SubmissionSampler(Sampler):
     """Extract 48(12*4) segments from the input sequence of 4 minutes."""
 
-    @delayed
-    def __call__(self, array: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
-        """Crop or pad based on length.
+    def sample(self, array: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
+        """Extract 48 segments of 5 seconds each from the input sequence of 4 minutes.
 
         :param array: The input array.
-        :return: the cropped or padded array.
+        :return: The array with 48 segments of 5 seconds each.
         """
         # Raise an warning if the audio is not 4 minutes long (32000 samples per second)
         if len(array) != 32000 * 60 * 4:
             logger.warning(f"Audio is not 4 minutes long: {len(array) / 32000} seconds..")
         # Extract 48 segments of 5 seconds each
         step = 32000 * 5
-        segments = [array[i : i + step] for i in range(0, len(array), step)]
+        segments = [array[i: i + step] for i in range(0, len(array), step)]
 
         # If the length of the last segment is less than 80000 (2.5 sec) remove it, else pad with 0s to 160000
         if len(segments[-1]) < 80000:
@@ -43,14 +44,7 @@ class SubmissionSampler:
         # Check that the last segment
         return all_segments
 
+    @delayed
+    def __call__(self, array: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
+        return self.sample(array)
 
-#
-# if __name__ == "__main__":
-#     sampler = SubmissionSampler()
-#     array = np.random.rand(32000 * 60 * 6)
-#     #Add last element with size 32199
-#     segments = sampler(array)
-#     print(segments[-4])
-#     print(len(segments))
-#     #Check that each segment is 5 seconds long
-#     print([len(segment) for segment in segments])
