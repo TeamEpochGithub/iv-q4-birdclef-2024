@@ -29,9 +29,22 @@ class ROCAUC(Scorer):
         """
         # Get metadata from the keyword arguments if not None
         scores = {}
-        for year in kwargs.get('years'):
-            metadata = y_true[f'meta_{year}']
-            y_true_year = y_true[f'label_{year}']
+        # separate the preds for the years
+        year_preds = {}
+        start_idx = 0
+
+        # Create union metadata
+        label_lookup = pd.concat([y_true[f'label_{year}'] for year in kwargs.get('years')]).fillna(0).reset_index(drop=True)
+
+        # Do the year splitting the same way as in XData and YData
+        for year in sorted(kwargs.get('years'), reverse=True):
+            year_preds[f'{year}'] = y_pred[start_idx:start_idx+len(kwargs.get('test_indices')[str(year)])]
+            start_idx += len(kwargs.get('test_indices')[str(year)])
+
+        # Loop over the 
+        for year in sorted(kwargs.get('years'), reverse=True):
+            metadata = y_true[f'meta_{year}'].iloc[kwargs.get('test_indices')[str(year)]]
+            y_true_year = y_true[f'label_{year}'].iloc[kwargs.get('test_indices')[str(year)]]
             # Check if metadata is not None
             if metadata is None:
                 raise ValueError("Metadata is required for this scorer.")
@@ -43,7 +56,7 @@ class ROCAUC(Scorer):
                 
                 indices = metadata["rating"] >= self.grade_threshold
                 # Use the mask to index the labels from y_true
-                y_true = y_true_year[indices]
+                y_true_year = y_true_year[indices]
 
                 # Also slice metadata
                 metadata = metadata[indices]
@@ -52,16 +65,16 @@ class ROCAUC(Scorer):
                 # Get the indices from the metadata where secondary label is an empty list as string
                 indices = metadata["secondary_labels"] == "[]"
                 # Use the mask to index the labels from y_true
-                if self.grade_threshold is not None:
-                    y_true = y_true[indices]
-                else:
-                    y_true = y_true_year[indices]
+                y_true_year = y_true_year[indices]
                 # from the preds index the years data, then index that year using indices
-                y_pred = y_pred[kwargs.get('test_indices')[str(year)]][indices]
+                y_pred_year = year_preds[f'{year}'][indices]
 
             # Convert
-            solution = y_true
-            submission = pd.DataFrame(np.clip(y_pred, 0, 1), columns=solution.columns)
+            solution = y_true_year
+            # Select the correct columns from the pred using the label_lookup
+            label_indices = [label_lookup.columns.get_loc(col) for col in y_true_year.columns]
+
+            submission = pd.DataFrame(np.clip(y_pred_year[:,label_indices], 0, 1), columns=solution.columns)
 
             if not pd.api.types.is_numeric_dtype(submission.values):
                 bad_dtypes = {x: submission[x].dtype for x in submission.columns if not pd.api.types.is_numeric_dtype(submission[x])}

@@ -21,7 +21,7 @@ metadata_path: data/raw/2024/train_metadata.csv
 test_size: 0.2
 
 scorer:
-  _target_: src.scoring.rocauc.ROCAUC # Add scorer
+  _target_: src.scoring.rocauc_years.ROCAUC # Add scorer
   name: rocauc
   grade_threshold: 0
   only_primary: true
@@ -35,5 +35,5 @@ splitter:
   n_splits: 5 # Set to 0 if you want train full.
   shuffle: true
   random_state: 42
-  years: ["2023", "2024"]
+  years: ["2024", "2023"]
 allow_multiple_instances: true

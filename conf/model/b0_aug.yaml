@@ -11,7 +11,7 @@ y_sys:
 train_sys:
   steps:
     - _target_: src.modules.training.main_trainer.MainTrainer
-      year: union_2023_2024
+      year: "union_2024_2023"
       dataset_args:
         sampler:
           _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
@@ -59,9 +59,9 @@ train_sys:
         prefetch_factor: 1
         persistent_workers: false
       n_folds: 5 # 0 for train full,
-      epochs: 1
+      epochs: 5
       patience: 14
-      batch_size: 64
+      batch_size: 128
       model:
         _target_: src.modules.training.models.timm.Timm #Ensure that activation is sigmoid for non Logits loss functions.
         in_channels: 1
@@ -73,7 +73,7 @@ train_sys:
         _args_:
           - _target_: hydra.utils.get_class
             path: timm.scheduler.cosine_lr.CosineLRScheduler
-        warmup_t: 2
+        warmup_t: 0
         warmup_lr_init: 1e-5
         t_initial: 50
         cycle_limit: 1
@@ -84,4 +84,4 @@ train_sys:
         _args_:
           - _target_: hydra.utils.get_class
             path: torch.optim.AdamW
-        lr: 1e-3
+        lr: 2e-3

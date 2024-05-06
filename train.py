@@ -91,7 +91,7 @@ def run_train_cfg(cfg: DictConfig) -> None:
         train_indices, test_indices = next(instantiate(cfg.splitter).split(y))  # type: ignore[index]
         fold = 0
 
-    logger.info(f"Train/Test size: {len(train_indices)}/{len(test_indices)}")
+    logger.info(f"Train/Test size: {[len(year_indices) for year_indices in train_indices.values()]}/{[len(year_indices) for year_indices in test_indices.values()]}")
     print_section_separator("Train model pipeline")
     train_args = setup_train_args(
         pipeline=model_pipeline,
