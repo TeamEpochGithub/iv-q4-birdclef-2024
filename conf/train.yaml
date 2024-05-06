@@ -23,7 +23,7 @@ test_size: 0.2
 scorer:
   _target_: src.scoring.rocauc.ROCAUC # Add scorer
   name: rocauc
-  grade_threshold: 4.5
+  grade_threshold: 0
   only_primary: true
 splitter:
   _target_: src.setup.splitter.Splitter
