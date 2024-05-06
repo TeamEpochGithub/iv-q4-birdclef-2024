@@ -26,7 +26,7 @@ class CVConfig:
     ensemble: Any
     raw_path: str
     cache_path: str
-    years: list[int]
+    years: list[str]
     data_path: str
     processed_path: str
     metadata_path: str

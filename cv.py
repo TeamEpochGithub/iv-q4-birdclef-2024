@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import Any
 
 import hydra
-import numpy as np
 import randomname
 import wandb
 from epochalyst.logging.section_separator import print_section_separator
@@ -97,33 +96,25 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     if not isinstance(y, YData):
         raise TypeError("Y Should be YData")
 
-    # Hardcode for 2024 for now.
-    # oof_predictions = np.zeros((len(y.meta_2024[y.meta_2024["rating"] >= cfg.scorer.grade_threshold]), 182), dtype=np.float64)
-    oof_predictions = np.zeros((len(y.meta_2024), 182), dtype=np.float64)
-
     for fold_no, (train_indices, test_indices) in enumerate(instantiate(cfg.splitter).split(y)):
         copy_x = copy.deepcopy(X)
 
         score, predictions = run_fold(fold_no, X, y, train_indices, test_indices, cfg, scorer, output_dir, cache_args)
         scores.append(score)
 
-        # Save predictions
-        sliced_test = test_indices[y.meta_2024["rating"].iloc[test_indices] >= cfg.scorer.grade_threshold]
-        oof_predictions[sliced_test] = predictions
-
         X = copy_x
 
-    avg_score = np.average(np.array(scores))
-    # Remove all rows with rating < grade_threshold
-    oof_predictions = oof_predictions[y.meta_2024["rating"] >= cfg.scorer.grade_threshold]
-    oof_score = scorer(y.label_2024, oof_predictions, metadata=y.meta_2024)
+    avg_score = {}
+    for score in scores:
+        for year in score:
+            if avg_score.get(year) is not None:
+                avg_score[year] += score[year] / len(scores)
+            else:
+                avg_score[year] = score[year] / len(scores)
 
     print_section_separator("CV - Results")
     logger.info(f"Avg Score: {avg_score}")
     wandb.log({"Avg Score": avg_score})
-
-    logger.info(f"OOF Score: {oof_score}")
-    wandb.log({"OOF Score": oof_score})
 
     logger.info("Finishing wandb run")
     wandb.finish()
@@ -174,7 +165,7 @@ def run_fold(
 
     gc.collect()
 
-    score = scorer(y.label_2024.iloc[test_indices], predictions, metadata=y.meta_2024.iloc[test_indices])
+    score = scorer(y_true=y, y_pred=predictions, test_indices=test_indices, years=cfg.years)
     logger.info(f"Score, fold {fold_no}: {score}")
 
     fold_dir = output_dir / str(fold_no)  # Files specific to a run can be saved here

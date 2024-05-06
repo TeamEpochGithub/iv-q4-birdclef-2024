@@ -44,18 +44,18 @@ class XData:
         if isinstance(indexer, str):
             # allow dict like indexing with keys
 
-            if 'union' in indexer.split('_'):
-            # Extract all the years to take the union of
-                years = sorted([year for year in indexer.split('_') if year.isdigit()], reverse=True) # Start from 2024
+            if "union" in indexer.split("_"):
+                # Extract all the years to take the union of
+                years = sorted([year for year in indexer.split("_") if year.isdigit()], reverse=True)  # Start from 2024
 
-                # Create the union field 
-                if indexer[:5] == 'bird_':
+                # Create the union field
+                if indexer[:5] == "bird_":
                     if not hasattr(self, indexer):
-                        setattr(self, indexer, np.concatenate([self[f'bird_{year}'] for year in years]))
-                if indexer[:5] == 'meta_':
+                        setattr(self, indexer, np.concatenate([self[f"bird_{year}"] for year in years]))
+                if indexer[:5] == "meta_":
                     if not hasattr(self, indexer):
-                        setattr(self, indexer, pd.concat([self[f'meta_{year}'] for year in years]).reset_index(drop=True))
-            
+                        setattr(self, indexer, pd.concat([self[f"meta_{year}"] for year in years]).reset_index(drop=True))
+
             return getattr(self, indexer)
 
         # If nothing is specified assume we are using 2024 data
@@ -119,17 +119,17 @@ class YData:
         if isinstance(indexer, str):
             # allow dict like indexing with keys
 
-            if 'union' in indexer.split('_'):
+            if "union" in indexer.split("_"):
                 # Extract all the years to take the union of
-                years = sorted([year for year in indexer.split('_') if year.isdigit()], reverse=True) # Start from 2024
+                years = sorted([year for year in indexer.split("_") if year.isdigit()], reverse=True)  # Start from 2024
 
-                # Create the union field 
-                if indexer[:6] == 'label_':
+                # Create the union field
+                if indexer[:6] == "label_":
                     if not hasattr(self, indexer):
-                        setattr(self, indexer, pd.concat([self[f'label_{year}'] for year in years]).fillna(0).reset_index(drop=True))
-                if indexer[:5] == 'meta_':
+                        setattr(self, indexer, pd.concat([self[f"label_{year}"] for year in years]).fillna(0).reset_index(drop=True))
+                if indexer[:5] == "meta_":
                     if not hasattr(self, indexer):
-                        setattr(self, indexer, pd.concat([self[f'meta_{year}'] for year in years]).reset_index(drop=True))
+                        setattr(self, indexer, pd.concat([self[f"meta_{year}"] for year in years]).reset_index(drop=True))
 
             return getattr(self, indexer)
 
