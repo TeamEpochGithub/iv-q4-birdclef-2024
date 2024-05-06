@@ -84,7 +84,7 @@ def run_train_cfg(cfg: DictConfig) -> None:
         if cfg.splitter.n_splits != 0:
             raise ValueError("Test size is 0, but n_splits is not 0. Also please set n_splits to 0 if you want to run train full.")
         logger.info("Training full.")
-        train_indices, test_indices = {year: list(range(len(X[f"bird_{year}"]))) for year in cfg.years}, {year: [] for year in cfg.years}  # type: ignore[arg-type, union-attr]
+        train_indices, test_indices = {year: list(range(len(X[f"bird_{year}"]))) for year in cfg.years}, {year: [] for year in cfg.years}  # type: ignore[arg-type, union-attr, index, var-annotated]
         fold = -1
     else:
         logger.info("Using splitter to split data into train and test sets.")

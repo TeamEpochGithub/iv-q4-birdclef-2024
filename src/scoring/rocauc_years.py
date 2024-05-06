@@ -1,5 +1,6 @@
 """ROC AUC scorer from Kaggle."""
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
 
@@ -7,19 +8,18 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_auc_score  # type: ignore[import-not-found]
 
-from src.scoring.scorer import Scorer
 from src.typing.typing import YData
 
 
 @dataclass
-class ROCAUC(Scorer):
+class ROCAUC:
     """OC AUC scorer from Kaggle."""
 
     name: str = "roc_auc"
     grade_threshold: float | None = None
     only_primary: bool = False
 
-    def __call__(self, y_true: YData, y_pred: np.ndarray[Any, Any], **kwargs: Any) -> float:
+    def __call__(self, y_true: YData, y_pred: np.ndarray[Any, Any], test_indices: dict[str, Iterable[int]], years: list[str], **kwargs: Any) -> dict[str, float]:
         """Calculate the ROC AUC score.
 
         :param y_true: The true labels.
@@ -34,17 +34,17 @@ class ROCAUC(Scorer):
         start_idx = 0
 
         # Create union metadata
-        label_lookup = pd.concat([y_true[f"label_{year}"] for year in kwargs.get("years")]).fillna(0).reset_index(drop=True)
+        label_lookup = pd.concat([y_true[f"label_{year}"] for year in years]).fillna(0).reset_index(drop=True)
 
         # Do the year splitting the same way as in XData and YData
-        for year in sorted(kwargs.get("years"), reverse=True):
-            year_preds[f"{year}"] = y_pred[start_idx : start_idx + len(kwargs.get("test_indices")[str(year)])]
-            start_idx += len(kwargs.get("test_indices")[str(year)])
+        for year in sorted(years, reverse=True):
+            year_preds[f"{year}"] = y_pred[start_idx : start_idx + len(test_indices[str(year)])]  # type: ignore[arg-type]
+            start_idx += len(test_indices[str(year)])  # type: ignore[arg-type]
 
         # Loop over the
-        for year in sorted(kwargs.get("years"), reverse=True):
-            metadata = y_true[f"meta_{year}"].iloc[kwargs.get("test_indices")[str(year)]]
-            y_true_year = y_true[f"label_{year}"].iloc[kwargs.get("test_indices")[str(year)]]
+        for year in sorted(years, reverse=True):
+            metadata = y_true[f"meta_{year}"].iloc[test_indices[str(year)]]  # type: ignore[union-attr]
+            y_true_year = y_true[f"label_{year}"].iloc[test_indices[str(year)]]  # type: ignore[union-attr]
             # Check if metadata is not None
             if metadata is None:
                 raise ValueError("Metadata is required for this scorer.")

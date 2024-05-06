@@ -16,7 +16,6 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 
 from src.config.cv_config import CVConfig
-from src.scoring.scorer import Scorer
 from src.setup.setup_data import setup_train_x_data, setup_train_y_data
 from src.setup.setup_pipeline import setup_pipeline
 from src.setup.setup_runtime_args import setup_train_args
@@ -87,7 +86,7 @@ def run_cv_cfg(cfg: DictConfig) -> None:
 
     # Instantiate scorer
     scorer = instantiate(cfg.scorer)
-    scores: list[float] = []
+    scores: list[dict[str, float]] = []
 
     # Split indices into train and test
     # splitter_data = setup_splitter_data()
@@ -104,9 +103,10 @@ def run_cv_cfg(cfg: DictConfig) -> None:
 
         X = copy_x
 
+    avg_score: dict[str, float]
     avg_score = {}
     for score in scores:
-        for year in score:
+        for year in score:  # type: ignore[union-attr]
             if avg_score.get(year) is not None:
                 avg_score[year] += score[year] / len(scores)
             else:
@@ -127,10 +127,10 @@ def run_fold(
     train_indices: list[int],
     test_indices: list[int],
     cfg: DictConfig,
-    scorer: Scorer,
+    scorer: Any,  # noqa: ANN401
     output_dir: Path,
     cache_args: dict[str, Any],
-) -> tuple[float, Any]:
+) -> tuple[dict[str, float], Any]:
     """Run a single fold of the cross validation.
 
     :param i: The fold number.
