@@ -29,7 +29,7 @@ splitter:
     _args_:
       - _target_: hydra.utils.get_class
         path: sklearn.model_selection.StratifiedKFold
-  n_splits: 2 # Set to 0 if you want train full.
+  n_splits: 5 # Set to 0 if you want train full.
   shuffle: true
   random_state: 42
   years: ["2023","2024"]

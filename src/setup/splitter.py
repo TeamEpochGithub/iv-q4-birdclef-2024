@@ -29,7 +29,7 @@ class Splitter:
     def split(self, data: YData) -> Generator[list[list[dict[int, Any]]], list[list[dict[int, Any]]], None]:
         """Split the datasets for each year and yield the appropriate dicts."""
         splits: list[list[dict[int, Any]]]
-        splits = [[{}, {}] for _ in range(5)]
+        splits = [[{}, {}] for _ in range(self.n_splits)]
         for year in self.years:
             year_splits = self.instantiated_splitter.split(data[f"meta_{year}"], data[f"meta_{year}"]["primary_label"])
             for i, split in enumerate(year_splits):
