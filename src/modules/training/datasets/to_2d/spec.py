@@ -17,6 +17,7 @@ class Spec:
     sequence_length: int = 160000  # 5 seconds x 32kHz
     scale: Callable[[torch.Tensor], torch.Tensor] = torch.log10
     sample_rate: int = 32000
+    f_min: int = 0
 
     def __post_init__(self) -> None:
         """Calculate the params for the desired input shape and instantiate the spec class."""
@@ -24,7 +25,7 @@ class Spec:
         self.hop_length = self.sequence_length // self.output_shape[1] + 1
         # Re-instantiate spec class with params for deisred output shape
         if self.spec.func is MelSpectrogram:
-            self.instantiated_spec = self.spec(n_fft=self.n_fft * 4, hop_length=self.hop_length, n_mels=self.output_shape[0], sample_rate=self.sample_rate)
+            self.instantiated_spec = self.spec(n_fft=self.n_fft * 4, hop_length=self.hop_length, n_mels=self.output_shape[0], sample_rate=self.sample_rate, f_min=self.f_min)
         else:
             self.instantiated_spec = self.spec(n_fft=self.n_fft, hop_length=self.hop_length)
 
