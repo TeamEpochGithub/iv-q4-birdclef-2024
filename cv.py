@@ -116,7 +116,10 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     avg_score = np.average(np.array(scores))
     # Remove all rows with rating < grade_threshold
     oof_predictions = oof_predictions[y.meta_2024["rating"] >= cfg.scorer.grade_threshold]
-    oof_score = scorer(y.label_2024, oof_predictions, metadata=y.meta_2024)
+
+    # Add OOF to the output directory
+    output_dir = output_dir / "oof"
+    oof_score = scorer(y.label_2024, oof_predictions, metadata=y.meta_2024, output_dir=output_dir)
 
     print_section_separator("CV - Results")
     logger.info(f"Avg Score: {avg_score}")
@@ -174,6 +177,8 @@ def run_fold(
 
     gc.collect()
 
+    # Add the fold number to the output directory
+    output_dir = output_dir / str(fold_no)
     score = scorer(y.label_2024.iloc[test_indices], predictions, metadata=y.meta_2024.iloc[test_indices])
     logger.info(f"Score, fold {fold_no}: {score}")
 
