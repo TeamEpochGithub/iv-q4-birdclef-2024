@@ -168,9 +168,11 @@ submission/dependencies
 outputs
 
 tm
-
-data/processed
 data/raw
+data/processed
+data/final
+notebooks/dataset
+
 
 submission/submission.csv
 
