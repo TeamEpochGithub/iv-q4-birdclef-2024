@@ -18,7 +18,7 @@ data_path: data/raw/2024/train_audio/
 metadata_path: data/raw/2024/train_metadata.csv
 
 # Do this if you want train full.
-test_size: 0
+test_size: 0.2
 
 scorer:
   _target_: src.scoring.rocauc_years.ROCAUC # Add scorer

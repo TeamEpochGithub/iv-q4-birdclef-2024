@@ -14,8 +14,10 @@ train_sys:
       year: "2024"
       dataset_args:
         sampler:
-          _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
-          length: 160000
+          _target_: src.modules.training.datasets.sampler.normalizer.Normalizer
+          sampler:
+            _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
+            length: 160000
         to_2d:
           _target_: src.modules.training.datasets.to_2d.spec.Spec
           spec:
@@ -26,6 +28,7 @@ train_sys:
           output_shape: [256, 256]
           scale:
             _target_: src.modules.training.datasets.to_2d.spec_normalize.SpecNormalize
+            eps: 1
 
         #  _target_: src.modules.training.datasets.to_2d.reshape.Reshape
         #  shape: [400,400]
@@ -61,8 +64,8 @@ train_sys:
         num_workers: 16
         prefetch_factor: 2
         persistent_workers: false
-      n_folds: 0 # 0 for train full,
-      epochs: 51
+      n_folds: 5 # 0 for train full,
+      epochs: 50
       patience: 15
       batch_size: 64
       model:
@@ -71,6 +74,8 @@ train_sys:
         out_channels: 182
         model_name: "eca_nfnet_l0"
         activation: "sigmoid"
+        drop_rate: 0.5
+        drop_path_rate: 0.2
       scheduler:
         _target_: functools.partial
         _args_:
@@ -87,4 +92,4 @@ train_sys:
         _args_:
           - _target_: hydra.utils.get_class
             path: torch.optim.AdamW
-        lr: 1e-4
+        lr: 5e-4

@@ -1,4 +1,6 @@
 """Timm model for 2D image classification."""
+from typing import Any
+
 import requests
 import torch
 from torch import nn
@@ -12,7 +14,7 @@ class Timm(nn.Module):
     :param model_name: Model to use
     """
 
-    def __init__(self, in_channels: int, out_channels: int, model_name: str, activation: str | None = None) -> None:
+    def __init__(self, in_channels: int, out_channels: int, model_name: str, activation: str | None = None, **kwargs: dict[str, Any]) -> None:
         """Initialize the Timm model.
 
         :param in_channels: The number of input channels.
@@ -33,9 +35,9 @@ class Timm(nn.Module):
         # If there is an internet connection, download the model with pretrained weights
         try:
             _ = requests.get("http://www.google.com", timeout=5)
-            self.model = timm.create_model(model_name, pretrained=True, in_chans=self.in_channels, num_classes=self.out_channels)
+            self.model = timm.create_model(model_name, pretrained=True, in_chans=self.in_channels, num_classes=self.out_channels, **kwargs)
         except requests.ConnectionError:
-            self.model = timm.create_model(model_name, pretrained=False, in_chans=self.in_channels, num_classes=self.out_channels)
+            self.model = timm.create_model(model_name, pretrained=False, in_chans=self.in_channels, num_classes=self.out_channels, **kwargs)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass of the Timm model.

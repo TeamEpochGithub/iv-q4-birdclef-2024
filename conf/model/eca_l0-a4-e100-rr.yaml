@@ -14,7 +14,7 @@ train_sys:
       year: "2024"
       dataset_args:
         sampler:
-          _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
+          _target_: src.modules.training.datasets.sampler.random.Random
           length: 160000
         to_2d:
           _target_: src.modules.training.datasets.to_2d.spec.Spec
@@ -52,6 +52,26 @@ train_sys:
           x_transforms:
             - _target_: kornia.augmentation.RandomErasing
               p: 0.25
+            - _target_: kornia.augmentation.auto.RandAugment
+              n: 2
+              m: 9
+              # this is the default policy, excluding problematic augmentations that crash (for 1 channel img)
+              policy:
+                #                - [[auto_contrast, 0, 1]]
+                - [ [ equalize, 0, 1 ] ]
+                #                - [[invert, 0, 1]] # simply does not make sense for spectrogram
+                - [ [ rotate, -30.0, 30.0 ] ]
+                - [ [ posterize, 0, 4 ] ]
+                - [ [ solarize, 0, 1 ] ]
+                - [ [ solarize_add, 0, 0.43 ] ]
+                #                - [color, 0.1, 1.9]
+                - [ [ contrast, 0.1, 1.9 ] ]
+                - [ [ brightness, 0.1, 1.9 ] ]
+                - [ [ sharpness, 0.1, 1.9 ] ]
+                - [ [ shear_x, -0.3, 0.3 ] ]
+                - [ [ shear_y, -0.3, 0.3 ] ]
+                - [ [ translate_x, -0.1, 0.1 ] ]
+                - [ [ translate_y, -0.1, 0.1 ] ]
           xy_transforms:
             - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.CutMix
               p: 1
@@ -61,8 +81,8 @@ train_sys:
         num_workers: 16
         prefetch_factor: 2
         persistent_workers: false
-      n_folds: 0 # 0 for train full,
-      epochs: 51
+      n_folds: 5 # 0 for train full,
+      epochs: 100
       patience: 15
       batch_size: 64
       model:
@@ -78,7 +98,7 @@ train_sys:
             path: timm.scheduler.cosine_lr.CosineLRScheduler
         warmup_t: 2
         warmup_lr_init: 1e-5
-        t_initial: 50
+        t_initial: 100
         cycle_limit: 1
       criterion:
         _target_: torch.nn.BCELoss

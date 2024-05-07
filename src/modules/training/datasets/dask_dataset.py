@@ -1,5 +1,5 @@
 """Dask dataset module. Torch dataset that works with dask."""
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from typing import Any
 
@@ -19,6 +19,9 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
 
     labeler: Callable[[torch.Tensor], torch.Tensor]
     sampler: Callable[[npt.NDArray[Any]], npt.NDArray[Any]]
+
+    process_delayed: Iterable[Callable[[npt.NDArray[Any]], npt.NDArray[Any]]] | None = None
+
     X: XData | None = None
     y: YData | None = None
     year: str = "2024"
@@ -49,6 +52,10 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
 
         if self.X is not None:
             x_window = [self.sampler(self.X[f"bird_{self.year}"][i]) for i in indices]  # type: ignore[arg-type]
+
+            # Apply any delayed transformations
+            for step in self.process_delayed:  # type: ignore[union-attr]
+                x_window = [step(x) for x in x_window]
 
         x_batch = dask.compute(*x_window)
 

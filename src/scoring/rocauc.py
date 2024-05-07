@@ -5,6 +5,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
 from sklearn.metrics import roc_auc_score  # type: ignore[import-not-found]
 
 from src.scoring.scorer import Scorer
@@ -29,6 +30,7 @@ class ROCAUC(Scorer):
         # Get metadata from the keyword arguments if not None
 
         metadata = kwargs.get("metadata")
+        output_dir = kwargs.get("output")
 
         # Check if metadata is not None
         if metadata is None:
@@ -65,12 +67,56 @@ class ROCAUC(Scorer):
         if len(scored_columns) <= 0:
             raise ValueError("No positive labels in y_true, ROC AUC score is not defined in that case.")
 
+        avg_roc_auc = roc_auc_score(solution[scored_columns].values, submission[scored_columns].values, average="macro")
+
+        # Plot the ROC AUC score for each class and save the plot
+        self.plot_class_scores(metadata, solution, submission, scored_columns, output_dir)  # type: ignore[arg-type]
+
         # Calculate the ROC AUC score
-        return roc_auc_score(solution[scored_columns].values, submission[scored_columns].values, average="macro")
+        return avg_roc_auc
 
     def __str__(self) -> str:
         """Return the name of the scorer."""
         return self.name
+
+    def plot_class_scores(self, metadata: pd.DataFrame, solution: pd.DataFrame, submission: pd.DataFrame, scored_columns: list[str], output_dir: str) -> None:
+        """Plot the ROC AUC score for each class and save the plot.
+
+        :param metadata: The metadata.
+        :param solution: The true labels.
+        :param submission: The predicted labels.
+        :param scored_columns: The scored columns.
+        :param output_dir: The output directory.
+        """
+        # Calculate the ROC AUC score for each class
+
+        class_roc_auc = roc_auc_score(solution[scored_columns].values, submission[scored_columns].values, average=None)
+
+        fig, ax = plt.subplots(1, 1, figsize=(20, 60))
+
+        # Plot using seaborn
+        import seaborn as sns
+
+        # Sort the scores and the columns
+        # Map the scored columns to Scientific names in metadata
+        scored_columns = [metadata[metadata["primary_label"] == x]["scientific_name"].to_numpy()[0] for x in scored_columns]
+
+        # Get the count of the scored columns from the metadata
+        scored_columns = [f"{x} ({metadata[metadata['scientific_name'] == x].shape[0]})" for x in scored_columns]
+
+        scored_columns = [x for _, x in sorted(zip(class_roc_auc, scored_columns, strict=False), reverse=True)]
+        class_roc_auc = sorted(class_roc_auc, reverse=True)
+
+        # Score using seaborn also annotate the scores
+        sns.barplot(x=class_roc_auc, y=scored_columns, ax=ax)
+        for i, v in enumerate(class_roc_auc):
+            ax.text(v + 0.01, i, str(round(v, 2)), color="black", va="center")
+        ax.set_xlabel("ROC AUC Score")
+        ax.set_ylabel("Bird Species")
+        ax.set_title("ROC AUC Score for each Bird Species")
+
+        # Save plot to output directory
+        plt.savefig(f"{output_dir}/roc_auc_score.png")
 
 
 # Test the scorer

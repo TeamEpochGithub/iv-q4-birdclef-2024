@@ -1,4 +1,5 @@
-"""Crop or pad the input to the given length."""
+"""Take the first or last segment. Pad if necessary."""
+import random
 from dataclasses import dataclass
 
 import numpy as np
@@ -8,13 +9,13 @@ from src.modules.training.datasets.sampler.sampler import Sampler
 
 
 @dataclass
-class CropOrPad(Sampler):
-    """Crop or pad the input sequence."""
+class FirstOrLast(Sampler):
+    """Take the first or last segment. Pad if necessary."""
 
     length: int
 
     def sample(self, array: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
-        """Crop or pad based on length.
+        """Take the first or last segment. Pad if necessary.
 
         :param array: The input array.
         :return: the cropped or padded array.
@@ -22,5 +23,9 @@ class CropOrPad(Sampler):
         if len(array) < self.length:
             # Pad the array
             return np.pad(array, (0, self.length - len(array)))
-        # If len is desired value nothing will happen, else will be cropped
-        return array[: self.length]
+
+        if random.random() > 0.5:  # noqa: S311
+            # Take the first segment
+            return array[: self.length]
+        # Take the last segment
+        return array[-self.length :]

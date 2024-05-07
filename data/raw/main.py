@@ -25,4 +25,4 @@ if __name__ == "__main__":
     # Shuffling the dataset
     np.random.shuffle(dataset)
 
-    np.save("train_data/dummy.npy", dataset)
+    np.save("2024/train_data/dummy.npy", dataset)
