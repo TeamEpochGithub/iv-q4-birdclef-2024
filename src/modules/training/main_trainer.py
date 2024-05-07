@@ -27,6 +27,8 @@ class MainTrainer(TorchTrainer, Logger):
     year: str = "2024"
     # Things like prefetch factor
     dataloader_args: dict[str, Any] = field(default_factory=dict, repr=False)
+    # Weights for the sampler
+    weights_path: str | None = None
 
     def save_model_to_external(self) -> None:
         """Save the model to external storage."""
@@ -90,13 +92,18 @@ class MainTrainer(TorchTrainer, Logger):
         :param test_dataset: The validation dataset.
         :return: The training and validation dataloaders.
         """
-        train_loader = DataLoader(
-            train_dataset,
-            batch_size=self.batch_size,
-            shuffle=True,
-            collate_fn=(collate_fn if hasattr(train_dataset, "__getitems__") else None),  # type: ignore[arg-type]
-            **self.dataloader_args,
-        )
+        # Check if weights_path exist in self.dataloader_args
+        if self.weights_path is not None:
+            train_loader = self.create_training_sampler(train_dataset)
+        else:
+            train_loader = DataLoader(
+                train_dataset,
+                batch_size=self.batch_size,
+                shuffle=True,
+                collate_fn=(collate_fn if hasattr(train_dataset, "__getitems__") else None),  # type: ignore[arg-type]
+                **self.dataloader_args,
+            )
+
         test_loader = DataLoader(
             test_dataset,
             batch_size=self.batch_size,
@@ -105,6 +112,35 @@ class MainTrainer(TorchTrainer, Logger):
             **self.dataloader_args,
         )
         return train_loader, test_loader
+
+    def create_training_sampler(self, train_dataset: Dataset[tuple[Tensor, ...]]) -> DataLoader[tuple[Tensor, ...]]:
+        """Create the training sampler for training.
+
+        :param train_dataset: The training dataset.
+        :return: The training sampler.
+        """
+        # Extract targets from dataset
+        targets = train_dataset.get_y()  # type: ignore[attr-defined]
+
+        # Take the argmax of the targets
+        targets = torch.argmax(targets, dim=1)
+
+        # Create the sampler
+        class_weights = np.load(self.weights_path)  # type: ignore[arg-type]
+
+        sample_weights = torch.tensor([class_weights[label] for label in targets])
+
+        sampler = torch.utils.data.WeightedRandomSampler(weights=sample_weights, num_samples=len(sample_weights), replacement=True)  # type: ignore[arg-type]
+
+        loader_args = self.dataloader_args.copy()
+        loader_args["sampler"] = sampler
+
+        return DataLoader(
+            train_dataset,
+            batch_size=self.batch_size,
+            collate_fn=(collate_fn if hasattr(train_dataset, "__getitems__") else None),  # type: ignore[arg-type]
+            **loader_args,
+        )
 
     def _load_model(self) -> None:
         """Load the model from the model_directory folder."""
@@ -151,8 +187,8 @@ class MainTrainer(TorchTrainer, Logger):
         """
         self.model.eval()
         predictions = []
-        # Create a new dataloader from the dataset of the input dataloader with collate_fn
 
+        # Create a new dataloader from the dataset of the input dataloader with collate_fn
         if self.device.type == "cuda":
             loader = DataLoader(
                 loader.dataset,
