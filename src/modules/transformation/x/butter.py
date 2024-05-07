@@ -1,4 +1,4 @@
-"""Butter filter for eeg signals."""
+"""Butter filter for signals."""
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -15,8 +15,9 @@ from src.typing.typing import XData
 
 @dataclass
 class ButterFilter(VerboseTransformationBlock):
-    """Butter filter for eeg signals.
+    """Butter filter for signals.
 
+    :param years: The years to filter
     :param lower: The lower bound of the filter, if 0, uses a low pass filter
     :param upper: The upper bound of the filter
     :param order: The order of the filter
@@ -28,7 +29,6 @@ class ButterFilter(VerboseTransformationBlock):
     upper: float = 20000.0
     order: int = 5
     sampling_rate: float = 32000.0
-    ranges: list[list[float]] | None = None
 
     def __post_init__(self) -> None:
         """Calculate the normal cutoff frequency."""
