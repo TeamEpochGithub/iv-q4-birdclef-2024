@@ -62,7 +62,7 @@ train_sys:
         prefetch_factor: 2
         persistent_workers: false
       n_folds: 0 # 0 for train full,
-      epochs: 51
+      epochs: 50
       patience: 15
       batch_size: 64
       model:
@@ -88,3 +88,5 @@ train_sys:
           - _target_: hydra.utils.get_class
             path: torch.optim.AdamW
         lr: 1e-4
+    - _target_: src.modules.training.postprocessing.smooth_file.SmoothFile
+      smooth_factor: 0.1
