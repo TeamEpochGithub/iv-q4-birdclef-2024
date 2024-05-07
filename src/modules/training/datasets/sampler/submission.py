@@ -3,7 +3,6 @@ from dataclasses import dataclass
 
 import numpy as np
 import numpy.typing as npt
-from dask import delayed
 
 from src.modules.training.datasets.sampler.sampler import Sampler
 from src.utils.logger import logger
@@ -42,8 +41,3 @@ class SubmissionSampler(Sampler):
 
         # Check that the last segment
         return all_segments
-
-    @delayed
-    def __call__(self, array: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
-        """Apply the sampler as a dask delayed function."""
-        return self.sample(array)

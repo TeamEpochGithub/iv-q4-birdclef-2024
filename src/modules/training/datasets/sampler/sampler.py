@@ -3,7 +3,9 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
+import numpy as np
 import numpy.typing as npt
+from dask import delayed
 
 
 class Sampler(ABC):
@@ -16,3 +18,8 @@ class Sampler(ABC):
         :param array: The input array.
         :return: The sampled array.
         """
+
+    @delayed
+    def __call__(self, array: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
+        """Apply the sampler as a dask delayed function."""
+        return self.sample(array)
