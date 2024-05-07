@@ -1,7 +1,7 @@
 defaults:
   - base_train
   - hydra/logging
-  - model: eca_l0-rr
+  - model: eca-l0-butter # Add models or ensembles
   - wandb: train
 
 ###############
@@ -26,7 +26,7 @@ scorer:
   only_primary: true
 splitter:
   _target_: sklearn.model_selection.StratifiedKFold
-  n_splits: 5 # Set to 0 if you want train full.
+  n_splits: 5  # Set to 0 if you want train full.
   shuffle: true
   random_state: 42
 allow_multiple_instances: true

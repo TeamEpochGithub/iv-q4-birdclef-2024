@@ -1,5 +1,5 @@
 """Example transformation block for the transformation pipeline."""
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 import numpy as np
@@ -15,7 +15,7 @@ from src.typing.typing import XData
 class NanToZero(VerboseTransformationBlock):
     """An example transformation block for the transformation pipeline."""
 
-    years: list[str]
+    years: list[str] = field(default_factory=lambda: ["2024"])
 
     def custom_transform(self, data: XData) -> XData:
         """Apply a custom transformation to the data.
@@ -41,6 +41,14 @@ class NanToZero(VerboseTransformationBlock):
         :return: The transformed data
         """
         return np.nan_to_num(data, nan=0.0)
+
+    def __call__(self, data: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
+        """Replace NaN values with 0.
+
+        :param data: The data to transform
+        :return: The transformed data
+        """
+        return self.nan_to_zero(data)
 
 
 # if __name__ == "__main__":
