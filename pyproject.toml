@@ -34,6 +34,10 @@ dependencies = [
     "dash-bootstrap-components>=1.5.0",
     "dash-bootstrap-templates>=1.1.1",
 
+    # Dask
+    "dask>=2024.4.0",
+    "dask-expr>=1.0.12",
+
     # pre-commit & MyPy
     "pre-commit>=3.6.0",
     "mypy>=1.7.1",
@@ -57,6 +61,8 @@ dependencies = [
     "jupyter>=1.0.0",
     "ipykernel>=6.27.1",
 
+    # Music & Sound
+    "librosa>=0.10.1",
 ]
 
 
