@@ -69,6 +69,25 @@ class ROCAUC(Scorer):
 
         avg_roc_auc = roc_auc_score(solution[scored_columns].values, submission[scored_columns].values, average="macro")
 
+        # Plot the ROC AUC score for each class and save the plot
+        self.plot_class_scores(metadata, solution, submission, scored_columns, output_dir)
+
+        # Calculate the ROC AUC score
+        return avg_roc_auc
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return self.name
+
+    def plot_class_scores(self, metadata: pd.DataFrame, solution: pd.DataFrame, submission: pd.DataFrame, scored_columns: list[str], output_dir: str) -> None:  # type: ignore[arg-type]
+        """Plot the ROC AUC score for each class and save the plot.
+
+        :param metadata: The metadata.
+        :param solution: The true labels.
+        :param submission: The predicted labels.
+        :param scored_columns: The scored columns.
+        :param output_dir: The output directory.
+        """
         # Calculate the ROC AUC score for each class
 
         class_roc_auc = roc_auc_score(solution[scored_columns].values, submission[scored_columns].values, average=None)
@@ -80,7 +99,7 @@ class ROCAUC(Scorer):
 
         # Sort the scores and the columns
         # Map the scored columns to Scientific names in metadata
-        scored_columns = [metadata[metadata["primary_label"] == x]["scientific_name"].values[0] for x in scored_columns]
+        scored_columns = [metadata[metadata["primary_label"] == x]["scientific_name"].to_numpy()[0] for x in scored_columns]
 
         # Get the count of the scored columns from the metadata
         scored_columns = [f"{x} ({metadata[metadata['scientific_name'] == x].shape[0]})" for x in scored_columns]
@@ -98,13 +117,6 @@ class ROCAUC(Scorer):
 
         # Save plot to output directory
         plt.savefig(f"{output_dir}/roc_auc_score.png")
-
-        # Calculate the ROC AUC score
-        return avg_roc_auc
-
-    def __str__(self) -> str:
-        """Return the name of the scorer."""
-        return self.name
 
 
 # Test the scorer
