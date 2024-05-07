@@ -70,7 +70,7 @@ class ROCAUC(Scorer):
         avg_roc_auc = roc_auc_score(solution[scored_columns].values, submission[scored_columns].values, average="macro")
 
         # Plot the ROC AUC score for each class and save the plot
-        self.plot_class_scores(metadata, solution, submission, scored_columns, output_dir)
+        self.plot_class_scores(metadata, solution, submission, scored_columns, output_dir)  # type: ignore[arg-type]
 
         # Calculate the ROC AUC score
         return avg_roc_auc
@@ -79,7 +79,7 @@ class ROCAUC(Scorer):
         """Return the name of the scorer."""
         return self.name
 
-    def plot_class_scores(self, metadata: pd.DataFrame, solution: pd.DataFrame, submission: pd.DataFrame, scored_columns: list[str], output_dir: str) -> None:  # type: ignore[arg-type]
+    def plot_class_scores(self, metadata: pd.DataFrame, solution: pd.DataFrame, submission: pd.DataFrame, scored_columns: list[str], output_dir: str) -> None:
         """Plot the ROC AUC score for each class and save the plot.
 
         :param metadata: The metadata.
