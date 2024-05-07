@@ -172,7 +172,7 @@ def run_fold(
     logger.debug(f"Output Directory: {fold_dir}")
 
     if wandb.run:
-        wandb.log({f"Score_{fold_no}": score})
+        [wandb.log({f"Score_{year}_{fold_no}": score[year]}) for year in score] if isinstance(score, dict) else wandb.log({f"Score_{fold_no}": score})
     return score, predictions
 
 

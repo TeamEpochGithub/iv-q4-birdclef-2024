@@ -110,11 +110,11 @@ def run_train_cfg(cfg: DictConfig) -> None:
     if sum(len(test_indices[year]) for year in test_indices) > 0:
         print_section_separator("Scoring")
         scorer = instantiate(cfg.scorer)
-        score = scorer(y, predictions, test_indices=test_indices, years=cfg.years)  # type: ignore[union-attr]
+        score = scorer(y, predictions, test_indices=test_indices, years=cfg.years, output_dir=output_dir)  # type: ignore[union-attr]
         logger.info(f"Score: {score}")
 
         if wandb.run:
-            wandb.log({"Score": score})
+            [wandb.log({f"Score_{year}_0": score[year]}) for year in score] if isinstance(score, dict) else wandb.log({"Score": score})
 
     wandb.finish()
 

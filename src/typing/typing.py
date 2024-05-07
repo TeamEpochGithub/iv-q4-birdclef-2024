@@ -1,4 +1,6 @@
 """Common type definitions for the project."""
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Any
 
@@ -30,7 +32,7 @@ class XData:
     bird_2022: npt.NDArray[Any] | None = None
     bird_2021: npt.NDArray[Any] | None = None
 
-    def __getitem__(self, indexer: Any) -> "XData" | pd.DataFrame | npt.NDArray[np.float32]:  # noqa: ANN401 C901
+    def __getitem__(self, indexer: Any) -> XData | pd.DataFrame | npt.NDArray[np.float32]:  # noqa: ANN401 C901
         """Index the data according to the indexer type."""
         if isinstance(indexer, dict):
             sliced_fields = {}
@@ -102,7 +104,7 @@ class YData:
     label_2022: pd.DataFrame | None = None
     label_2021: pd.DataFrame | None = None
 
-    def __getitem__(self, indexer: Any) -> "YData" | pd.DataFrame:  # noqa: ANN401 C901
+    def __getitem__(self, indexer: Any) -> YData | pd.DataFrame:  # noqa: ANN401 C901
         """Index the data according to the indexer type."""
         if isinstance(indexer, dict):
             sliced_fileds = {}
