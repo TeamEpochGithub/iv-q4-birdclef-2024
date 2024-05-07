@@ -61,8 +61,8 @@ train_sys:
         num_workers: 16
         prefetch_factor: 2
         persistent_workers: false
-      n_folds: 0 # 0 for train full,
-      epochs: 50
+      n_folds: 5 # 0 for train full,
+      epochs: 100
       patience: 15
       batch_size: 64
       model:
@@ -78,7 +78,7 @@ train_sys:
             path: timm.scheduler.cosine_lr.CosineLRScheduler
         warmup_t: 2
         warmup_lr_init: 1e-5
-        t_initial: 50
+        t_initial: 100
         cycle_limit: 1
       criterion:
         _target_: torch.nn.BCELoss

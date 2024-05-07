@@ -14,7 +14,7 @@ train_sys:
       year: "2024"
       dataset_args:
         sampler:
-          _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
+          _target_: src.modules.training.datasets.sampler.random.Random
           length: 160000
         to_2d:
           _target_: src.modules.training.datasets.to_2d.spec.Spec
@@ -23,12 +23,10 @@ train_sys:
            _args_:
              - _target_: hydra.utils.get_class
                path: torchaudio.transforms.MelSpectrogram #nnAudio.features.mel.MelSpectrogram
-          output_shape: [256, 256]
+          output_shape: [224,224]
           scale:
             _target_: src.modules.training.datasets.to_2d.spec_normalize.SpecNormalize
 
-        #  _target_: src.modules.training.datasets.to_2d.reshape.Reshape
-        #  shape: [400,400]
         labeler:
           _target_: src.modules.training.datasets.labeler.psd_labeler.PSDLabeler
         filter_:
@@ -52,6 +50,26 @@ train_sys:
           x_transforms:
             - _target_: kornia.augmentation.RandomErasing
               p: 0.25
+            - _target_: kornia.augmentation.auto.RandAugment
+              n: 2
+              m: 9
+              # this is the default policy, excluding problematic augmentations that crash (for 1 channel img)
+              policy:
+#                - [[auto_contrast, 0, 1]]
+                - [[equalize, 0, 1]]
+#                - [[invert, 0, 1]] # simply does not make sense for spectrogram
+                - [[rotate, -30.0, 30.0]]
+                - [[posterize, 0, 4]]
+                - [[solarize, 0, 1]]
+                - [[solarize_add, 0, 0.43]]
+#                - [color, 0.1, 1.9]
+                - [[contrast, 0.1, 1.9]]
+                - [[brightness, 0.1, 1.9]]
+                - [[sharpness, 0.1, 1.9]]
+                - [[shear_x, -0.3, 0.3]]
+                - [[shear_y, -0.3, 0.3]]
+                - [[translate_x, -0.1, 0.1]]
+                - [[translate_y, -0.1, 0.1]]
           xy_transforms:
             - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.CutMix
               p: 1
@@ -61,24 +79,24 @@ train_sys:
         num_workers: 16
         prefetch_factor: 2
         persistent_workers: false
-      n_folds: 0 # 0 for train full,
-      epochs: 50
+      n_folds: 5 # 0 for train full,
+      epochs: 90
       patience: 15
-      batch_size: 64
+      batch_size: 256
       model:
         _target_: src.modules.training.models.timm.Timm #Ensure that activation is sigmoid for non Logits loss functions.
         in_channels: 1
         out_channels: 182
-        model_name: "eca_nfnet_l0"
+        model_name: "convnext_tiny"
         activation: "sigmoid"
       scheduler:
         _target_: functools.partial
         _args_:
           - _target_: hydra.utils.get_class
             path: timm.scheduler.cosine_lr.CosineLRScheduler
-        warmup_t: 2
+        warmup_t: 5
         warmup_lr_init: 1e-5
-        t_initial: 50
+        t_initial: 90
         cycle_limit: 1
       criterion:
         _target_: torch.nn.BCELoss
@@ -87,4 +105,4 @@ train_sys:
         _args_:
           - _target_: hydra.utils.get_class
             path: torch.optim.AdamW
-        lr: 1e-4
+        lr: 2e-4
