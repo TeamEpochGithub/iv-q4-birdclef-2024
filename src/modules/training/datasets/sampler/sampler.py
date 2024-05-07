@@ -16,5 +16,3 @@ class Sampler(ABC):
         :param array: The input array.
         :return: The sampled array.
         """
-        pass
-

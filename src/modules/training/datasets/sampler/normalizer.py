@@ -1,6 +1,5 @@
 """Standardize data before applying a sampler."""
 from dataclasses import dataclass
-from typing import Callable
 
 import numpy as np
 import numpy.typing as npt

@@ -1,4 +1,6 @@
 """Timm model for 2D image classification."""
+from typing import Any
+
 import requests
 import torch
 from torch import nn
@@ -12,7 +14,7 @@ class Timm(nn.Module):
     :param model_name: Model to use
     """
 
-    def __init__(self, in_channels: int, out_channels: int, model_name: str, activation: str | None = None, **kwargs) -> None:
+    def __init__(self, in_channels: int, out_channels: int, model_name: str, activation: str | None = None, **kwargs: dict[str, Any]) -> None:
         """Initialize the Timm model.
 
         :param in_channels: The number of input channels.
