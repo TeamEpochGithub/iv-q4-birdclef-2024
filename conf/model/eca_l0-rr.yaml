@@ -14,7 +14,7 @@ train_sys:
       year: "2024"
       dataset_args:
         sampler:
-          _target_: src.modules.training.datasets.sampler.random.Random
+          _target_: src.modules.training.datasets.sampler.first_or_last.FirstOrLast
           length: 160000
         to_2d:
           _target_: src.modules.training.datasets.to_2d.spec.Spec
