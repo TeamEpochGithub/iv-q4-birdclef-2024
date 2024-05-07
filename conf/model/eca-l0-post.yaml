@@ -62,7 +62,7 @@ train_sys:
         prefetch_factor: 2
         persistent_workers: false
       n_folds: 5 # 0 for train full,
-      epochs: 100
+      epochs: 5
       patience: 15
       batch_size: 64
       model:
@@ -76,7 +76,7 @@ train_sys:
         _args_:
           - _target_: hydra.utils.get_class
             path: timm.scheduler.cosine_lr.CosineLRScheduler
-        warmup_t: 2
+        warmup_t: 0
         warmup_lr_init: 1e-5
         t_initial: 100
         cycle_limit: 1
@@ -88,3 +88,5 @@ train_sys:
           - _target_: hydra.utils.get_class
             path: torch.optim.AdamW
         lr: 1e-4
+    - _target_: src.modules.training.postprocessing.smooth_file.SmoothFile
+      smooth_factor: 0.1

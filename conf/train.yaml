@@ -1,7 +1,7 @@
 defaults:
   - base_train
   - hydra/logging
-  - model: eca-l0-butter # Add models or ensembles
+  - model: convnext-post # Add models or ensembles
   - wandb: train
 
 ###############
