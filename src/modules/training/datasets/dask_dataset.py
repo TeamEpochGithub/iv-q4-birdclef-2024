@@ -73,13 +73,14 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
             y_batch = y_batch.to_numpy()
             y_tensor = torch.from_numpy(y_batch)
 
-        if self.aug_1d is not None:
-            x_tensor, y_tensor = self.aug_1d(x_tensor.unsqueeze(1), y_tensor)
-        # Convert to 2D if method is specified
-        if self.to_2d is not None:
-            x_tensor = self.to_2d(x_tensor)
-            # Only apply 2D augmentations if converted to 2D
-            if self.aug_2d is not None:
-                x_tensor, y_tensor = self.aug_2d(x_tensor, y_tensor)
+        if not torch.cuda.is_available():
+            if self.aug_1d is not None:
+                x_tensor, y_tensor = self.aug_1d(x_tensor.unsqueeze(1), y_tensor)
+            # Convert to 2D if method is specified
+            if self.to_2d is not None:
+                x_tensor = self.to_2d(x_tensor)
+                # Only apply 2D augmentations if converted to 2D
+                if self.aug_2d is not None:
+                    x_tensor, y_tensor = self.aug_2d(x_tensor, y_tensor)
 
         return x_tensor, y_tensor

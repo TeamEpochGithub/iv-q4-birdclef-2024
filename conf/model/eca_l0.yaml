@@ -17,7 +17,7 @@ train_sys:
           _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
           length: 160000
         to_2d:
-          _target_: src.modules.training.datasets.to_2d.spec.Spec
+          _target_: src.modules.training.datasets.to_2d.3_channel_spec.Spec
           spec:
            _target_: functools.partial
            _args_:
@@ -59,15 +59,15 @@ train_sys:
               p: 0.8
       dataloader_args:
         num_workers: 16
-        prefetch_factor: 2
-        persistent_workers: false
-      n_folds: 0 # 0 for train full,
+        prefetch_factor: 1
+        persistent_workers: False
+      n_folds: 5 # 0 for train full,
       epochs: 50
       patience: 15
-      batch_size: 64
+      batch_size: 128
       model:
         _target_: src.modules.training.models.timm.Timm #Ensure that activation is sigmoid for non Logits loss functions.
-        in_channels: 1
+        in_channels: 3
         out_channels: 182
         model_name: "eca_nfnet_l0"
         activation: "sigmoid"

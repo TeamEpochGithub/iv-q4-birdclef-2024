@@ -3,9 +3,7 @@ defaults:
   - _self_
 
 x_sys:
-  steps:
-    - _target_: src.modules.transformation.x.nan_to_zero.NanToZero
-      years: ["2024", "2023"]
+
 y_sys:
 
 train_sys:
@@ -63,7 +61,7 @@ train_sys:
       n_folds: 5 # 0 for train full,
       epochs: 5
       patience: 14
-      batch_size: 128
+      batch_size: 256
       model:
         _target_: src.modules.training.models.timm.Timm #Ensure that activation is sigmoid for non Logits loss functions.
         in_channels: 1

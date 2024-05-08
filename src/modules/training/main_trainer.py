@@ -1,4 +1,5 @@
 """Module for example training block."""
+import gc
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -16,6 +17,7 @@ from tqdm import tqdm
 from src.modules.logging.logger import Logger
 from src.modules.training.datasets.dask_dataset import DaskDataset
 from src.modules.training.datasets.sampler.submission import SubmissionSampler
+from src.modules.training.datasets.to_2d.spec import Spec
 from src.typing.typing import XData, YData
 
 
@@ -210,10 +212,15 @@ class MainTrainer(TorchTrainer, Logger):
             )
 
         if self.device.type == "cuda":
+            # move to_2d to cuda if it isnt already
+            if isinstance(loader.dataset.to_2d, Spec):
+                loader.dataset.to_2d.instantiated_spec = loader.dataset.to_2d.instantiated_spec.to("cuda")
             self.log_to_terminal("Predicting on the test data - Normal")
             with torch.no_grad(), tqdm(loader, unit="batch", disable=False) as tepoch:
                 for data in tepoch:
                     X_batch = data[0].to(self.device).float()
+                    # Aplly to 2d transformation on cuda
+                    X_batch = loader.dataset.to_2d(X_batch)
 
                     y_pred = self.model(X_batch).squeeze(1).cpu().numpy()
                     predictions.extend(y_pred)
@@ -247,6 +254,95 @@ class MainTrainer(TorchTrainer, Logger):
         # Remove the saved onnx model
         Path(f"{self.get_hash()}.onnx").unlink()
         return np.array(predictions)
+
+    def _train_one_epoch(
+        self,
+        dataloader: DataLoader[tuple[Tensor, ...]],
+        epoch: int,
+    ) -> float:
+        """Train the model for one epoch.
+
+        :param dataloader: Dataloader for the training data.
+        :param epoch: Epoch number.
+        :return: Average loss for the epoch.
+        """
+        losses = []
+        self.model.train()
+        pbar = tqdm(
+            dataloader,
+            unit="batch",
+            desc=f"Epoch {epoch} Train ({self.initialized_optimizer.param_groups[0]['lr']})",
+        )
+        if isinstance(dataloader.dataset.to_2d, Spec):
+            dataloader.dataset.to_2d.instantiated_spec = dataloader.dataset.to_2d.instantiated_spec.to("cuda")
+        for batch in pbar:
+            x_tensor, y_tensor = batch
+            x_tensor = x_tensor.to(self.device).float()
+            y_tensor = y_tensor.to(self.device).float()
+            # Apply augs and 2d transform
+            if dataloader.dataset.aug_1d is not None:
+                x_tensor, y_tensor = dataloader.dataset.aug_1d(x_tensor.unsqueeze(1), y_tensor)
+            # Convert to 2D if method is specified
+            if dataloader.dataset.to_2d is not None:
+                x_tensor = dataloader.dataset.to_2d(x_tensor)
+                # Only apply 2D augmentations if converted to 2D
+                if dataloader.dataset.aug_2d is not None:
+                    x_tensor, y_tensor = dataloader.dataset.aug_2d(x_tensor, y_tensor)
+
+            # Forward pass
+            y_pred = self.model(x_tensor).squeeze(1)
+            loss = self.criterion(y_pred, y_tensor)
+
+            # Backward pass
+            self.initialized_optimizer.zero_grad()
+            loss.backward()
+            self.initialized_optimizer.step()
+
+            # Print tqdm
+            losses.append(loss.item())
+            pbar.set_postfix(loss=sum(losses) / len(losses))
+
+        # Step the scheduler
+        if self.initialized_scheduler is not None:
+            self.initialized_scheduler.step(epoch=epoch)
+
+        # Remove the cuda cache
+        torch.cuda.empty_cache()
+        gc.collect()
+
+        return sum(losses) / len(losses)
+
+    def _val_one_epoch(
+        self,
+        dataloader: DataLoader[tuple[Tensor, ...]],
+        desc: str,
+    ) -> float:
+        """Compute validation loss of the model for one epoch.
+
+        :param dataloader: Dataloader for the testing data.
+        :param desc: Description for the tqdm progress bar.
+        :return: Average loss for the epoch.
+        """
+        losses = []
+        self.model.eval()
+        pbar = tqdm(dataloader, unit="batch")
+        if isinstance(dataloader.dataset.to_2d, Spec):
+            dataloader.dataset.to_2d.instantiated_spec = dataloader.dataset.to_2d.instantiated_spec.to("cuda")
+        with torch.no_grad():
+            for batch in pbar:
+                X_batch, y_batch = batch
+                X_batch = X_batch.to(self.device).float()
+                y_batch = y_batch.to(self.device).float()
+                X_batch = dataloader.dataset.to_2d(X_batch)
+                # Forward pass
+                y_pred = self.model(X_batch).squeeze(1)
+                loss = self.criterion(y_pred, y_batch)
+
+                # Print losses
+                losses.append(loss.item())
+                pbar.set_description(desc=desc)
+                pbar.set_postfix(loss=sum(losses) / len(losses))
+        return sum(losses) / len(losses)
 
 
 def collate_fn(batch: tuple[Tensor, ...]) -> tuple[Tensor, ...]:
