@@ -3,9 +3,7 @@ defaults:
   - _self_
 
 x_sys:
-  steps:
-    - _target_: src.modules.transformation.x.nan_to_zero.NanToZero
-      years: ["2024"]
+
 y_sys:
 
 train_sys:
@@ -17,7 +15,7 @@ train_sys:
           _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
           length: 160000
         to_2d:
-          _target_: src.modules.training.datasets.to_2d.3_channel_spec.Spec
+          _target_: src.modules.training.datasets.to_2d.spec.Spec
           spec:
            _target_: functools.partial
            _args_:
@@ -34,6 +32,8 @@ train_sys:
         filter_:
           _target_: src.modules.training.datasets.filter.grade_threshold.GradeThreshold
           threshold: 0
+        process_delayed:
+          - _target_: src.modules.transformation.x.nan_to_zero.NanToZero
         aug_1d:
           _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
           x_transforms:
@@ -67,7 +67,7 @@ train_sys:
       batch_size: 128
       model:
         _target_: src.modules.training.models.timm.Timm #Ensure that activation is sigmoid for non Logits loss functions.
-        in_channels: 3
+        in_channels: 1
         out_channels: 182
         model_name: "eca_nfnet_l0"
         activation: "sigmoid"
