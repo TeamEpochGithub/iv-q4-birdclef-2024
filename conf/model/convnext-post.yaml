@@ -84,7 +84,7 @@ train_sys:
         path: torch.optim.AdamW
       lr: 0.0005
   - _target_: src.modules.training.postprocessing.smooth_file.SmoothFile
-    smooth_factor: 0.1
+    smooth_factor: 0.5
 pred_sys:
   _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline
   title: Postprocessing pipeline
