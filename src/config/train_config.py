@@ -29,6 +29,7 @@ class TrainConfig:
     data_path: str
     processed_path: str
     metadata_path: str
+    years: list[str]
     scorer: Any
     wandb: WandBConfig
     splitter: Any

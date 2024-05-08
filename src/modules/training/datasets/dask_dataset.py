@@ -38,10 +38,6 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
             self.y[f"label_{self.year}"] = filtered_y  # type: ignore[index]
             self.X[f"bird_{self.year}"] = filtered_x  # type: ignore[index]
 
-        # # If using torch functions like Spectrogram, move their parameters to cuda
-        # if isinstance(self.to_2d, Spec):
-        #     self.to_2d = self.to_2d.instantiated_spec.to("cuda")
-
     def __len__(self) -> int:
         """Get the length of the dataset."""
         return len(self.X[f"bird_{self.year}"])  # type: ignore[index, arg-type]

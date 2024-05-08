@@ -74,24 +74,24 @@ def run_train_cfg(cfg: DictConfig) -> None:
     X = None
     if not x_cache_exists:
         # X = setup_train_x_data(cfg.data_path, cfg.cache_path)
-        X = setup_train_x_data(cfg.data_path, cfg.metadata_path)
+        X = setup_train_x_data(cfg.raw_path, cfg.years)
 
     # If not cache exists, we need to load the data
-    y = setup_train_y_data(cfg.metadata_path)
+    y = setup_train_y_data(cfg.raw_path, cfg.years)
 
     # For this simple splitter, we only need y.
     if cfg.test_size == 0:
         if cfg.splitter.n_splits != 0:
             raise ValueError("Test size is 0, but n_splits is not 0. Also please set n_splits to 0 if you want to run train full.")
         logger.info("Training full.")
-        train_indices, test_indices = list(range(len(X.bird_2024))), []  # type: ignore[union-attr]
+        train_indices, test_indices = {year: list(range(len(X[f"bird_{year}"]))) for year in cfg.years}, {year: [] for year in cfg.years}  # type: ignore[arg-type, union-attr, index, var-annotated]
         fold = -1
     else:
         logger.info("Using splitter to split data into train and test sets.")
-        train_indices, test_indices = next(instantiate(cfg.splitter).split(y.meta_2024, y.meta_2024["primary_label"]))  # type: ignore[index]
+        train_indices, test_indices = next(instantiate(cfg.splitter).split(y))  # type: ignore[index]
         fold = 0
 
-    logger.info(f"Train/Test size: {len(train_indices)}/{len(test_indices)}")
+    logger.info(f"Train/Test size: {[len(year_indices) for year_indices in train_indices.values()]}/{[len(year_indices) for year_indices in test_indices.values()]}")
     print_section_separator("Train model pipeline")
     train_args = setup_train_args(
         pipeline=model_pipeline,
@@ -107,15 +107,15 @@ def run_train_cfg(cfg: DictConfig) -> None:
     if y is None:
         y = y_new
 
-    if len(test_indices) > 0:
+    if sum(len(test_indices[year]) for year in test_indices) > 0:
         print_section_separator("Scoring")
         scorer = instantiate(cfg.scorer)
-        score = scorer(y.label_2024.iloc[test_indices], predictions, metadata=y.meta_2024.iloc[test_indices], output=output_dir)  # type: ignore[union-attr]
+        score = scorer(y, predictions, test_indices=test_indices, years=cfg.years, output_dir=output_dir)  # type: ignore[union-attr]
         logger.info(f"Score: {score}")
 
         if wandb.run:
-            wandb.log({"Score": score})
-
+            [wandb.log({f"Score_{year}_0": score[year]}) for year in score] if isinstance(score, dict) else wandb.log({"Score": score})
+        wandb.log({"Score": score["2024"]}) if isinstance(score, dict) and "2024" in score else None
     wandb.finish()
 
 

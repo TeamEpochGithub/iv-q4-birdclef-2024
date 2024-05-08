@@ -8,8 +8,8 @@ from epochalyst.pipeline.model.model import ModelPipeline
 def setup_train_args(
     pipeline: ModelPipeline | EnsemblePipeline,
     cache_args: dict[str, Any],
-    train_indices: list[int],
-    test_indices: list[int],
+    train_indices: list[int] | dict[str, list[int]],
+    test_indices: list[int] | dict[str, list[int]],
     fold: int = -1,
     *,
     save_model: bool = False,
@@ -34,7 +34,7 @@ def setup_train_args(
     }
 
     if fold > -1:
-        main_trainer["fold"] = fold
+        main_trainer["fold"] = fold  # type: ignore[assignment]
 
     # Train system arguments
     train_sys = {

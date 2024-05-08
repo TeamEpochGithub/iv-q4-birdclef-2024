@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import Any
 
 import hydra
-import numpy as np
 import randomname
 import wandb
 from epochalyst.logging.section_separator import print_section_separator
@@ -17,7 +16,6 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 
 from src.config.cv_config import CVConfig
-from src.scoring.scorer import Scorer
 from src.setup.setup_data import setup_train_x_data, setup_train_y_data
 from src.setup.setup_pipeline import setup_pipeline
 from src.setup.setup_runtime_args import setup_train_args
@@ -82,13 +80,13 @@ def run_cv_cfg(cfg: DictConfig) -> None:
 
     X = None
     if not x_cache_exists:
-        X = setup_train_x_data(cfg.data_path, cfg.metadata_path)
+        X = setup_train_x_data(cfg.raw_path, cfg.years)
 
-    y = setup_train_y_data(cfg.metadata_path)
+    y = setup_train_y_data(cfg.raw_path, cfg.years)
 
     # Instantiate scorer
     scorer = instantiate(cfg.scorer)
-    scores: list[float] = []
+    scores: list[dict[str, float]] = []
 
     # Split indices into train and test
     # splitter_data = setup_splitter_data()
@@ -97,36 +95,27 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     if not isinstance(y, YData):
         raise TypeError("Y Should be YData")
 
-    # Hardcode for 2024 for now.
-    # oof_predictions = np.zeros((len(y.meta_2024[y.meta_2024["rating"] >= cfg.scorer.grade_threshold]), 182), dtype=np.float64)
-    oof_predictions = np.zeros((len(y.meta_2024), 182), dtype=np.float64)
-
-    for fold_no, (train_indices, test_indices) in enumerate(instantiate(cfg.splitter).split(y.meta_2024, y.meta_2024["primary_label"])):
+    for fold_no, (train_indices, test_indices) in enumerate(instantiate(cfg.splitter).split(y)):
         copy_x = copy.deepcopy(X)
 
         score, predictions = run_fold(fold_no, X, y, train_indices, test_indices, cfg, scorer, output_dir, cache_args)
         scores.append(score)
 
-        # Save predictions
-        sliced_test = test_indices[y.meta_2024["rating"].iloc[test_indices] >= cfg.scorer.grade_threshold]
-        oof_predictions[sliced_test] = predictions
-
         X = copy_x
 
-    avg_score = np.average(np.array(scores))
-    # Remove all rows with rating < grade_threshold
-    oof_predictions = oof_predictions[y.meta_2024["rating"] >= cfg.scorer.grade_threshold]
-
-    # Add OOF to the output directory
-    output_dir = output_dir / "oof"
-    oof_score = scorer(y.label_2024, oof_predictions, metadata=y.meta_2024, output_dir=output_dir)
+    avg_score: dict[str, float]
+    avg_score = {}
+    for score in scores:
+        for year in score:  # type: ignore[union-attr]
+            if avg_score.get(year) is not None:
+                avg_score[year] += score[year] / len(scores)
+            else:
+                avg_score[year] = score[year] / len(scores)
 
     print_section_separator("CV - Results")
     logger.info(f"Avg Score: {avg_score}")
-    wandb.log({"Avg Score": avg_score})
-
-    logger.info(f"OOF Score: {oof_score}")
-    wandb.log({"OOF Score": oof_score})
+    [wandb.log({f"Avg Score_{year}": avg_score[year]}) for year in avg_score] if isinstance(avg_score, dict) else wandb.log({"Avg Score": avg_score})
+    wandb.log({"Score": avg_score["2024"]}) if isinstance(avg_score, dict) and "2024" in avg_score else None
 
     logger.info("Finishing wandb run")
     wandb.finish()
@@ -139,10 +128,10 @@ def run_fold(
     train_indices: list[int],
     test_indices: list[int],
     cfg: DictConfig,
-    scorer: Scorer,
+    scorer: Any,  # noqa: ANN401
     output_dir: Path,
     cache_args: dict[str, Any],
-) -> tuple[float, Any]:
+) -> tuple[dict[str, float], Any]:
     """Run a single fold of the cross validation.
 
     :param i: The fold number.
@@ -177,16 +166,14 @@ def run_fold(
 
     gc.collect()
 
-    # Add the fold number to the output directory
-    output_dir = output_dir / str(fold_no)
-    score = scorer(y.label_2024.iloc[test_indices], predictions, metadata=y.meta_2024.iloc[test_indices])
+    score = scorer(y_true=y, y_pred=predictions, test_indices=test_indices, years=cfg.years)
     logger.info(f"Score, fold {fold_no}: {score}")
 
     fold_dir = output_dir / str(fold_no)  # Files specific to a run can be saved here
     logger.debug(f"Output Directory: {fold_dir}")
 
     if wandb.run:
-        wandb.log({f"Score_{fold_no}": score})
+        [wandb.log({f"Score_{year}_{fold_no}": score[year]}) for year in score] if isinstance(score, dict) else wandb.log({f"Score_{fold_no}": score})
     return score, predictions
 
 
