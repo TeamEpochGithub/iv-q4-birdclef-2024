@@ -58,7 +58,7 @@ def load_audio(path: str) -> npt.NDArray[np.float32]:
     :param path: Path to the audio file
     :return: Audio data
     """
-    return librosa.load(path, sr=32000, dtype=np.float32)[0] / 200
+    return librosa.load(path, sr=32000, dtype=np.float32)[0]
 
 
 def setup_train_y_data(path: str) -> YData:
