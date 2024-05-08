@@ -1,6 +1,6 @@
 """Dask dataset module. Torch dataset that works with dask."""
 from collections.abc import Callable, Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 import dask
@@ -20,7 +20,7 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
     labeler: Callable[[torch.Tensor], torch.Tensor]
     sampler: Callable[[npt.NDArray[Any]], npt.NDArray[Any]]
 
-    process_delayed: Iterable[Callable[[npt.NDArray[Any]], npt.NDArray[Any]]] | None = None
+    process_delayed: Iterable[Callable[[npt.NDArray[Any]], npt.NDArray[Any]]] | None = field(default_factory=list)
 
     X: XData | None = None
     y: YData | None = None
