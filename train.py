@@ -115,7 +115,7 @@ def run_train_cfg(cfg: DictConfig) -> None:
 
         if wandb.run:
             [wandb.log({f"Score_{year}_0": score[year]}) for year in score] if isinstance(score, dict) else wandb.log({"Score": score})
-
+        wandb.log({"Score": score["2024"]}) if isinstance(score, dict) and "2024" in score else None
     wandb.finish()
 
 

@@ -114,7 +114,8 @@ def run_cv_cfg(cfg: DictConfig) -> None:
 
     print_section_separator("CV - Results")
     logger.info(f"Avg Score: {avg_score}")
-    wandb.log({"Avg Score": avg_score})
+    [wandb.log({f"Avg Score_{year}": avg_score[year]}) for year in avg_score] if isinstance(avg_score, dict) else wandb.log({"Avg Score": avg_score})
+    wandb.log({"Score": avg_score["2024"]}) if isinstance(avg_score, dict) and "2024" in avg_score else None
 
     logger.info("Finishing wandb run")
     wandb.finish()
