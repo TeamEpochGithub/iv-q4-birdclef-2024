@@ -42,8 +42,6 @@ beautifulsoup4==4.12.3
     # via nbconvert
 bleach==6.1.0
     # via nbconvert
-blinker==1.8.2
-    # via flask
 certifi==2022.12.7
     # via httpcore
     # via httpx
@@ -58,7 +56,6 @@ charset-normalizer==2.1.1
     # via requests
 click==8.1.7
     # via dask
-    # via flask
     # via wandb
 cloudpickle==3.0.0
     # via dask
@@ -70,23 +67,10 @@ comm==0.2.2
     # via ipywidgets
 contourpy==1.2.1
     # via matplotlib
+coverage==7.5.1
+    # via pytest-cov
 cycler==0.12.1
     # via matplotlib
-dash==2.17.0
-    # via dash-bootstrap-components
-    # via dash-bootstrap-templates
-    # via q4-bird-clef
-dash-bootstrap-components==1.6.0
-    # via dash-bootstrap-templates
-    # via q4-bird-clef
-dash-bootstrap-templates==1.1.2
-    # via q4-bird-clef
-dash-core-components==2.0.0
-    # via dash
-dash-html-components==2.0.0
-    # via dash
-dash-table==5.0.0
-    # via dash
 dask==2024.5.0
     # via dask-expr
     # via q4-bird-clef
@@ -108,6 +92,7 @@ epochalyst==0.3.2
 exceptiongroup==1.2.1
     # via anyio
     # via ipython
+    # via pytest
 executing==2.0.1
     # via stack-data
 fastjsonschema==2.19.1
@@ -119,8 +104,6 @@ filelock==3.13.1
     # via virtualenv
 fire==0.6.0
     # via randomname
-flask==3.0.3
-    # via dash
 flatbuffers==24.3.25
     # via onnxruntime
 fonttools==4.51.0
@@ -155,13 +138,13 @@ idna==3.4
     # via jsonschema
     # via requests
 importlib-metadata==7.1.0
-    # via dash
     # via dask
+iniconfig==2.0.0
+    # via pytest
 ipykernel==6.29.4
     # via jupyter
     # via jupyter-console
     # via jupyterlab
-    # via q4-bird-clef
     # via qtconsole
 ipython==8.24.0
     # via ipykernel
@@ -171,12 +154,9 @@ ipywidgets==8.1.2
     # via jupyter
 isoduration==20.11.0
     # via jsonschema
-itsdangerous==2.2.0
-    # via flask
 jedi==0.19.1
     # via ipython
 jinja2==3.1.3
-    # via flask
     # via jupyter-server
     # via jupyterlab
     # via jupyterlab-server
@@ -197,7 +177,6 @@ jsonschema==4.22.0
 jsonschema-specifications==2023.12.1
     # via jsonschema
 jupyter==1.0.0
-    # via q4-bird-clef
 jupyter-client==8.6.1
     # via ipykernel
     # via jupyter-console
@@ -254,7 +233,6 @@ locket==1.0.0
 markupsafe==2.1.5
     # via jinja2
     # via nbconvert
-    # via werkzeug
 matplotlib==3.8.4
     # via q4-bird-clef
     # via seaborn
@@ -267,10 +245,6 @@ mpmath==1.3.0
     # via sympy
 msgpack==1.0.8
     # via librosa
-mypy==1.10.0
-    # via q4-bird-clef
-mypy-extensions==1.0.0
-    # via mypy
 nbclient==0.10.0
     # via nbconvert
 nbconvert==7.16.4
@@ -281,7 +255,6 @@ nbformat==5.10.4
     # via nbclient
     # via nbconvert
 nest-asyncio==1.6.0
-    # via dash
     # via ipykernel
 networkx==3.2.1
     # via torch
@@ -289,7 +262,6 @@ nodeenv==1.8.0
     # via pre-commit
 notebook==7.1.3
     # via jupyter
-    # via q4-bird-clef
 notebook-shim==0.2.4
     # via jupyterlab
     # via notebook
@@ -297,7 +269,6 @@ numba==0.59.1
     # via librosa
 numpy==1.26.3
     # via contourpy
-    # via dash-bootstrap-templates
     # via epochalyst
     # via librosa
     # via matplotlib
@@ -305,7 +276,6 @@ numpy==1.26.3
     # via onnx
     # via onnxruntime
     # via pandas
-    # via pandas-stubs
     # via pyarrow
     # via q4-bird-clef
     # via scikit-learn
@@ -364,14 +334,13 @@ packaging==22.0
     # via onnxruntime
     # via plotly
     # via pooch
+    # via pytest
     # via qtconsole
     # via qtpy
 pandas==2.2.2
     # via dask-expr
     # via q4-bird-clef
     # via seaborn
-pandas-stubs==2.2.1.240316
-    # via q4-bird-clef
 pandocfilters==1.5.1
     # via nbconvert
 parso==0.8.4
@@ -389,12 +358,12 @@ platformdirs==4.2.1
     # via virtualenv
     # via wandb
 plotly==5.22.0
-    # via dash
     # via q4-bird-clef
+pluggy==1.5.0
+    # via pytest
 pooch==1.8.1
     # via librosa
 pre-commit==3.7.0
-    # via q4-bird-clef
 prometheus-client==0.20.0
     # via jupyter-server
 prompt-toolkit==3.0.43
@@ -423,6 +392,9 @@ pygments==2.18.0
     # via qtconsole
 pyparsing==3.1.2
     # via matplotlib
+pytest==8.2.0
+    # via pytest-cov
+pytest-cov==5.0.0
 python-dateutil==2.9.0.post0
     # via arrow
     # via jupyter-client
@@ -457,13 +429,10 @@ referencing==0.35.1
     # via jsonschema-specifications
     # via jupyter-events
 requests==2.28.1
-    # via dash
     # via huggingface-hub
     # via jupyterlab-server
     # via pooch
     # via wandb
-retrying==1.3.4
-    # via dash
 rfc3339-validator==0.1.4
     # via jsonschema
     # via jupyter-events
@@ -489,7 +458,6 @@ sentry-sdk==2.1.1
 setproctitle==1.3.3
     # via wandb
 setuptools==69.5.1
-    # via dash
     # via nodeenv
     # via wandb
 six==1.16.0
@@ -498,7 +466,6 @@ six==1.16.0
     # via docker-pycreds
     # via fire
     # via python-dateutil
-    # via retrying
     # via rfc3339-validator
 smmap==5.0.1
     # via gitdb
@@ -530,8 +497,9 @@ timm==0.9.16
 tinycss2==1.3.0
     # via nbconvert
 tomli==2.0.1
+    # via coverage
     # via jupyterlab
-    # via mypy
+    # via pytest
 toolz==0.12.1
     # via dask
     # via partd
@@ -572,22 +540,17 @@ traitlets==5.14.3
     # via nbclient
     # via nbconvert
     # via nbformat
-    # via q4-bird-clef
     # via qtconsole
 triton==2.2.0
     # via torch
 types-python-dateutil==2.9.0.20240316
     # via arrow
-types-pytz==2024.1.0.20240417
-    # via pandas-stubs
 typing-extensions==4.9.0
     # via anyio
     # via async-lru
-    # via dash
     # via huggingface-hub
     # via ipython
     # via librosa
-    # via mypy
     # via q4-bird-clef
     # via torch
 tzdata==2024.1
@@ -610,9 +573,6 @@ webencodings==0.5.1
     # via tinycss2
 websocket-client==1.8.0
     # via jupyter-server
-werkzeug==3.0.3
-    # via dash
-    # via flask
 widgetsnbextension==4.0.10
     # via ipywidgets
 zipp==3.18.1
