@@ -16,8 +16,8 @@ class SetTo0(VerboseTrainingBlock):
     :param consider_thresh: The threshold for considering a prediction as a bird.
     :param to_0_thresh: The threshold for setting a prediction to 0."""
 
-    consider_thresh: float = 0.1
-    to_0_thresh: float = 0.001
+    consider_thresh: float = 0.2
+    to_0_thresh: float = 0.1
 
     def custom_train(self, x: npt.NDArray[np.float32], y: npt.NDArray[np.float32], **train_args: Any) -> tuple[Any, Any]:
         """Return the input data and labels."""
