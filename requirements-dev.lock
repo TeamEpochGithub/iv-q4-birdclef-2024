@@ -7,8 +7,8 @@
 #   all-features: false
 #   with-sources: true
 
---extra-index-url https://download.pytorch.org/whl/cu121
 --index-url https://pypi.org/simple/
+--find-links https://download.pytorch.org/whl/torch_stable.html
 
 -e file:.
 agogos==0.4

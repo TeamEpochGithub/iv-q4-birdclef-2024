@@ -66,7 +66,8 @@ lock-with-sources = true
 
 [[tool.rye.sources]]
 name = "pytorch"
-url = "https://download.pytorch.org/whl/cu121"
+url = "https://download.pytorch.org/whl/torch_stable.html"
+type = "find-links"
 
 [tool.mypy]
 exclude = ["external/", "venv/", ".cache"]
