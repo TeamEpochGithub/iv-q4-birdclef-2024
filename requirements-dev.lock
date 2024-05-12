@@ -13,6 +13,12 @@
 -e file:.
 agogos==0.4
     # via epochalyst
+aiofiles==23.2.1
+    # via xeno-canto
+aiohttp==3.9.5
+    # via xeno-canto
+aiosignal==1.3.1
+    # via aiohttp
 annotated-types==0.6.0
     # via q4-bird-clef
 antlr4-python3-runtime==4.9.3
@@ -31,7 +37,10 @@ asttokens==2.4.1
     # via stack-data
 async-lru==2.0.4
     # via jupyterlab
+async-timeout==4.0.3
+    # via aiohttp
 attrs==23.2.0
+    # via aiohttp
     # via jsonschema
     # via referencing
 audioread==3.0.1
@@ -41,10 +50,12 @@ babel==2.15.0
 beautifulsoup4==4.12.3
     # via nbconvert
 bleach==6.1.0
+    # via kaggle
     # via nbconvert
-certifi==2022.12.7
+certifi==2024.2.2
     # via httpcore
     # via httpx
+    # via kaggle
     # via requests
     # via sentry-sdk
 cffi==1.16.0
@@ -110,6 +121,9 @@ fonttools==4.51.0
     # via matplotlib
 fqdn==1.5.1
     # via jsonschema
+frozenlist==1.4.1
+    # via aiohttp
+    # via aiosignal
 fsspec==2024.2.0
     # via dask
     # via huggingface-hub
@@ -137,6 +151,7 @@ idna==3.4
     # via httpx
     # via jsonschema
     # via requests
+    # via yarl
 importlib-metadata==7.1.0
     # via dask
 iniconfig==2.0.0
@@ -216,6 +231,7 @@ jupyterlab-server==2.24.0
     # via notebook
 jupyterlab-widgets==3.0.10
     # via ipywidgets
+kaggle==1.6.12
 kiwisolver==1.4.5
     # via matplotlib
 kornia==0.7.2
@@ -245,6 +261,9 @@ mpmath==1.3.0
     # via sympy
 msgpack==1.0.8
     # via librosa
+multidict==6.0.5
+    # via aiohttp
+    # via yarl
 nbclient==0.10.0
     # via nbconvert
 nbconvert==7.16.4
@@ -398,10 +417,13 @@ pytest-cov==5.0.0
 python-dateutil==2.9.0.post0
     # via arrow
     # via jupyter-client
+    # via kaggle
     # via matplotlib
     # via pandas
 python-json-logger==2.0.7
     # via jupyter-events
+python-slugify==8.0.4
+    # via kaggle
 pytz==2024.1
     # via pandas
 pyyaml==6.0.1
@@ -431,6 +453,7 @@ referencing==0.35.1
 requests==2.28.1
     # via huggingface-hub
     # via jupyterlab-server
+    # via kaggle
     # via pooch
     # via wandb
 rfc3339-validator==0.1.4
@@ -465,6 +488,7 @@ six==1.16.0
     # via bleach
     # via docker-pycreds
     # via fire
+    # via kaggle
     # via python-dateutil
     # via rfc3339-validator
 smmap==5.0.1
@@ -490,6 +514,8 @@ termcolor==2.4.0
 terminado==0.18.1
     # via jupyter-server
     # via jupyter-server-terminals
+text-unidecode==1.3
+    # via python-slugify
 threadpoolctl==3.5.0
     # via scikit-learn
 timm==0.9.16
@@ -524,6 +550,7 @@ tornado==6.4
     # via terminado
 tqdm==4.64.1
     # via huggingface-hub
+    # via kaggle
     # via q4-bird-clef
 traitlets==5.14.3
     # via comm
@@ -558,6 +585,7 @@ tzdata==2024.1
 uri-template==1.3.0
     # via jsonschema
 urllib3==1.26.13
+    # via kaggle
     # via requests
     # via sentry-sdk
 virtualenv==20.26.1
@@ -575,5 +603,8 @@ websocket-client==1.8.0
     # via jupyter-server
 widgetsnbextension==4.0.10
     # via ipywidgets
+xeno-canto==3.0
+yarl==1.9.4
+    # via aiohttp
 zipp==3.18.1
     # via importlib-metadata
