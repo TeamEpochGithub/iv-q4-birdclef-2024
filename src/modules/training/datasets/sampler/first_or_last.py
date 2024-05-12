@@ -24,7 +24,7 @@ class FirstOrLast(Sampler):
             # Pad the array
             return np.pad(array, (0, self.length - len(array)))
 
-        if random.random() > 0.5:  # noqa: S311
+        if random.random() > 0.5:
             # Take the first segment
             return array[: self.length]
         # Take the last segment
