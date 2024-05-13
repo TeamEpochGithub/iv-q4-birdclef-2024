@@ -7,8 +7,9 @@ from typing import Any
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.metrics import roc_auc_score  # type: ignore[import-not-found]
+from sklearn.metrics import roc_auc_score
 
+from src.modules.logging.logger import logger
 from src.typing.typing import YData
 
 
@@ -29,9 +30,9 @@ class ROCAUC:
         :return: The ROC AUC score.
         """
         # Get metadata from the keyword arguments if not None
-        scores = {}
+        scores: dict[str, float] = {}
         # separate the preds for the years
-        year_preds = {}
+        year_preds: dict[str, float] = {}
         start_idx = 0
         output_dir: str = kwargs.get("output_dir", "")
 
@@ -39,12 +40,14 @@ class ROCAUC:
         label_lookup = pd.concat([y_true[f"label_{year}"] for year in years]).fillna(0).reset_index(drop=True)
 
         # Do the year splitting the same way as in XData and YData
-        for year in sorted(years, reverse=True):
-            year_preds[f"{year}"] = y_pred[start_idx : start_idx + len(test_indices[str(year)])]  # type: ignore[arg-type]
+        for year in years:
+            year_preds[str(year)] = y_pred[start_idx : start_idx + len(test_indices[str(year)])]  # type: ignore[arg-type, assignment]
             start_idx += len(test_indices[str(year)])  # type: ignore[arg-type]
 
-        # Loop over the
-        for year in sorted(years, reverse=True):
+        # Loop over the years
+        for year in years:
+            logger.info(f"Calculating ROC AUC for year {year}")
+
             metadata = y_true[f"meta_{year}"].iloc[test_indices[str(year)]]  # type: ignore[union-attr]
             y_true_year = y_true[f"label_{year}"].iloc[test_indices[str(year)]]  # type: ignore[union-attr]
             # Check if metadata is not None
@@ -69,7 +72,7 @@ class ROCAUC:
                 # Use the mask to index the labels from y_true
                 y_true_year = y_true_year[indices]
                 # from the preds index the years data, then index that year using indices
-                y_pred_year = year_preds[f"{year}"][indices]
+                y_pred_year = year_preds[f"{year}"][indices]  # type: ignore[index]
             else:
                 y_pred_year = year_preds[f"{year}"]
 

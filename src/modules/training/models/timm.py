@@ -1,9 +1,10 @@
 """Timm model for 2D image classification."""
 from typing import Any
 
-import requests
 import torch
 from torch import nn
+
+from src.utils.logger import logger
 
 
 class Timm(nn.Module):
@@ -32,11 +33,11 @@ class Timm(nn.Module):
         self.out_channels = out_channels
         self.activation = activation
 
-        # If there is an internet connection, download the model with pretrained weights
-        try:
-            _ = requests.get("http://www.google.com", timeout=5)
+        # Check if cuda is available
+        if torch.cuda.is_available():
+            logger.info("CUDA is available")
             self.model = timm.create_model(model_name, pretrained=True, in_chans=self.in_channels, num_classes=self.out_channels, **kwargs)
-        except requests.ConnectionError:
+        else:
             self.model = timm.create_model(model_name, pretrained=False, in_chans=self.in_channels, num_classes=self.out_channels, **kwargs)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

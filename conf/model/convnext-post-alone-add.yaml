@@ -6,13 +6,13 @@ x_sys:
   steps:
   - _target_: src.modules.transformation.x.nan_to_zero.NanToZero
     years:
-    - '2024'
+    - '2024add'
 y_sys: null
 train_sys:
   _target_: src.modules.training.verbose_training_pipeline.VerboseTrainingPipeline
   steps:
   - _target_: src.modules.training.main_trainer.MainTrainer
-    year: '2024'
+    year: '2024add'
     dataset_args:
       sampler:
         _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
@@ -57,21 +57,21 @@ train_sys:
       prefetch_factor: 2
       persistent_workers: false
     n_folds: 5
-    epochs: 50
+    epochs: 3
     patience: 15
     batch_size: 64
     model:
       _target_: src.modules.training.models.timm.Timm
       in_channels: 1
       out_channels: 182
-      model_name: convnext_tiny
+      model_name: efficientnet_b0
       activation: sigmoid
     scheduler:
       _target_: functools.partial
       _args_:
       - _target_: hydra.utils.get_class
         path: timm.scheduler.cosine_lr.CosineLRScheduler
-      warmup_t: 3
+      warmup_t: 0
       warmup_lr_init: 1.0e-05
       t_initial: 50
       cycle_limit: 1

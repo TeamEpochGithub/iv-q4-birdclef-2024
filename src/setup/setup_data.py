@@ -38,7 +38,7 @@ def setup_train_x_data(raw_path: str, years: list[int]) -> XData:
         filenames = metadata.filename
         filenames = [data_path + filename for filename in filenames]
 
-        bird = np.array([load_audio(filename) for filename in filenames])
+        bird = np.array([load_audio_train(filename) for filename in filenames])
         xdata[f"bird_{year}"] = bird
         xdata[f"meta_{year}"] = metadata
 
@@ -46,13 +46,23 @@ def setup_train_x_data(raw_path: str, years: list[int]) -> XData:
 
 
 @delayed
-def load_audio(path: str) -> npt.NDArray[np.float32]:
+def load_audio_train(path: str) -> npt.NDArray[np.float32]:
     """Load audio data lazily using librosa.
 
     :param path: Path to the audio file
     :return: Audio data
     """
     return librosa.load(path, sr=32000, dtype=np.float32)[0]
+
+
+@delayed
+def load_audio_submit(path: str) -> npt.NDArray[np.float32]:
+    """Load audio data lazily using librosa.
+
+    :param path: Path to the audio file
+    :return: Audio data
+    """
+    return librosa.load(path, sr=32000, dtype=np.float32)[0] / 100
 
 
 def setup_train_y_data(raw_path: str, years: list[str]) -> YData:
@@ -139,7 +149,7 @@ def setup_inference_data(path: str) -> Any:  # noqa: ANN401
     logger.info(f"Filenames: {filenames[:10]}...")
 
     # Load the bird_2024 data
-    bird_2024 = np.array([load_audio(filename) for filename in filenames])
+    bird_2024 = np.array([load_audio_submit(filename) for filename in filenames])
 
     return XData(bird_2024=bird_2024)
 

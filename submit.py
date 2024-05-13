@@ -36,6 +36,9 @@ def run_submit(cfg: DictConfig) -> None:
 
     coloredlogs.install()
 
+    # Get output directory
+    output_dir = Path(hydra.core.hydra_config.HydraConfig.get().runtime.output_dir)
+
     # Preload the pipeline
     print_section_separator("Setup pipeline")
     model_pipeline = setup_pipeline(cfg, is_train=False)
@@ -45,7 +48,7 @@ def run_submit(cfg: DictConfig) -> None:
 
     # Predict on the test data
     logger.info("Making predictions...")
-    pred_args = setup_pred_args(pipeline=model_pipeline)
+    pred_args = setup_pred_args(pipeline=model_pipeline, output_dir=output_dir.as_posix(), data_dir=cfg.data_path, species_dir=cfg.species_path)
     predictions = model_pipeline.predict(X, **pred_args)
 
     # Make submission
