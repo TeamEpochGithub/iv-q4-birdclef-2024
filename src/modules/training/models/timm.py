@@ -1,7 +1,6 @@
 """Timm model for 2D image classification."""
 from typing import Any
 
-import requests
 import torch
 from torch import nn
 

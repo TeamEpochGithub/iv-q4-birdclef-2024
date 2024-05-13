@@ -1,5 +1,5 @@
 from epochalyst.pipeline.ensemble import EnsemblePipeline
-from epochalyst.pipeline.model.training.training import  TrainingPipeline
+from epochalyst.pipeline.model.training.training import TrainingPipeline
 
 from src.modules.logging.logger import Logger
 
