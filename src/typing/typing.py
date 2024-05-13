@@ -13,10 +13,10 @@ import pandas as pd
 class XData:
     """Dataclass to hold X data.
 
-    :param meta_2024: Metadata of BirdClef2024:
-    :param meta_2023: Metadata of BirdClef2023:
-    :param meta_2022: Metadata of BirdClef2022:
-    :param meta_2021: Metadata of BirdClef2021:
+    :param meta_2024: Metadata of BirdClef2024
+    :param meta_2023: Metadata of BirdClef2023
+    :param meta_2022: Metadata of BirdClef2022
+    :param meta_2021: Metadata of BirdClef2021
     :param bird_2024: Audiodata of BirdClef2024
     :param bird_2023: Audiodata of BirdClef2023
     :param bird_2022: Audiodata of BirdClef2022
@@ -24,9 +24,11 @@ class XData:
     """
 
     meta_2024: pd.DataFrame | None = None
+    meta_2024add: pd.DataFrame | None = None
     meta_2023: pd.DataFrame | None = None
     meta_2022: pd.DataFrame | None = None
     meta_2021: pd.DataFrame | None = None
+    bird_2024add: npt.NDArray[Any] | None = None
     bird_2024: npt.NDArray[Any] | None = None
     bird_2023: npt.NDArray[Any] | None = None
     bird_2022: npt.NDArray[Any] | None = None
@@ -46,9 +48,9 @@ class XData:
         if isinstance(indexer, str):
             # allow dict like indexing with keys
 
-            if "union" in indexer.split("_"):
+            if "union" in indexer:
                 # Extract all the years to take the union of
-                years = sorted([year for year in indexer.split("_") if year.isdigit()], reverse=True)  # Start from 2024
+                years = indexer.split("_")[2:]
 
                 # Create the union field
                 if indexer[:5] == "bird_" and not hasattr(self, indexer):
@@ -94,11 +96,12 @@ class YData:
     :param label_2022: Labels of BirdClef2022
     :param label_2021: Labels of BirdClef2021
     """
-
+    meta_2024add: pd.DataFrame | None = None
     meta_2024: pd.DataFrame | None = None
     meta_2023: pd.DataFrame | None = None
     meta_2022: pd.DataFrame | None = None
     meta_2021: pd.DataFrame | None = None
+    label_2024add: pd.DataFrame | None = None
     label_2024: pd.DataFrame | None = None
     label_2023: pd.DataFrame | None = None
     label_2022: pd.DataFrame | None = None
@@ -119,9 +122,9 @@ class YData:
         if isinstance(indexer, str):
             # allow dict like indexing with keys
 
-            if "union" in indexer.split("_"):
+            if "union" in indexer:
                 # Extract all the years to take the union of
-                years = sorted([year for year in indexer.split("_") if year.isdigit()], reverse=True)  # Start from 2024
+                years = indexer.split("_")[2:]
 
                 # Create the union field
                 if indexer[:6] == "label_" and not hasattr(self, indexer):

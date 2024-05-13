@@ -83,8 +83,9 @@ train_sys:
       - _target_: hydra.utils.get_class
         path: torch.optim.AdamW
       lr: 0.0005
+  - _target_: src.modules.training.postprocessing.set_to_0.SetTo0
   - _target_: src.modules.training.postprocessing.smooth_file.SmoothFile
-    smooth_factor: 0.5
+    smooth_factor: 0.75
 pred_sys:
   _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline
   title: Postprocessing pipeline

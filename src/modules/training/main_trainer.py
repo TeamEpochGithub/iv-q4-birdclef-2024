@@ -79,7 +79,7 @@ class MainTrainer(TorchTrainer, Logger):
             del pred_dataset_args["aug_2d"]
         pred_dataset_args["sampler"] = SubmissionSampler()
 
-        return DaskDataset(X=x, year=self.year, **pred_dataset_args)
+        return DaskDataset(X=x, year='2024', **pred_dataset_args)
 
     def create_dataloaders(
         self,

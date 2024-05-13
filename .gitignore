@@ -177,3 +177,7 @@ notebooks/dataset
 submission/submission.csv
 
 conf/best
+
+plots
+
+tmbackup
