@@ -220,6 +220,7 @@ safetensors==0.4.3
     # via timm
 scikit-learn==1.4.2
     # via librosa
+    # via q4-bird-clef
 scipy==1.13.0
     # via librosa
     # via scikit-learn

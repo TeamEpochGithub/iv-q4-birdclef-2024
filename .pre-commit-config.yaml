@@ -45,6 +45,7 @@ repos:
       - id: mypy
         additional_dependencies:
           - numpy
+          - scikit-learn
           - epochalyst
           - tqdm
           - torch==2.2.2
