@@ -9,7 +9,6 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_auc_score  # type: ignore[import-not-found]
 
-
 from src.modules.logging.logger import logger
 from src.typing.typing import YData
 
@@ -47,7 +46,6 @@ class ROCAUC:
 
         # Loop over the years
         for year in years:
-
             logger.info(f"Calculating ROC AUC for year {year}")
 
             metadata = y_true[f"meta_{year}"].iloc[test_indices[str(year)]]  # type: ignore[union-attr]

@@ -96,6 +96,7 @@ class YData:
     :param label_2022: Labels of BirdClef2022
     :param label_2021: Labels of BirdClef2021
     """
+
     meta_2024add: pd.DataFrame | None = None
     meta_2024: pd.DataFrame | None = None
     meta_2023: pd.DataFrame | None = None
