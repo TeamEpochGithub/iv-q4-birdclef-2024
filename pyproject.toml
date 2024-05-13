@@ -16,7 +16,7 @@ authors = [
     { name = "Kristóf Sándor", email = "Emherk512@gmail.com" },
 ]
 description = "Team Epoch's base application for competing in machine learning competitions"
-license = "MIT"
+license = { file = "LICENSE" }
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
