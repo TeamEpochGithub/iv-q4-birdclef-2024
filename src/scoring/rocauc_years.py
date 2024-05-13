@@ -116,7 +116,7 @@ class ROCAUC:
         # Plot using seaborn
         import seaborn as sns
 
-        if 'scientific_name' in metadata.columns:
+        if "scientific_name" in metadata.columns:
             # Sort the scores and the columns
             # Map the scored columns to Scientific names in metadata
             scored_columns = [metadata[metadata["primary_label"] == x]["scientific_name"].to_numpy()[0] for x in scored_columns]

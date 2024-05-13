@@ -72,7 +72,7 @@ def setup_train_y_data(raw_path: str, years: list[str]) -> YData:
 
         ydata[f"meta_{year}"] = metadata
 
-        if 'labels' in metadata.columns:
+        if "labels" in metadata.columns:
             ydata[f"label_{year}"] = one_hot_label(metadata)
         else:
             ydata[f"label_{year}"] = one_hot_primary_secondary(metadata)
@@ -105,7 +105,7 @@ def one_hot_primary_secondary(metadata: pd.DataFrame) -> pd.DataFrame:
 
 
 def one_hot_label(metadata: pd.DataFrame) -> pd.DataFrame:
-    """Create one-hot encoded labels for labels lists
+    """Create one-hot encoded labels for labels lists.
 
     :param metadata: Metadata dataframe
     :return: One-hot encoded labels
@@ -116,7 +116,7 @@ def one_hot_label(metadata: pd.DataFrame) -> pd.DataFrame:
         species.update(ast.literal_eval(labels))
 
     # Create empty columns
-    bird_cols = sorted(list(species))
+    bird_cols = sorted(species)
     one_hot = pd.DataFrame(0, index=np.arange(len(metadata)), columns=bird_cols)
 
     # Fill in the one-hot encoded labels
