@@ -1,0 +1,6 @@
+defaults:
+  - /model/convnext-post@steps.0
+  - /model/effb0@steps.1
+
+_target_: src.modules.training.post_ensembling.PostEnsemble
+_convert_: partial

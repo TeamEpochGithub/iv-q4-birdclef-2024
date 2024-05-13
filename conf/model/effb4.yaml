@@ -64,7 +64,7 @@ train_sys:
       _target_: src.modules.training.models.timm.Timm
       in_channels: 1
       out_channels: 182
-      model_name: convnext_tiny
+      model_name: efficientnet_b4
       activation: sigmoid
     scheduler:
       _target_: functools.partial
