@@ -41,7 +41,7 @@ class ROCAUC:
 
         # Do the year splitting the same way as in XData and YData
         for year in years:
-            year_preds[str(year)] = y_pred[start_idx : start_idx + len(test_indices[str(year)])]  # type: ignore[arg-type]
+            year_preds[str(year)] = y_pred[start_idx : start_idx + len(test_indices[str(year)])]  # type: ignore[arg-type, assignment]
             start_idx += len(test_indices[str(year)])  # type: ignore[arg-type]
 
         # Loop over the years
@@ -71,7 +71,7 @@ class ROCAUC:
                 # Use the mask to index the labels from y_true
                 y_true_year = y_true_year[indices]
                 # from the preds index the years data, then index that year using indices
-                y_pred_year = year_preds[f"{year}"][indices]
+                y_pred_year = year_preds[f"{year}"][indices]  # type: ignore[index]
 
             # Convert
             solution = y_true_year
