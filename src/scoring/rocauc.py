@@ -6,7 +6,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
-from sklearn.metrics import roc_auc_score  # type: ignore[import-not-found]
+from sklearn.metrics import roc_auc_score
 
 from src.scoring.scorer import Scorer
 
