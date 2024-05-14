@@ -17,18 +17,6 @@ train_sys:
       sampler:
         _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
         length: 160000
-      to_2d:
-        _target_: src.modules.training.datasets.to_2d.spec.Spec
-        spec:
-          _target_: functools.partial
-          _args_:
-          - _target_: hydra.utils.get_class
-            path: torchaudio.transforms.MelSpectrogram
-        output_shape:
-        - 224
-        - 224
-        scale:
-          _target_: src.modules.training.datasets.to_2d.spec_normalize.SpecNormalize
       labeler:
         _target_: src.modules.training.datasets.labeler.psd_labeler.PSDLabeler
       filter_:
@@ -47,6 +35,20 @@ train_sys:
           p: 0.5
         - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.MixUp1D
           p: 0.5
+        - _target_: src.modules.training.augmentations.time_series_augmentations.Scale
+          p: 0.5
+      to_2d:
+        _target_: src.modules.training.datasets.to_2d.spec.Spec
+        spec:
+          _target_: functools.partial
+          _args_:
+          - _target_: hydra.utils.get_class
+            path: torchaudio.transforms.MelSpectrogram
+        output_shape:
+        - 224
+        - 224
+        scale:
+          _target_: src.modules.training.datasets.to_2d.spec_normalize.SpecNormalize
       aug_2d:
         _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
         xy_transforms:
@@ -57,7 +59,7 @@ train_sys:
       prefetch_factor: 2
       persistent_workers: false
     n_folds: 5
-    epochs: 50
+    epochs: 25
     patience: 15
     batch_size: 64
     model:
