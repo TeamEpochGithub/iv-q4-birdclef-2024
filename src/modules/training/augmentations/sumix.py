@@ -23,9 +23,11 @@ class Sumix:
             label_coeffs_2 = torch.where(coeffs_2 >= 0.5, 1, 1 - 2 * (0.5 - coeffs_2))
             augmented_x = torch.zeros(x.shape)
             augmented_y = torch.zeros(y.shape)
-            for i in range(x.shape[0]):
-                augmented_x[i] = coeffs_1[i] * x[i] + coeffs_2[i] * x[perm][i]
-            for i in range(y.shape[0]):
-                augmented_y[i] = torch.clip(label_coeffs_1[i] * y[i] + label_coeffs_2[i] * y[perm][i], 0, 1)
+            # for i in range(x.shape[0]):
+            #     augmented_x[i] = coeffs_1[i] * x[i] + coeffs_2[i] * x[perm][i]
+            # for i in range(y.shape[0]):
+            #     augmented_y[i] = torch.clip(label_coeffs_1[i] * y[i] + label_coeffs_2[i] * y[perm][i], 0, 1)
+            augmented_x = coeffs_1.unsqueeze(-1).expand(x.shape) * x + coeffs_2.unsqueeze(-1).expand(x.shape) * x[perm]
+            augmented_y = torch.clip(label_coeffs_1.expand(y.shape) * y + label_coeffs_2.expand(y.shape) * y[perm], 0, 1)
             return augmented_x, augmented_y
         return x, y

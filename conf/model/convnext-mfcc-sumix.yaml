@@ -48,7 +48,7 @@ train_sys:
         - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.CutMix1D
           p: 0.5
         - _target_: src.modules.training.augmentations.sumix.Sumix
-          p: 0.5
+          p: 1
       aug_2d:
         _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
         xy_transforms:
@@ -68,6 +68,15 @@ train_sys:
       out_channels: 351
       model_name: convnext_tiny
       activation: sigmoid
+    scheduler:
+      _target_: functools.partial
+      _args_:
+      - _target_: hydra.utils.get_class
+        path: timm.scheduler.cosine_lr.CosineLRScheduler
+      warmup_t: 3
+      warmup_lr_init: 1.0e-05
+      t_initial: 50
+      cycle_limit: 1
     criterion:
       _target_: torch.nn.BCELoss
     optimizer:
@@ -75,7 +84,7 @@ train_sys:
       _args_:
       - _target_: hydra.utils.get_class
         path: torch.optim.AdamW
-      lr: 0.0003
+      lr: 0.0005
 pred_sys:
   _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline
   title: Postprocessing pipeline
