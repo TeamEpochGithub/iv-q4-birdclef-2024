@@ -1,7 +1,7 @@
 defaults:
   - base_train
   - hydra/logging
-  - model: convnext-post-mfcc # Add models or ensembles
+  - model: convnext-post-mfcc-sumix # Add models or ensembles
   - wandb: train
 
 ###############
