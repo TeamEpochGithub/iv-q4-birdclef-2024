@@ -67,15 +67,6 @@ train_sys:
       out_channels: 182
       model_name: convnext_tiny
       activation: sigmoid
-    scheduler:
-      _target_: functools.partial
-      _args_:
-      - _target_: hydra.utils.get_class
-        path: timm.scheduler.cosine_lr.CosineLRScheduler
-      warmup_t: 3
-      warmup_lr_init: 1.0e-05
-      t_initial: 50
-      cycle_limit: 1
     criterion:
       _target_: torch.nn.BCELoss
     optimizer:
@@ -83,7 +74,7 @@ train_sys:
       _args_:
       - _target_: hydra.utils.get_class
         path: torch.optim.AdamW
-      lr: 0.0005
+      lr: 0.00005
   - _target_: src.modules.training.postprocessing.set_to_0.SetTo0
   - _target_: src.modules.training.postprocessing.smooth_file.SmoothFile
     smooth_factor: 0.75
