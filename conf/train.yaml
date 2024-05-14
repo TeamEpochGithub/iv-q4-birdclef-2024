@@ -1,7 +1,7 @@
 defaults:
   - base_train
   - hydra/logging
-  - model: convnext-post-add # Add models or ensembles
+  - model: eca_l0_dropout # Add models or ensembles
   - wandb: train
 
 ###############
@@ -11,7 +11,7 @@ defaults:
 ###############
 processed_path: data/processed/
 raw_path: data/raw/
-years: [ "2024", "2024add"]
+years: ["kenya"]
 cache_path: data/cache
 #data_path: data/raw/train_data/dummy.npy
 data_path: data/raw/2024/train_audio/
@@ -24,7 +24,7 @@ scorer:
   _target_: src.scoring.rocauc_years.ROCAUC # Add scorer
   name: rocauc
   grade_threshold: 0
-  only_primary: true
+  only_primary: false
 splitter:
   _target_: src.setup.splitter.Splitter
   splitter:
@@ -35,5 +35,5 @@ splitter:
   n_splits: 5 # Set to 0 if you want train full.
   shuffle: true
   random_state: 42
-  years: [ "2024", "2024add"]
+  years: ["kenya"]
 allow_multiple_instances: true
