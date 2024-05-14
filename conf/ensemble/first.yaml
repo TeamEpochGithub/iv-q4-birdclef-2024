@@ -2,5 +2,9 @@ defaults:
   - /model/effb4@steps.0
   - /model/effb0@steps.1
 
+weights:
+  - 0.5
+  - 0.5
+
 _target_: src.modules.training.post_ensembling.PostEnsemble
 _convert_: partial
