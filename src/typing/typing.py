@@ -13,22 +13,16 @@ import pandas as pd
 class XData:
     """Dataclass to hold X data.
 
-    <<<<<<< HEAD
     :param meta_2024: Metadata of BirdClef2024:
     :param meta_2023: Metadata of BirdClef2023:
     :param meta_2022: Metadata of BirdClef2022:
     :param meta_2021: Metadata of BirdClef2021:
     :param meta_kenya: Metadata of Kenya:
-    =======
-    :param meta_2024: Metadata of BirdClef2024
-    :param meta_2023: Metadata of BirdClef2023
-    :param meta_2022: Metadata of BirdClef2022
-    :param meta_2021: Metadata of BirdClef2021
-    >>>>>>> main
     :param bird_2024: Audiodata of BirdClef2024
     :param bird_2023: Audiodata of BirdClef2023
     :param bird_2022: Audiodata of BirdClef2022
     :param bird_2021: Audiodata of BirdClef2021
+    :param bird_kenya: Audiodata of Kenya
     """
 
     meta_2024: pd.DataFrame | None = None
