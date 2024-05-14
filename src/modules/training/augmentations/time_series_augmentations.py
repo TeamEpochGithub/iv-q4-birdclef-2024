@@ -13,6 +13,8 @@ class Scale(torch.nn.Module):
     """
 
     p: float = 0.5
+    lower: float = 1e-5
+    higher: float = 1e2
 
     def __call__(
         self,
@@ -28,18 +30,6 @@ class Scale(torch.nn.Module):
         # Randomly sample between 10e-5 and 10e2
 
         if torch.rand(1) < self.p:
-            scale = 10 ** (torch.rand(1) * 7 - 5)
+            scale = torch.exp(torch.rand(1) * (torch.log(torch.tensor(self.higher)) - torch.log(torch.tensor(self.lower))) + torch.log(torch.tensor(self.lower)))
             x = x * scale
         return x, y
-
-
-# if __name__ == "__main__":
-#     # Test the Scale augmentation
-#     scale = Scale(p=1)
-#     x = torch.rand(10, 1, 100)
-#     y = torch.rand(10, 1)
-#     x_aug, y_aug = scale(x, y)
-#     assert x_aug.shape == x.shape
-#     assert y_aug.shape == y.shape
-#     assert torch.allclose(x_aug / x, y_aug / y, atol=1e-6)
-#     print("Scale augmentation test passed.")
