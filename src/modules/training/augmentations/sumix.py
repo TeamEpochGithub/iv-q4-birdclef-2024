@@ -26,6 +26,6 @@ class Sumix:
             for i in range(x.shape[0]):
                 augmented_x[i] = coeffs_1[i] * x[i] + coeffs_2[i] * x[perm][i]
             for i in range(y.shape[0]):
-                augmented_y = torch.clip(label_coeffs_1[i] * y[i] + label_coeffs_2[i] * y[perm][i], 0, 1)
+                augmented_y[i] = torch.clip(label_coeffs_1[i] * y[i] + label_coeffs_2[i] * y[perm][i], 0, 1)
             return augmented_x, augmented_y
         return x, y
