@@ -58,16 +58,24 @@ def setup_train_args(
     return train_args
 
 
-def setup_pred_args(pipeline: ModelPipeline | EnsemblePipeline) -> dict[str, Any]:
+def setup_pred_args(pipeline: ModelPipeline | EnsemblePipeline, output_dir: str, data_dir: str, species_dir: str) -> dict[str, Any]:
     """Set train arguments for pipeline.
 
     :param pipeline: Pipeline to receive arguments
+    :param output_dir: Output directory
+    :param data_dir: Data directory
+    :param species_dir: Species directory
     :return: Dictionary containing arguments
     """
     pred_args: dict[str, Any] = {
         "train_sys": {
             "MainTrainer": {
                 "batch_size": 1,
+            },
+            "VisualizePreds": {
+                "output_dir": output_dir,
+                "data_dir": data_dir,
+                "species_dir": species_dir,
             },
         },
     }

@@ -24,7 +24,7 @@ scorer:
   _target_: src.scoring.rocauc_years.ROCAUC # Add scorer
   name: rocauc
   grade_threshold: 0
-  only_primary: true
+  only_primary: false
 splitter:
   _target_: src.setup.splitter.Splitter
   splitter:

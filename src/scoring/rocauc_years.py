@@ -7,8 +7,7 @@ from typing import Any
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.metrics import roc_auc_score  # type: ignore[import-not-found]
-
+from sklearn.metrics import roc_auc_score
 
 from src.modules.logging.logger import logger
 from src.typing.typing import YData
@@ -42,12 +41,11 @@ class ROCAUC:
 
         # Do the year splitting the same way as in XData and YData
         for year in years:
-            year_preds[str(year)] = y_pred[start_idx : start_idx + len(test_indices[str(year)])]  # type: ignore[arg-type]
+            year_preds[str(year)] = y_pred[start_idx : start_idx + len(test_indices[str(year)])]  # type: ignore[arg-type, assignment]
             start_idx += len(test_indices[str(year)])  # type: ignore[arg-type]
 
         # Loop over the years
         for year in years:
-
             logger.info(f"Calculating ROC AUC for year {year}")
 
             metadata = y_true[f"meta_{year}"].iloc[test_indices[str(year)]]  # type: ignore[union-attr]
@@ -70,10 +68,13 @@ class ROCAUC:
             if self.only_primary:
                 # Get the indices from the metadata where secondary label is an empty list as string
                 indices = metadata["secondary_labels"] == "[]"
+
                 # Use the mask to index the labels from y_true
                 y_true_year = y_true_year[indices]
                 # from the preds index the years data, then index that year using indices
-                y_pred_year = year_preds[f"{year}"][indices]
+                y_pred_year = year_preds[f"{year}"][indices]  # type: ignore[index]
+            else:
+                y_pred_year = year_preds[f"{year}"]
 
             # Convert
             solution = y_true_year
@@ -118,12 +119,13 @@ class ROCAUC:
         # Plot using seaborn
         import seaborn as sns
 
-        # Sort the scores and the columns
-        # Map the scored columns to Scientific names in metadata
-        scored_columns = [metadata[metadata["primary_label"] == x]["scientific_name"].to_numpy()[0] for x in scored_columns]
+        if "scientific_name" in metadata.columns:
+            # Sort the scores and the columns
+            # Map the scored columns to Scientific names in metadata
+            scored_columns = [metadata[metadata["primary_label"] == x]["scientific_name"].to_numpy()[0] for x in scored_columns]
 
-        # Get the count of the scored columns from the metadata
-        scored_columns = [f"{x} ({metadata[metadata['scientific_name'] == x].shape[0]})" for x in scored_columns]
+            # Get the count of the scored columns from the metadata
+            scored_columns = [f"{x} ({metadata[metadata['scientific_name'] == x].shape[0]})" for x in scored_columns]
 
         scored_columns = [x for _, x in sorted(zip(class_roc_auc, scored_columns, strict=False), reverse=True)]
         class_roc_auc = sorted(class_roc_auc, reverse=True)

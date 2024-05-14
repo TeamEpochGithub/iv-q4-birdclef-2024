@@ -14,7 +14,8 @@ class SetTo0(VerboseTrainingBlock):
     """Set predictions to 0, if the model thinks with low probability that there is not a bird.
 
     :param consider_thresh: The threshold for considering a prediction as a bird.
-    :param to_0_thresh: The threshold for setting a prediction to 0."""
+    :param to_0_thresh: The threshold for setting a prediction to 0.
+    """
 
     consider_thresh: float = 0.2
     to_0_thresh: float = 0.1
