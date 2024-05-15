@@ -13,7 +13,8 @@ from src.modules.training.verbose_training_block import VerboseTrainingBlock
 class SmoothFile(VerboseTrainingBlock):
     """Smooth the predictions based on the current 4 minute audio file."""
 
-    smooth_factor: float = 0.1
+    smooth_factor: float = 1
+    power: float = 2
     kernel: list[float] | None = None
 
     def custom_train(self, x: npt.NDArray[np.float32], y: npt.NDArray[np.float32], **train_args: Any) -> tuple[Any, Any]:
@@ -41,7 +42,8 @@ class SmoothFile(VerboseTrainingBlock):
         # Calculate the average of the predictions. y_avg will be of size (n, 182)
         x_avg = np.zeros((x.shape[0] // 48, x.shape[1]))
         for i in range(0, x.shape[0], 48):
-            x_avg[i // 48] = np.mean(x[i : i + 48], axis=0)
+            sliced = x[i : i + 48]
+            x_avg[i // 48] = (sliced**self.power).mean(axis=0) ** (1 / self.power)
 
         # Loop over all samples and apply the smoothing factor
         for i in tqdm(range(x.shape[0]), desc="Smoothing predictions"):

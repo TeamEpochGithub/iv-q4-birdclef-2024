@@ -83,7 +83,6 @@ train_sys:
       - _target_: hydra.utils.get_class
         path: torch.optim.AdamW
       lr: 0.0005
-  - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
   - _target_: src.modules.training.postprocessing.smooth_file.SmoothFile
     smooth_factor: 0.75
 pred_sys:
