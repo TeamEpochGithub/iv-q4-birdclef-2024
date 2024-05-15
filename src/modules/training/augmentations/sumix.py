@@ -1,4 +1,5 @@
 """Sumix implementation copied from Kaggle."""
+
 from dataclasses import dataclass
 
 import torch

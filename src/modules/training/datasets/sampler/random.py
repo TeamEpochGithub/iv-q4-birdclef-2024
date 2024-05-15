@@ -1,4 +1,5 @@
 """Select a random fragment of specified length."""
+
 from dataclasses import dataclass
 
 import numpy as np

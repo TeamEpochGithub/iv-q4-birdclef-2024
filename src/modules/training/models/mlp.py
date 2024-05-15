@@ -1,4 +1,5 @@
 """Small torch network for testing purposes."""
+
 import torch
 import torch.nn.functional as F  # noqa: N812
 from torch import nn

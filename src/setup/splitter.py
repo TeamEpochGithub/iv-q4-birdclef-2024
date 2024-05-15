@@ -1,4 +1,5 @@
 """Wrapper class fo sklearn splitters that returns dicts."""
+
 from collections.abc import Generator
 from dataclasses import dataclass, field
 from typing import Any

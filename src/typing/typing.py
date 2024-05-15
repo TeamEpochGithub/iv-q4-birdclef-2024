@@ -1,4 +1,5 @@
 """Common type definitions for the project."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

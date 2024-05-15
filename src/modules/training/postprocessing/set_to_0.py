@@ -1,4 +1,5 @@
 """Set predictions to 0, if the model thinks with low probability that there is not a bird."""
+
 from dataclasses import dataclass
 from typing import Any
 

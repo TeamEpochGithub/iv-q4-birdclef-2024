@@ -1,4 +1,5 @@
 """Normalizer for Spectrograms."""
+
 import torch
 from torch import nn
 

@@ -1,4 +1,5 @@
 """File contains the function to_submission_format() which converts the output of the model to the submission format."""
+
 import os
 from pathlib import Path
 

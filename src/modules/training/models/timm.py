@@ -1,4 +1,5 @@
 """Timm model for 2D image classification."""
+
 from typing import Any
 
 import torch
@@ -24,7 +25,7 @@ class Timm(nn.Module):
         :param activation: The activation function to use.
         """
         try:
-            import timm  # type: ignore[import-not-found]
+            import timm
         except ImportError as err:
             raise ImportError("Need to install timm if you want to use timm models") from err
 

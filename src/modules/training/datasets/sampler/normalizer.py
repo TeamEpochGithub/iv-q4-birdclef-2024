@@ -1,4 +1,5 @@
 """Standardize data before applying a sampler."""
+
 from dataclasses import dataclass
 
 import numpy as np

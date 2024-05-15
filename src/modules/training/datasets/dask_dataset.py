@@ -1,4 +1,5 @@
 """Dask dataset module. Torch dataset that works with dask."""
+
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from typing import Any

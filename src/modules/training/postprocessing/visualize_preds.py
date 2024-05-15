@@ -1,4 +1,5 @@
 """Visualize predictions block that creates a stacked line chart."""
+
 import os
 from dataclasses import dataclass
 from pathlib import Path

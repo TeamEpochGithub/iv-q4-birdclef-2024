@@ -1,11 +1,12 @@
 """Module for example training block."""
+
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import numpy.typing as npt
-import onnxruntime as onnxrt  # type: ignore[import-not-found]
+import onnxruntime as onnxrt
 import torch
 import wandb
 from epochalyst.pipeline.model.training.torch_trainer import TorchTrainer

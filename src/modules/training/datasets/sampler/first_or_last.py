@@ -1,4 +1,5 @@
 """Take the first or last segment. Pad if necessary."""
+
 import random
 from dataclasses import dataclass
 

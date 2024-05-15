@@ -1,4 +1,5 @@
 """Keep only the predictions of the bird species featured in the BirdCLEF 2024 dataset when using the datasets from other years."""
+
 from dataclasses import dataclass
 from typing import Any
 
