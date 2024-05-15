@@ -1,7 +1,7 @@
 defaults:
   - base_submit
   - hydra/logging
-  - model: convnext-post-scale # Add models or ensembles
+  - model: convnext-post-power-2 # Add models or ensembles
 
 # Use this when uploading to Kaggle
 

@@ -20,6 +20,7 @@ class VisualizePreds(VerboseTrainingBlock):
     """Visualize predictions block that creates a stacked line chart."""
 
     n: int = 10
+    threshold: float = 0.1
 
     def custom_train(
         self,
@@ -84,7 +85,7 @@ class VisualizePreds(VerboseTrainingBlock):
 
         :param predictions: The predictions in shape (n_samples=48, n_features=182)
         """
-        threshold = 0.2
+        threshold = self.threshold
         class_above_threshold = np.max(predictions, axis=0) > threshold
         filtered_predictions = predictions[:, class_above_threshold]
         minutes = self.sections_to_time_labels(predictions)
