@@ -31,12 +31,14 @@ class XData:
     meta_2022: pd.DataFrame | None = None
     meta_2021: pd.DataFrame | None = None
     meta_kenya: pd.DataFrame | None = None
+    meta_esc50: pd.DataFrame | None = None
     bird_2024add: npt.NDArray[Any] | None = None
     bird_2024: npt.NDArray[Any] | None = None
     bird_2023: npt.NDArray[Any] | None = None
     bird_2022: npt.NDArray[Any] | None = None
     bird_2021: npt.NDArray[Any] | None = None
     bird_kenya: npt.NDArray[Any] | None = None
+    bird_esc50: npt.NDArray[Any] | None = None
 
     def __getitem__(self, indexer: Any) -> XData | pd.DataFrame | npt.NDArray[np.float32]:  # noqa: ANN401 C901
         """Index the data according to the indexer type."""
@@ -107,12 +109,14 @@ class YData:
     meta_2022: pd.DataFrame | None = None
     meta_2021: pd.DataFrame | None = None
     meta_kenya: pd.DataFrame | None = None
+    meta_esc50: pd.DataFrame | None = None
     label_2024add: pd.DataFrame | None = None
     label_2024: pd.DataFrame | None = None
     label_2023: pd.DataFrame | None = None
     label_2022: pd.DataFrame | None = None
     label_2021: pd.DataFrame | None = None
     label_kenya: pd.DataFrame | None = None
+    label_esc50: pd.DataFrame | None = None
 
     def __getitem__(self, indexer: Any) -> YData | pd.DataFrame:  # noqa: ANN401 C901
         """Index the data according to the indexer type."""
