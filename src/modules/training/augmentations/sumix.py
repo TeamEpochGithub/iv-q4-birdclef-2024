@@ -13,7 +13,7 @@ class Sumix:
     min_percent: float = 0.3
 
     def __call__(self, x: torch.Tensor, y: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        """Apply sumix augmentation to the input.
+        """Apply sumix augmentation to the input. A different type of mixup that uses more aggressive weigths for the labels.
 
         :param x: Input tensor (N,C,L)
         :param y: Input labels
