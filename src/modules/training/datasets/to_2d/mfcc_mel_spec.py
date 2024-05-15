@@ -1,17 +1,16 @@
-"""Wrapper class to create spectrograms from the data."""
+"""Class to create 2 channel Mel Spec and MFCC image."""
 
 import functools
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any
 
 import torch
-from torchaudio.transforms import MelSpectrogram
 from torchaudio.functional import create_dct
+from torchaudio.transforms import MelSpectrogram
 
 
 @dataclass
-class Spec:
+class MFCCMelSpec:
     """Wrapper class for spectrogram functions from torchaudio."""
 
     spec: functools.partial[torch.nn.Module]
@@ -35,7 +34,6 @@ class Spec:
         else:
             self.instantiated_spec = self.spec(n_fft=self.n_fft, hop_length=self.hop_length)
 
-
     def __call__(self, input_data: torch.Tensor) -> torch.Tensor:
         """Create spectrograms from the input."""
         # Create spectrograms from the input
@@ -44,7 +42,7 @@ class Spec:
 
         if len(spec_out.shape) == 3:
             spec_out = spec_out.unsqueeze(1)
-        
+
         dct_matrix = create_dct(self.output_shape[0], self.output_shape[0], norm=None)
         mfcc = torch.matmul(dct_matrix, spec_out)
         # Log spec
