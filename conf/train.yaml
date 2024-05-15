@@ -18,13 +18,13 @@ data_path: data/raw/2024/train_audio/
 metadata_path: data/raw/2024/train_metadata.csv
 
 # Do this if you want train full.
-test_size: 0.2
+test_size: 0.5
 
 scorer:
   _target_: src.scoring.rocauc_years.ROCAUC # Add scorer
   name: rocauc
   grade_threshold: 0
-  only_primary: false
+  only_primary: true
 splitter:
   _target_: src.setup.splitter.Splitter
   splitter:
