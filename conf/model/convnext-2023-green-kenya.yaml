@@ -1,0 +1,80 @@
+defaults:
+  - pipeline/default@_here_
+  - _self_
+
+x_sys:
+  steps:
+    - _target_: src.modules.transformation.x.nan_to_zero.NanToZero
+      years: ["2023","green","kenya"]
+y_sys:
+
+train_sys:
+  steps:
+    - _target_: src.modules.training.main_trainer.MainTrainer
+      year: "union_2023_green_kenya"
+      dataset_args:
+        sampler:
+          _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
+          length: 160000
+        to_2d:
+          _target_: src.modules.training.datasets.to_2d.spec.Spec
+          spec:
+           _target_: functools.partial
+           _args_:
+             - _target_: hydra.utils.get_class
+               path: torchaudio.transforms.MelSpectrogram #nnAudio.features.mel.MelSpectrogram
+          output_shape: [224,224]
+          scale:
+            _target_: src.modules.training.datasets.to_2d.spec_normalize.SpecNormalize
+
+        #  _target_: src.modules.training.datasets.to_2d.reshape.Reshape
+        #  shape: [400,400]
+        labeler:
+          _target_: src.modules.training.datasets.labeler.psd_labeler.PSDLabeler
+        filter_:
+          _target_: src.modules.training.datasets.filter.grade_threshold.GradeThreshold
+          threshold: 0
+        aug_1d:
+          _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
+          x_transforms:
+            - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomPhaseShift
+              p: 0.5
+              shift_limit: 0.5
+            - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomAmplitudeShift
+              p: 0.5
+          xy_transforms:
+            - _target_: src.modules.training.augmentations.sumix.Sumix
+              p: 1
+        aug_2d:
+      dataloader_args:
+        num_workers: 16
+        prefetch_factor: 1
+        persistent_workers: False
+      n_folds: 5 # 0 for train full,
+      epochs: 50
+      patience: 15
+      batch_size: 64
+      model:
+        _target_: src.modules.training.models.timm.Timm #Ensure that activation is sigmoid for non Logits loss functions.
+        in_channels: 1
+        out_channels: 267
+        model_name: "convnext_tiny"
+        activation: "sigmoid"
+      scheduler:
+        _target_: functools.partial
+        _args_:
+          - _target_: hydra.utils.get_class
+            path: timm.scheduler.cosine_lr.CosineLRScheduler
+        warmup_t: 3
+        warmup_lr_init: 1e-5
+        t_initial: 50
+        cycle_limit: 1
+      criterion:
+        _target_: torch.nn.BCELoss
+      optimizer:
+        _target_: functools.partial
+        _args_:
+          - _target_: hydra.utils.get_class
+            path: torch.optim.AdamW
+        lr: 5e-4
+    - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
