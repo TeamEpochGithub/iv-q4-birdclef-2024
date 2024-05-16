@@ -1,32 +1,39 @@
 """ROC AUC scorer from Kaggle."""
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 from sklearn.metrics import roc_auc_score
+from typing_extensions import override
 
 from src.modules.logging.logger import logger
+from src.scoring.scorer import Scorer
 from src.typing.typing import YData
 
 
 @dataclass
-class ROCAUC:
-    """OC AUC scorer from Kaggle."""
+class ROCAUC(Scorer):
+    """ROC AUC scorer from Kaggle."""
 
     name: str = "roc_auc"
     grade_threshold: float | None = None
     only_primary: bool = False
 
-    def __call__(self, y_true: YData, y_pred: np.ndarray[Any, Any], test_indices: dict[str, Iterable[int]], years: list[str], **kwargs: Any) -> dict[str, float]:
+    @override
+    def __call__(self, y_true: YData, y_pred: npt.NDArray[Any], **kwargs: Any) -> dict[str, float]:
         """Calculate the ROC AUC score.
 
         :param y_true: The true labels.
         :param y_pred: The predicted labels.
-
+        :param test_indices: The test indices.
+        :param years: The datasets to use.
+        :param output_dir: The output directory.
+        :param kwargs: Additional keyword arguments.
         :return: The ROC AUC score.
         """
         # Get metadata from the keyword arguments if not None
@@ -34,6 +41,10 @@ class ROCAUC:
         # separate the preds for the years
         year_preds: dict[str, float] = {}
         start_idx = 0
+
+        # Retrieve the necessary keyword arguments
+        test_indices: Mapping[str, Iterable[int]] = kwargs["test_indices"]
+        years: Iterable[str] = kwargs["years"]
         output_dir: str = kwargs.get("output_dir", "")
 
         # Create union metadata
@@ -48,10 +59,10 @@ class ROCAUC:
         for year in years:
             logger.info(f"Calculating ROC AUC for year {year}")
 
-            metadata = y_true[f"meta_{year}"].iloc[test_indices[str(year)]]  # type: ignore[union-attr]
-            y_true_year = y_true[f"label_{year}"].iloc[test_indices[str(year)]]  # type: ignore[union-attr]
+            metadata: pd.DataFrame | None = y_true[f"meta_{year}"].iloc[test_indices[str(year)]]  # type: ignore[union-attr]
+            y_true_year: pd.DataFrame | None = y_true[f"label_{year}"].iloc[test_indices[str(year)]]  # type: ignore[union-attr]
             # Check if metadata is not None
-            if metadata is None:
+            if metadata is None or y_true_year is None:
                 raise ValueError("Metadata is required for this scorer.")
 
             # Convert both solution and submission to a dataframe
@@ -96,10 +107,6 @@ class ROCAUC:
             self.plot_class_scores(metadata=metadata, solution=solution, submission=submission, scored_columns=scored_columns, output_dir=output_dir, year=year)
         # Calculate the ROC AUC score
         return scores
-
-    def __str__(self) -> str:
-        """Return the name of the scorer."""
-        return self.name
 
     def plot_class_scores(self, metadata: pd.DataFrame, solution: pd.DataFrame, submission: pd.DataFrame, scored_columns: list[str], output_dir: str, year: str) -> None:
         """Plot the ROC AUC score for each class and save the plot.

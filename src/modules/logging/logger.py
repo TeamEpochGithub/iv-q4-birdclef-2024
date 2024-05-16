@@ -69,3 +69,10 @@ class Logger(_Logger):
         """
         if wandb.run:
             wandb.define_metric(metric, step_metric=metric_type)
+
+    def log_section_separator(self, message: str) -> None:
+        """Log a section separator.
+
+        :param message: The message to log
+        """
+        super().log_section_separator(message)

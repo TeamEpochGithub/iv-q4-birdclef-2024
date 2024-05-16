@@ -37,7 +37,7 @@ def setup_pipeline(cfg: DictConfig, *, is_train: bool = True) -> ModelPipeline |
     else:
         raise ValueError("Neither model nor ensemble specified in config.")
 
-    model_pipeline = instantiate(pipeline_cfg)
+    model_pipeline: ModelPipeline | EnsemblePipeline = instantiate(pipeline_cfg)
     logger.debug(f"Pipeline: \n{model_pipeline}")
 
     return model_pipeline

@@ -45,7 +45,7 @@ def setup_train_args(
     if save_model_preds:
         train_sys["cache_args"] = cache_args
 
-    train_args = {
+    train_args: dict[str, dict[str, Any]] = {
         "x_sys": {},
         "y_sys": {},
         "train_sys": train_sys,

@@ -36,8 +36,7 @@ def setup_train_x_data(raw_path: str, years: list[int]) -> XData:
         metadata["samplename"] = metadata.filename.map(lambda x: x.split("/")[0] + "-" + x.split("/")[-1].split(".")[0])
 
         # Load the bird_2024 data
-        filenames = metadata.filename
-        filenames = [data_path + filename for filename in filenames]
+        filenames = [data_path + filename for filename in metadata["filename"]]
 
         bird = np.array([load_audio_train(filename) for filename in filenames])
         xdata[f"bird_{year}"] = bird

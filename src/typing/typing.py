@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast, overload
 
 import numpy as np
 import numpy.typing as npt
@@ -39,9 +40,22 @@ class XData:
     bird_2021: npt.NDArray[Any] | None = None
     bird_kenya: npt.NDArray[Any] | None = None
 
-    def __getitem__(self, indexer: Any) -> XData | pd.DataFrame | npt.NDArray[np.float32]:  # noqa: ANN401 C901
-        """Index the data according to the indexer type."""
-        if isinstance(indexer, dict):
+    @overload
+    def __getitem__(self, indexer: int | Iterable[int] | slice) -> XData: ...
+
+    @overload
+    def __getitem__(self, indexer: Mapping[str, Any]) -> XData: ...
+
+    @overload
+    def __getitem__(self, indexer: str) -> pd.DataFrame | npt.NDArray[Any]: ...
+
+    def __getitem__(self, indexer: int | Iterable[int] | slice | Mapping[str, Any] | str) -> XData | pd.DataFrame | npt.NDArray[Any]:
+        """Index the data according to the indexer type.
+
+        :param indexer: The indexer to use
+        :return: The data requested
+        """
+        if isinstance(indexer, Mapping):
             sliced_fields = {}
             # Slice all the years by the appropriate indices and save to a dict
             for year in indexer:
@@ -61,15 +75,16 @@ class XData:
                 if indexer[:5] == "bird_" and not hasattr(self, indexer):
                     setattr(self, indexer, np.concatenate([self[f"bird_{year}"] for year in years]))
                 if indexer[:5] == "meta_" and not hasattr(self, indexer):
-                    setattr(self, indexer, pd.concat([self[f"meta_{year}"] for year in years]).reset_index(drop=True))
+                    setattr(self, indexer, pd.concat([cast(pd.DataFrame, self[f"meta_{year}"]) for year in years]).reset_index(drop=True))
 
             return getattr(self, indexer)
 
         # If nothing is specified assume we are using 2024 data
-        if self.meta_2024 is not None:
-            sliced_meta_2024 = self.meta_2024.iloc[indexer]
-        if self.bird_2024 is not None:
-            sliced_bird_2024 = self.bird_2024[indexer]
+        if self.bird_2024 is None or self.meta_2024 is None:
+            raise AttributeError("No data available for 2024")
+
+        sliced_meta_2024 = pd.DataFrame(self.meta_2024.iloc[indexer])
+        sliced_bird_2024 = self.bird_2024[indexer]
 
         return XData(
             meta_2024=sliced_meta_2024,
@@ -115,9 +130,18 @@ class YData:
     label_2021: pd.DataFrame | None = None
     label_kenya: pd.DataFrame | None = None
 
-    def __getitem__(self, indexer: Any) -> YData | pd.DataFrame:  # noqa: ANN401 C901
+    @overload
+    def __getitem__(self, indexer: int | Iterable[int] | slice) -> YData: ...
+
+    @overload
+    def __getitem__(self, indexer: Mapping[str, Any]) -> YData: ...
+
+    @overload
+    def __getitem__(self, indexer: str) -> pd.DataFrame: ...
+
+    def __getitem__(self, indexer: int | Iterable[int] | slice | Mapping[str, Any] | str) -> YData | pd.DataFrame:
         """Index the data according to the indexer type."""
-        if isinstance(indexer, dict):
+        if isinstance(indexer, Mapping):
             sliced_fileds = {}
             # Slice all the years by the appropriate indices and save to a dict
             for year in indexer:
@@ -143,10 +167,11 @@ class YData:
             return getattr(self, indexer)
 
         # If indices are not a dict assume that we are using the 2024 data
-        if self.meta_2024 is not None:
-            sliced_meta_2024 = self.meta_2024.iloc[indexer]
-        if self.label_2024 is not None:
-            sliced_label_2024 = self.label_2024.iloc[indexer]
+        if self.label_2024 is None or self.meta_2024 is None:
+            raise AttributeError("No data available for 2024")
+
+        sliced_meta_2024 = pd.DataFrame(self.meta_2024.iloc[indexer])
+        sliced_label_2024 = pd.DataFrame(self.label_2024.iloc[indexer])
 
         return YData(
             meta_2024=sliced_meta_2024,

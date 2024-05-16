@@ -81,7 +81,7 @@ def update_dependencies():
     else:
         os.makedirs(DEPENDENCIES_SAVE_PATH)
 
-    print('Copying the requirements.txt file and excluding -e')
+    print('Copying the kaggle_requirements.txt file and excluding -e')
     with open(SOURCE_CODE_PATH / 'kaggle_requirements.txt', 'r') as f:
         lines = f.readlines()
     with open(DEPENDENCIES_SAVE_PATH / 'kaggle_requirements.txt', 'w') as f:
@@ -108,7 +108,7 @@ def update_dependencies():
     print('Copying the dataset-metadata.json file')
     shutil.copy('config/dependencies.json', DEPENDENCIES_SAVE_PATH / 'dataset-metadata.json')
 
-    print('Excluding --find-files in requirements.txt')
+    print('Excluding --find-files in kaggle_requirements.txt')
     with open(DEPENDENCIES_SAVE_PATH / 'kaggle_requirements.txt', 'r') as f:
         lines = f.readlines()
     with open(DEPENDENCIES_SAVE_PATH / 'kaggle_requirements.txt', 'w') as f:
