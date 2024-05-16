@@ -144,7 +144,7 @@ def setup_inference_data(path: str) -> Any:  # noqa: ANN401
     :return: Inference data
     """
     # Load all files in the path that end with .ogg with glob
-    filenames = glob.glob(path + "/*.ogg")
+    filenames = glob.glob(path + "/*.ogg") + glob.glob(path + "/*.wav")
 
     logger.info(f"Filenames: {filenames[:10]}...")
 

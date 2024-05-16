@@ -45,7 +45,7 @@ class VisualizePreds(VerboseTrainingBlock):
         data_dir: str = pred_args["data_dir"]
         species_dir: str = pred_args["species_dir"]
 
-        file_list = [file.stem for file in Path(data_dir).glob("*.ogg")]
+        file_list = [file.stem for file in Path(data_dir).glob("*.ogg")] + [file.stem for file in Path(data_dir).glob("*.wav")]
         bird_classes = sorted(os.listdir(species_dir))
 
         # Create folders
