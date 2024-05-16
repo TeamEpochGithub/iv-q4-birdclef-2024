@@ -25,9 +25,11 @@ class XData:
 
     meta_2024: pd.DataFrame | None = None
     meta_2024add: pd.DataFrame | None = None
+    meta_2024google: pd.DataFrame | None = None
     meta_2023: pd.DataFrame | None = None
     meta_2022: pd.DataFrame | None = None
     meta_2021: pd.DataFrame | None = None
+    bird_2024google: npt.NDArray[Any] | None = None
     bird_2024add: npt.NDArray[Any] | None = None
     bird_2024: npt.NDArray[Any] | None = None
     bird_2023: npt.NDArray[Any] | None = None

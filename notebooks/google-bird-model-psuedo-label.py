@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 from typing import Any
 
-AUDIO_PATH = Path("data/raw/2024/test_soundscapes")
+AUDIO_PATH = Path("data/raw/2024/unlabeled_soundscapes")
 FILE_PATHS = list(AUDIO_PATH.glob("*.ogg"))
 MODEL_PATH = "https://kaggle.com/models/google/bird-vocalization-classifier/frameworks/TensorFlow2/variations/bird-vocalization-classifier/versions/4"
 PREDICTIONS_OUTPUT_PATH = Path("data/raw/2024/google-bvc-predictions.csv")
@@ -38,6 +38,7 @@ missing_birds
 
 # %%
 
+
 class AudioDataset(Dataset):
     def __len__(self):
         return len(FILE_PATHS)
@@ -48,11 +49,14 @@ class AudioDataset(Dataset):
 dataloader = DataLoader(AudioDataset(), batch_size=1, num_workers=os.cpu_count())
 
 all_predictions: dict[str, npt.NDArray[np.floating[Any]]] = {}
+all_filenames = []
+preds_list = []
 
 with tf.device("/GPU:0"):
     for audio, filename in tqdm(dataloader):
         audio = audio[0]
         filename = filename[0]
+        curr_filenames = []
         file_predictions: list[npt.NDArray[np.floating[Any]]] = []
         for i in range(0, len(audio), WINDOW):
             clip = audio[i:i+WINDOW]
@@ -61,11 +65,22 @@ with tf.device("/GPU:0"):
             result = model.infer_tf(clip[None, :])
             prediction = np.concatenate([result[0].numpy(), -100], axis=None)  # add -100 logit for unpredicted birds
             file_predictions.append(prediction[model_bc_indexes])
+            curr_filenames.append(f"{filename}_{i // SAMPLE_RATE}")
+        #Check length of file_predictions
+        if len(file_predictions) != 48:
+            print(f"File {filename} has {len(file_predictions)} predictions")
+            continue
         all_predictions[filename] = np.stack(file_predictions)
+        preds_list.append(np.stack(file_predictions))
+        all_filenames.extend(curr_filenames)
+
 
 # %%
 from scipy.special import expit
 
-logits = np.reshape(np.stack(list(all_predictions.values())), (-1, len(CLASSES)))
+# Get indices of birds that
+
+logits = np.reshape(np.stack(np.array(preds_list)), (-1, len(CLASSES)))
 submission = pd.DataFrame(expit(logits), columns=CLASSES)
+submission["row_id"] = all_filenames
 submission.to_csv(PREDICTIONS_OUTPUT_PATH, index=False)
