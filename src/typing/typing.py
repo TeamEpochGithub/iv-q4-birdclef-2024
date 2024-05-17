@@ -87,18 +87,12 @@ class XData:
         return "XData"
 
     @property
-    def years(self) -> list[str]:
-        """Return the "years" present in the data.
-
-        :return: The "years" present in the data.
-        """
-        return [year.split("_")[1] for year in self.__dict__ if year[:5] == "bird_" and self[year] is not None]
+    def years(self) -> tuple[str, ...]:
+        """The "years" present in the data."""
+        return tuple(year.split("_")[1] for year in self.__dict__ if year[:5] == "bird_" and self[year] is not None)
 
     def __len__(self) -> int:
-        """Get the total number of sounds in the data across all years.
-
-        :return: The total number of sounds in the data across all years.
-        """
+        """Get the total number of sounds in the data across all years."""
         return sum([len(self[f"bird_{year}"]) for year in self.years])
 
 
@@ -179,16 +173,10 @@ class YData:
         return "YData"
 
     @property
-    def years(self) -> list[str]:
-        """Return the "years" present in the data.
-
-        :return: The "years" present in the data.
-        """
-        return [year.split("_")[1] for year in self.__dict__ if year[:6] == "label_" and self[year] is not None]
+    def years(self) -> tuple[str, ...]:
+        """Return the "years" present in the data."""
+        return tuple(year.split("_")[1] for year in self.__dict__ if year[:6] == "label_" and self[year] is not None)
 
     def __len__(self) -> int:
-        """Get the total number of sounds in the data across all years.
-
-        :return: The total number of sounds in the data across all years.
-        """
+        """Get the total number of sounds in the data across all years."""
         return sum([len(self[f"label_{year}"]) for year in self.years])

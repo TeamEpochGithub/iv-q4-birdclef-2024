@@ -25,8 +25,8 @@ train_sys:
           - _target_: hydra.utils.get_class
             path: torchaudio.transforms.MelSpectrogram
         output_shape:
-        - 224
-        - 224
+        - 256
+        - 256
         scale:
           _target_: src.modules.training.datasets.to_2d.spec_normalize.SpecNormalize
       labeler:

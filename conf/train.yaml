@@ -1,7 +1,7 @@
 defaults:
   - base_train
   - hydra/logging
-  - model: alternate-ensemble[pry46jiv,uubbpt64]
+  - model: convnext-post
   - wandb: train
 
 ###############
