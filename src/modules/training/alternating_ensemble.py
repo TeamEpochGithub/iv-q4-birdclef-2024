@@ -44,7 +44,7 @@ class AlternatingEnsemble(PostEnsemble):
                 model_windows = [
                     sound.reshape((NUM_WINDOWS, WINDOW_SIZE))[i_window] for sound in x[f"bird_{year}"] for i_window in range(i_model, NUM_WINDOWS, len(self.steps))
                 ]
-                model_data[i_model][f"bird_{year}"] = np.array(model_windows)
+                model_data[i_model][f"bird_{year}"] = np.concatenate(model_windows)  # TODO(Jeffrey): Delay the concatenation
 
         predictions: list[npt.NDArray[np.floating[Any]]] = [model.predict(model_data[i], **pred_args) for i, model in enumerate(self.steps)]
         merged_predictions: list[npt.NDArray[np.floating[Any]]] = [
