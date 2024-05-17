@@ -38,7 +38,7 @@ def setup_train_args(
 
     # Train system arguments
     train_sys = {
-        "MainTrainer": main_trainer,
+        "DoubleTrainer": main_trainer,
     }
 
     if save_model_preds:

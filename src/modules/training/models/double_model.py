@@ -7,7 +7,7 @@ class DoubleModel(nn.Module):
 
     def __init__(self, model):
         """Initialize the model"""
-        super.__init__()
+        super().__init__()
         self.model = model
 
     def forward(self, x: torch.Tensor):
@@ -16,4 +16,4 @@ class DoubleModel(nn.Module):
         preds = self.model(x)
 
         # Separate the last pred in the head
-        return preds[:,:-1], preds[:,-1]
+        return preds[:,:-2], preds[:,-2:]

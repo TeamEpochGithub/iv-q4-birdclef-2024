@@ -13,7 +13,7 @@ train_sys:
   _target_: src.modules.training.verbose_training_pipeline.VerboseTrainingPipeline
   steps:
   - _target_: src.modules.training.double_trainer.DoubleTrainer
-    year: 'union_2023_kenya'
+    years: ['2023', 'kenya']
     dataset_args:
       sampler:
         _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
@@ -49,7 +49,7 @@ train_sys:
       model:
         _target_: src.modules.training.models.timm.Timm
         in_channels: 1
-        out_channels: 432
+        out_channels: 266
         model_name: convnext_tiny
         activation: sigmoid
     scheduler:
@@ -63,8 +63,10 @@ train_sys:
       cycle_limit: 1
     criterion:
       _target_: src.modules.training.losses.double_loss.DoubleLoss
-      target_loss: torch.nn.BCELoss
-      call_loss: torch.nn.BCELoss
+      task_loss: 
+        _target_: torch.nn.BCELoss
+      call_loss: 
+        _target_: torch.nn.BCELoss
     optimizer:
       _target_: functools.partial
       _args_:
