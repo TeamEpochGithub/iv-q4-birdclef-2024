@@ -49,34 +49,29 @@ train_sys:
               p: 0.5
         aug_2d:
           _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
-          x_transforms:
-            - _target_: kornia.augmentation.RandomErasing
-              p: 0.25
           xy_transforms:
             - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.CutMix
-              p: 1
-            - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.MixUp
-              p: 0.8
+              p: 0.5
       dataloader_args:
         num_workers: 16
-        prefetch_factor: 2
-        persistent_workers: false
+        prefetch_factor: 1
+        persistent_workers: False
       n_folds: 5 # 0 for train full,
       epochs: 50
       patience: 15
-      batch_size: 256
+      batch_size: 64
       model:
         _target_: src.modules.training.models.timm.Timm #Ensure that activation is sigmoid for non Logits loss functions.
         in_channels: 1
         out_channels: 182
-        model_name: "levit_384"
+        model_name: "convnext_tiny"
         activation: "sigmoid"
       scheduler:
         _target_: functools.partial
         _args_:
           - _target_: hydra.utils.get_class
             path: timm.scheduler.cosine_lr.CosineLRScheduler
-        warmup_t: 5
+        warmup_t: 3
         warmup_lr_init: 1e-5
         t_initial: 50
         cycle_limit: 1
