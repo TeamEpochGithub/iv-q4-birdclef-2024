@@ -209,6 +209,8 @@ class MainTrainer(TorchTrainer, Logger):
                 ),
             )
 
+        # Predict on the loader
+
         if self.device.type == "cuda":
             self.log_to_terminal("Predicting on the test data - Normal")
             with torch.no_grad(), tqdm(loader, unit="batch", disable=False) as tepoch:

@@ -27,12 +27,14 @@ class XData:
 
     meta_2024: pd.DataFrame | None = None
     meta_2024add: pd.DataFrame | None = None
-    meta_2024google: pd.DataFrame | None = None
+    meta_2024gsil: pd.DataFrame | None = None
+    meta_2024gbird: pd.DataFrame | None = None
     meta_2023: pd.DataFrame | None = None
     meta_2022: pd.DataFrame | None = None
     meta_2021: pd.DataFrame | None = None
     meta_kenya: pd.DataFrame | None = None
-    bird_2024google: npt.NDArray[Any] | None = None
+    bird_2024gsil: pd.DataFrame | None = None
+    bird_2024gbird: pd.DataFrame | None = None
     bird_2024add: npt.NDArray[Any] | None = None
     bird_2024: npt.NDArray[Any] | None = None
     bird_2023: npt.NDArray[Any] | None = None
@@ -103,14 +105,16 @@ class YData:
     :param label_2021: Labels of BirdClef2021
     """
 
-    meta_2024google: pd.DataFrame | None = None
+    meta_2024gsil: pd.DataFrame | None = None
+    meta_2024gbird: pd.DataFrame | None = None
     meta_2024add: pd.DataFrame | None = None
     meta_2024: pd.DataFrame | None = None
     meta_2023: pd.DataFrame | None = None
     meta_2022: pd.DataFrame | None = None
     meta_2021: pd.DataFrame | None = None
     meta_kenya: pd.DataFrame | None = None
-    label_2024google: pd.DataFrame | None = None
+    label_2024gsil: pd.DataFrame | None = None
+    label_2024gbird: pd.DataFrame | None = None
     label_2024add: pd.DataFrame | None = None
     label_2024: pd.DataFrame | None = None
     label_2023: pd.DataFrame | None = None
