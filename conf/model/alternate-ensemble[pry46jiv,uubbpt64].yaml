@@ -66,29 +66,12 @@ train_sys:
       patience: 15
       batch_size: 64
       model:
-        _target_: src.modules.training.models.alternating_ensemble_model.AlternatingEnsembleModel
+        _target_: src.modules.training.models.ensemble_model.AlternatingEnsembleModel
         models:
           - _target_: src.modules.training.models.pretrained_model.PretrainedModel
-            model:
-              _target_: src.modules.training.models.timm.Timm
-              in_channels: 1
-              out_channels: 182
-              model_name: convnext_tiny
-              activation: sigmoid
-            state_dict_path: "tm/0c28f51639bd8aa18c5ca86c5d3ef453_5_f0.pt"
+            model_path: "tm/5a83d56bd7f73db48bec6af4e7a16c2b_5_f0.pt"  # wandb.ai/team-epoch-iv/detect-bird/runs/pry46jiv
           - _target_: src.modules.training.models.pretrained_model.PretrainedModel
-            model:
-              _target_: src.modules.training.models.timm.Timm
-              in_channels: 1
-              out_channels: 182
-              model_name: efficientnet_b0
-              activation: sigmoid
-            state_dict_path: "tm/0c28f51639bd8aa18c5ca86c5d3ef453_5_f1.pt"
-#        _target_: src.modules.training.models.timm.Timm #Ensure that activation is sigmoid for non Logits loss functions.
-#        in_channels: 1
-#        out_channels: 182
-#        model_name: "eca_nfnet_l0"
-#        activation: "sigmoid"
+            model_path: "tm/e17aaf9b8a605b9f199376d7827cf639_5_f0.pt"  # wandb.ai/team-epoch-iv/detect-bird/runs/uubbpt64
       scheduler:
         _target_: functools.partial
         _args_:
@@ -107,4 +90,5 @@ train_sys:
             path: torch.optim.AdamW
         lr: 1e-4
     - _target_: src.modules.training.postprocessing.smooth_file.SmoothFile
-      smooth_factor: 0.1
+      smooth_factor: 0.75
+    - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds

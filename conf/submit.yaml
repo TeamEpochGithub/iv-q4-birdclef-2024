@@ -1,7 +1,7 @@
 defaults:
   - base_submit
   - hydra/logging
-  - ensemble: alternating # Add models or ensembles
+  - model: alternate-ensemble[pry46jiv,uubbpt64]
 
 # Use this when uploading to Kaggle
 

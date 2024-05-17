@@ -1,18 +1,20 @@
-"""Ensemble that alternates between models for inference."""
+"""Ensembles that act like models.
 
+Yes, we use ensembles as models now because our codebase hates any other ensembling techniques than voting.
+"""
+from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from typing import Annotated, Final
 
 import torch
 from annotated_types import MinLen
+from typing_extensions import override
 
-N_CLASSES: Final[int] = 182
+N_CLASSES: Final[int] = 182  # TODO(Jeffrey): Don't hardcode the number of bird species.
 
 
-class AlternatingEnsembleModel(torch.nn.Module):
-    """Ensemble that alternates between models for inference.
-
-    Yes, it's an ensemble as a model because our codebase hates any other ensembling techniques than voting.
+class EnsembleModel(torch.nn.Module, ABC):
+    """Ensemble that acts like model.
 
     :param models: The models to alternate between.
     """
@@ -22,11 +24,25 @@ class AlternatingEnsembleModel(torch.nn.Module):
     def __init__(self, models: Iterable[torch.nn.Module] | None) -> None:
         """Initialize the ensemble.
 
-        :param models: The models to alternate between.
+        :param models: The models to use.
         """
         super().__init__()
         self.models = torch.nn.ModuleList(models)
 
+    @abstractmethod
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass of the ensemble.
+
+        :param x: The data of a 4-minute soundscape of shape (48, C, H, W)
+        :return: The predictions of shape (48, 182)
+        """
+        raise NotImplementedError("EnsembleModel is an abstract class.")
+
+
+class AlternatingEnsembleModel(EnsembleModel):
+    """Ensemble that alternates between models for inference."""
+
+    @override
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass of the ensemble.
 
@@ -39,10 +55,10 @@ class AlternatingEnsembleModel(torch.nn.Module):
         if self.training:
             return torch.stack([model(x) for model in self.models]).mean(dim=0)
 
-        predictions: torch.Tensor = torch.empty((len(x), N_CLASSES), device=x.device, dtype=x.dtype)
+        predictions: torch.Tensor = torch.empty((x.shape[0], N_CLASSES), device=x.device, dtype=x.dtype)
 
         for i in range(len(self.models)):
-            indices = range(i, len(x), len(self.models))
+            indices = range(i, x.shape[0], len(self.models))
             predictions[indices] = self.models[i](x[indices])
 
         return predictions

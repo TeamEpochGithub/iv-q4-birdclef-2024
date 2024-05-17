@@ -1,7 +1,7 @@
 defaults:
   - base_train
   - hydra/logging
-  - model: convnext-post-10-epochs # Add models or ensembles
+  - model: alternate-ensemble[pry46jiv,uubbpt64]
   - wandb: train
 
 ###############

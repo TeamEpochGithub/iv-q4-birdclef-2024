@@ -10,24 +10,21 @@ class PretrainedModel(torch.nn.Module):
 
     This is a somewhat clumsy workaround to use a pretrained model inside a different config.
 
-    :param model: The pretrained model to use.
-    :param state_dict_file: The file path to the state dict of the model.
+    :param model_path: The path to the pretrained model to load.
     """
+
     model: torch.nn.Module
-    state_dict_path: Path
 
-
-    def __init__(self, model: torch.nn.Module, state_dict_path: str | PathLike[str]) -> None:
+    def __init__(self, model_path: str | PathLike[str]) -> None:
         """Initialize the model.
 
-        :param model: The pretrained model to use.
-        :param state_dict_path: The file path to the state dict of the model.
+        :param model_path: The path to the pretrained model to load.
         """
         super().__init__()
-        self.model = model
-        self.state_dict_path = Path(state_dict_path)
-        self.model.load_state_dict(torch.load(self.state_dict_path))
+        self.model = torch.load(Path(model_path), map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
+        if isinstance(self.model, torch.nn.DataParallel | torch.nn.parallel.DistributedDataParallel):
+            self.model = self.model.module
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass of the model.
@@ -36,5 +33,6 @@ class PretrainedModel(torch.nn.Module):
         :return: The predictions of shape (48, 182)
         """
         if self.training:
-            raise RuntimeError("A pretrained model should not be in training mode during inference.")
+            raise NotImplementedError("Fine-tuning a pretrained model is not supported.")
+
         return self.model(x)
