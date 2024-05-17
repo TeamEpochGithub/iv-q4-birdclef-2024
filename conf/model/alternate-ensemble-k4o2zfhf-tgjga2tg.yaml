@@ -61,9 +61,9 @@ train_sys:
         _target_: src.modules.training.models.ensemble_model.AlternatingEnsembleModel
         models:
           - _target_: src.modules.training.models.pretrained_model.PretrainedModel
-            model_path: "tm/5a83d56bd7f73db48bec6af4e7a16c2b_5_f0.pt"  # wandb.ai/team-epoch-iv/detect-bird/runs/uubbpt64
+            model_path: "tm/a8d11385aac1b94481fe9f02a49b5123_5_f0.pt"  # wandb.ai/team-epoch-iv/detect-bird/runs/k4o2zfhf
           - _target_: src.modules.training.models.pretrained_model.PretrainedModel
-            model_path: "tm/e17aaf9b8a605b9f199376d7827cf639_5_f0.pt"  # wandb.ai/team-epoch-iv/detect-bird/runs/pry46jiv
+            model_path: "tm/e2864152f48e322c408bcca9cc4ec30f_0.pt"  # wandb.ai/team-epoch-iv/detect-bird/runs/tgjga2tg
       scheduler:
         _target_: functools.partial
         _args_:
@@ -82,6 +82,7 @@ train_sys:
             path: torch.optim.AdamW
         lr: 1e-4
     - _target_: src.modules.training.postprocessing.post_ensemble.AlternatingEnsembleModelPredictionsReweight
+      n_models: 2
     - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
     - _target_: src.modules.training.postprocessing.smooth_file.SmoothFile
       smooth_factor: 0.75

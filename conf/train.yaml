@@ -1,7 +1,7 @@
 defaults:
   - base_train
   - hydra/logging
-  - model: convnext-post
+  - model: eca_l0
   - wandb: train
 
 ###############
