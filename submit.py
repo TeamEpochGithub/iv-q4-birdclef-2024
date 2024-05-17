@@ -29,7 +29,10 @@ cs.store(name="base_submit", node=SubmitConfig)
 @hydra.main(version_base=None, config_path="conf", config_name="submit")
 # TODO(Epoch): Use SubmitConfig instead of DictConfig
 def run_submit(cfg: DictConfig) -> None:
-    """Run the main script for submitting the predictions."""
+    """Run the main script for submitting the predictions.
+
+    :param cfg: The config object. Created with Hydra.
+    """
     print_section_separator("Q4 - BirdCLEF - Submit")
 
     # Set up logging

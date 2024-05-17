@@ -1,5 +1,6 @@
 """Module for example training block."""
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -22,7 +23,13 @@ from src.typing.typing import XData, YData
 
 @dataclass
 class MainTrainer(TorchTrainer, Logger):
-    """Main training block."""
+    """Main training block.
+
+    :param dataset_args: The arguments for the dataset.
+    :param year: The year to use for the dataset.
+    :param dataloader_args: The arguments for the dataloader.
+    :param weights_path: The path to the weights for the sampler.
+    """
 
     dataset_args: dict[str, Any] = field(default_factory=dict)
     year: str = "2024"
@@ -38,7 +45,13 @@ class MainTrainer(TorchTrainer, Logger):
             model_artifact.add_file(f"{self._model_directory}/{self.get_hash()}.pt")
             wandb.log_artifact(model_artifact)
 
-    def create_datasets(self, x: XData, y: YData, train_indices: list[int], test_indices: list[int]) -> tuple[Dataset[tuple[Tensor, ...]], Dataset[tuple[Tensor, ...]]]:
+    def create_datasets(
+        self,
+        x: XData,
+        y: YData,
+        train_indices: Sequence[int],
+        test_indices: Sequence[int],
+    ) -> tuple[Dataset[tuple[Tensor, ...]], Dataset[tuple[Tensor, ...]]]:
         """Create the datasets for training and validation.
 
         :param x: The input data.

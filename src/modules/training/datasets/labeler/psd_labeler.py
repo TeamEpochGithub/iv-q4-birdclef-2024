@@ -7,7 +7,10 @@ import torch
 
 @dataclass
 class PSDLabeler:
-    """Filter audio segments with too little power."""
+    """Filter audio segments with too little power.
+
+    :param threshold: The threshold to use.
+    """
 
     threshold = 1
 

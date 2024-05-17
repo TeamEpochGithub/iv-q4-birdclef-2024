@@ -14,8 +14,9 @@ from src.utils.logger import logger
 def setup_pipeline(cfg: DictConfig, *, is_train: bool = True) -> ModelPipeline | EnsemblePipeline:
     """Instantiate the pipeline.
 
-    :param pipeline_cfg: The model pipeline config. Root node should be a ModelPipeline
+    :param cfg: The model pipeline config. Root node should be a ModelPipeline
     :param is_train: Whether the pipeline is used for training
+    :return: The instantiated pipeline
     """
     logger.info("Instantiating the pipeline")
 
@@ -54,6 +55,7 @@ def update_ensemble_cfg_dict(
     :param ensemble_cfg_dict: The original ensemble_cfg_dict
     :param test_size: Test size to add to the models
     :param is_train: Boolean whether models are being trained
+    :return: The updated ensemble_cfg_dict
     """
     if isinstance(ensemble_cfg_dict, dict):
         ensemble_cfg_dict["steps"] = list(ensemble_cfg_dict["steps"].values())
@@ -62,7 +64,6 @@ def update_ensemble_cfg_dict(
                 update_model_cfg_test_size(model, test_size)
 
         return ensemble_cfg_dict
-
     return {}
 
 
@@ -74,7 +75,6 @@ def update_model_cfg_test_size(
 
     :param cfg: The model config.
     :param test_size: The test size.
-
     :return: The updated model config.
     """
     if cfg is None:

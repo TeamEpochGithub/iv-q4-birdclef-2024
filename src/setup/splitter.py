@@ -4,7 +4,6 @@ from collections.abc import Generator
 from dataclasses import dataclass, field
 from typing import Any
 
-import sklearn
 import sklearn.model_selection
 
 from src.typing.typing import YData
@@ -12,7 +11,14 @@ from src.typing.typing import YData
 
 @dataclass
 class Splitter:
-    """Wrapper class fo sklearn splitters that returns dicts."""
+    """Wrapper class fo sklearn splitters that returns dicts.
+
+    :param splitter: The sklearn splitter to use.
+    :param n_splits: The number of splits to use.
+    :param shuffle: Whether to shuffle the data.
+    :param random_state: The random state to use.
+    :param years: The years to split.
+    """
 
     splitter: Any = sklearn.model_selection.StratifiedKFold
     n_splits: int = 5

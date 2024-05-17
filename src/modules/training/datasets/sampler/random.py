@@ -10,7 +10,10 @@ from src.modules.training.datasets.sampler.sampler import Sampler
 
 @dataclass
 class Random(Sampler):
-    """Select a random fragment of specified length."""
+    """Select a random fragment of specified length.
+
+    :param length: The desired length.
+    """
 
     length: int
 

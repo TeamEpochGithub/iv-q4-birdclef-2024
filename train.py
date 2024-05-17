@@ -31,7 +31,10 @@ cs.store(name="base_train", node=TrainConfig)
 
 @hydra.main(version_base=None, config_path="conf", config_name="train")
 def run_train(cfg: DictConfig) -> None:
-    """Train a model pipeline with a train-test split. Entry point for Hydra which loads the config file."""
+    """Train a model pipeline with a train-test split. Entry point for Hydra which loads the config file.
+
+    :param cfg: The config object. Created with Hydra.
+    """
     # Run the train config with an optional lock
     optional_lock = Lock if not cfg.allow_multiple_instances else nullcontext
     with optional_lock():
@@ -39,7 +42,10 @@ def run_train(cfg: DictConfig) -> None:
 
 
 def run_train_cfg(cfg: DictConfig) -> None:
-    """Train a model pipeline with a train-test split."""
+    """Train a model pipeline with a train-test split.
+
+    :param cfg: The config object. Created with Hydra.
+    """
     print_section_separator("Q4 - BirdCLEF - Training")
 
     import coloredlogs

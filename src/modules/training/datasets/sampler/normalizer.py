@@ -11,7 +11,10 @@ from src.modules.training.datasets.sampler.sampler import Sampler
 
 @dataclass
 class Normalizer:
-    """Standardize data before applying a sampler."""
+    """Standardize data before applying a sampler.
+
+    :param sampler: The sampler to use.
+    """
 
     sampler: Sampler
 

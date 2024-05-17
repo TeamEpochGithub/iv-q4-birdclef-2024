@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, cast, overload
+from typing import Any, TypeAlias, cast, overload
 
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+
+PandasIlocIndexer: TypeAlias = int | slice | Sequence[int] | Sequence[bool]
 
 
 @dataclass
@@ -41,7 +43,7 @@ class XData:
     bird_kenya: npt.NDArray[Any] | None = None
 
     @overload
-    def __getitem__(self, indexer: int | Iterable[int] | slice) -> XData: ...
+    def __getitem__(self, indexer: PandasIlocIndexer) -> XData: ...
 
     @overload
     def __getitem__(self, indexer: Mapping[str, Any]) -> XData: ...
@@ -49,7 +51,7 @@ class XData:
     @overload
     def __getitem__(self, indexer: str) -> pd.DataFrame | npt.NDArray[Any]: ...
 
-    def __getitem__(self, indexer: int | Iterable[int] | slice | Mapping[str, Any] | str) -> XData | pd.DataFrame | npt.NDArray[Any]:
+    def __getitem__(self, indexer: PandasIlocIndexer | Mapping[str, Any] | str) -> XData | pd.DataFrame | npt.NDArray[Any]:
         """Index the data according to the indexer type.
 
         :param indexer: The indexer to use
@@ -83,8 +85,8 @@ class XData:
         if self.bird_2024 is None or self.meta_2024 is None:
             raise AttributeError("No data available for 2024")
 
-        sliced_meta_2024 = pd.DataFrame(self.meta_2024.iloc[indexer])
-        sliced_bird_2024 = self.bird_2024[indexer]
+        sliced_meta_2024 = pd.DataFrame(self.meta_2024.iloc[indexer])  # type: ignore[index]
+        sliced_bird_2024 = self.bird_2024[indexer]  # type: ignore[index]
 
         return XData(
             meta_2024=sliced_meta_2024,
@@ -131,7 +133,7 @@ class YData:
     label_kenya: pd.DataFrame | None = None
 
     @overload
-    def __getitem__(self, indexer: int | Iterable[int] | slice) -> YData: ...
+    def __getitem__(self, indexer: PandasIlocIndexer) -> YData: ...
 
     @overload
     def __getitem__(self, indexer: Mapping[str, Any]) -> YData: ...
@@ -139,7 +141,7 @@ class YData:
     @overload
     def __getitem__(self, indexer: str) -> pd.DataFrame: ...
 
-    def __getitem__(self, indexer: int | Iterable[int] | slice | Mapping[str, Any] | str) -> YData | pd.DataFrame:
+    def __getitem__(self, indexer: PandasIlocIndexer | Mapping[str, Any] | str) -> YData | pd.DataFrame:
         """Index the data according to the indexer type."""
         if isinstance(indexer, Mapping):
             sliced_fileds = {}
@@ -170,8 +172,8 @@ class YData:
         if self.label_2024 is None or self.meta_2024 is None:
             raise AttributeError("No data available for 2024")
 
-        sliced_meta_2024 = pd.DataFrame(self.meta_2024.iloc[indexer])
-        sliced_label_2024 = pd.DataFrame(self.label_2024.iloc[indexer])
+        sliced_meta_2024 = pd.DataFrame(self.meta_2024.iloc[indexer])  # type: ignore[index]
+        sliced_label_2024 = pd.DataFrame(self.label_2024.iloc[indexer])  # type: ignore[index]
 
         return YData(
             meta_2024=sliced_meta_2024,

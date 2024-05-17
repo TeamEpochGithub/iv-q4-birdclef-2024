@@ -1,18 +1,13 @@
 """Lock that makes sure only one instance of the script is running at a time."""
 
 import os
-import sys
 import time
 from types import TracebackType
+from typing import Literal
+
+from typing_extensions import Self
 
 from src.utils.logger import logger
-
-if sys.version_info < (3, 11):  # Self was added in Python 3.11
-    from typing import Literal
-
-    from typing_extensions import Self
-else:
-    from typing import Literal, Self
 
 
 class Lock:

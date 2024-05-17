@@ -64,3 +64,14 @@ dev-dependencies = [
 name = "pytorch"
 url = "https://download.pytorch.org/whl/torch_stable.html"
 type = "find-links"
+
+[tool.pydoclint]
+style = "sphinx"
+arg-type-hints-in-docstring = false
+arg-type-hints-in-signature = true
+skip-checking-short-docstrings = false
+check-return-types = false
+show-filenames-in-every-violation-message = true
+ignore = [
+    "DOC103",  # Docstring arguments are different from function arguments. Too often a false positive.
+]

@@ -59,8 +59,8 @@ class ROCAUC(Scorer):
         for year in years:
             logger.info(f"Calculating ROC AUC for year {year}")
 
-            metadata: pd.DataFrame | None = y_true[f"meta_{year}"].iloc[test_indices[str(year)]]  # type: ignore[union-attr]
-            y_true_year: pd.DataFrame | None = y_true[f"label_{year}"].iloc[test_indices[str(year)]]  # type: ignore[union-attr]
+            metadata: pd.DataFrame | None = y_true[f"meta_{year}"].iloc[test_indices[str(year)]]  # type: ignore[call-overload]
+            y_true_year: pd.DataFrame | None = y_true[f"label_{year}"].iloc[test_indices[str(year)]]  # type: ignore[call-overload]
             # Check if metadata is not None
             if metadata is None or y_true_year is None:
                 raise ValueError("Metadata is required for this scorer.")

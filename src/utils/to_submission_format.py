@@ -10,7 +10,7 @@ import pandas as pd
 from src.utils.logger import logger
 
 
-def to_submission_format(predictions: npt.NDArray[np.float32], test_path: str, species_path: str) -> pd.DataFrame:
+def to_submission_format(predictions: npt.NDArray[np.float32], test_path: str | os.PathLike[str], species_path: str | os.PathLike[str]) -> pd.DataFrame:
     """Convert the predictions to the submission format.
 
     :param predictions: The predictions of the model.

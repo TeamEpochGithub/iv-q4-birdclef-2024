@@ -36,7 +36,10 @@ cs.store(name="base_cv", node=CVConfig)
 
 @hydra.main(version_base=None, config_path="conf", config_name="cv")
 def run_cv(cfg: DictConfig) -> None:  # TODO(Jeffrey): Use CVConfig instead of DictConfig
-    """Do cv on a model pipeline with K fold split. Entry point for Hydra which loads the config file."""
+    """Do cv on a model pipeline with K fold split. Entry point for Hydra which loads the config file.
+
+    :param cfg: The config object. Created with Hydra.
+    """
     # Run the cv config with an optional lock
     optional_lock = Lock if not cfg.allow_multiple_instances else nullcontext
     with optional_lock():
@@ -44,7 +47,10 @@ def run_cv(cfg: DictConfig) -> None:  # TODO(Jeffrey): Use CVConfig instead of D
 
 
 def run_cv_cfg(cfg: DictConfig) -> None:
-    """Do cv on a model pipeline with K fold split."""
+    """Do cv on a model pipeline with K fold split.
+
+    :param cfg: The config object. Created with Hydra.
+    """
     print_section_separator("Q4 - BirdCLEF - CV")
 
     import coloredlogs

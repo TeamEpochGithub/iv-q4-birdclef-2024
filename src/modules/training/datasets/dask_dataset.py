@@ -2,7 +2,7 @@
 
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, cast
 
 import dask
 import numpy as np
@@ -15,47 +15,66 @@ from src.typing.typing import XData, YData
 
 
 @dataclass
-class DaskDataset(Dataset):  # type: ignore[type-arg]
-    """Dask dataset to convert the data to spectrograms."""
+class DaskDataset(Dataset[tuple[torch.Tensor, torch.Tensor]]):
+    """Dask dataset to convert the data to spectrograms.
+
+    :param labeler: The function to label the data.
+    :param sampler: The function to sample the data.
+    :param process_delayed: The delayed transformations to apply to the data.
+    :param X: The X data.
+    :param y: The y data.
+    :param year: The "year" to use.
+    :param to_2d: The function to convert the data to 2D.
+    :param filter_: The function to filter the data.
+    :param aug_1d: The 1D augmentations to apply.
+    :param aug_2d: The 2D augmentations to apply.
+    """
 
     labeler: Callable[[torch.Tensor], torch.Tensor]
     sampler: Callable[[npt.NDArray[Any]], npt.NDArray[Any]]
 
-    process_delayed: Iterable[Callable[[npt.NDArray[Any]], npt.NDArray[Any]]] | None = field(default_factory=list)
+    process_delayed: Iterable[Callable[[npt.NDArray[Any]], npt.NDArray[Any]]] = field(default_factory=list)
 
     X: XData | None = None
     y: YData | None = None
     year: str = "2024"
     to_2d: Callable[[torch.Tensor], torch.Tensor] | None = None
-    filter_: Callable[[XData | None, YData | None, str], tuple[XData, YData]] | None = None
-    aug_1d: Any = None
-    aug_2d: Any = None
+    filter_: Callable[[XData | None, YData | None, str], tuple[npt.NDArray[Any], pd.DataFrame]] | None = None
+    aug_1d: Callable[[torch.Tensor, torch.Tensor | None], tuple[torch.Tensor, torch.Tensor | None]] | None = None
+    aug_2d: Callable[[torch.Tensor, torch.Tensor | None], tuple[torch.Tensor, torch.Tensor | None]] | None = None
 
     def __post_init__(self) -> None:
         """Filter the data if filter_ is specified."""
         # ie. keep grade >= 4,
         if self.filter_ is not None and self.X is not None and self.y is not None:
             filtered_x, filtered_y = self.filter_(self.X, self.y, self.year)
-            self.y[f"label_{self.year}"] = filtered_y  # type: ignore[index]
-            self.X[f"bird_{self.year}"] = filtered_x  # type: ignore[index]
+            self.y[f"label_{self.year}"] = filtered_y
+            self.X[f"bird_{self.year}"] = filtered_x
 
     def __len__(self) -> int:
         """Get the length of the dataset."""
-        return len(self.X[f"bird_{self.year}"])  # type: ignore[index, arg-type]
+        return 0 if self.X is None else len(self.X[f"bird_{self.year}"])
 
     def get_y(self) -> torch.Tensor:
-        """Get the labels."""
+        """Get the labels.
+
+        :return: The labels.
+        """
         return torch.from_numpy(self.y[f"label_{self.year}"].to_numpy())  # type: ignore[union-attr, attr-defined, index]
 
-    def __getitems__(self, indices: list[int]) -> tuple[Any, Any]:
-        """Get multiple items from the dataset and apply augmentations if necessary."""
+    def __getitems__(self, indices: Iterable[int]) -> tuple[torch.Tensor, torch.Tensor | None]:
+        """Get multiple items from the dataset and apply augmentations if necessary.
+
+        :param indices: The indices to get.
+        :return: The X and y data.
+        """
         # Get a window from each sample
 
         if self.X is not None:
-            x_window = [self.sampler(self.X[f"bird_{self.year}"][i]) for i in indices]  # type: ignore[arg-type]
+            x_window = [self.sampler(cast(npt.NDArray[Any], self.X[f"bird_{self.year}"])[i]) for i in indices]
 
             # Apply any delayed transformations
-            for step in self.process_delayed:  # type: ignore[union-attr]
+            for step in self.process_delayed:
                 x_window = [step(x) for x in x_window]
 
         x_batch = dask.compute(*x_window)
@@ -70,9 +89,8 @@ class DaskDataset(Dataset):  # type: ignore[type-arg]
         y_tensor = None
 
         if self.y is not None and isinstance(self.y[f"label_{self.year}"], pd.DataFrame):
-            y_batch = self.y[f"label_{self.year}"].iloc[indices]  # type: ignore[union-attr, attr-defined]
-            y_batch = y_batch.to_numpy()
-            y_tensor = torch.from_numpy(y_batch)
+            y_batch = self.y[f"label_{self.year}"].iloc[indices]  # type: ignore[call-overload]
+            y_tensor = torch.from_numpy(y_batch.to_numpy())
 
         if self.aug_1d is not None:
             x_tensor, y_tensor = self.aug_1d(x_tensor.unsqueeze(1), y_tensor)

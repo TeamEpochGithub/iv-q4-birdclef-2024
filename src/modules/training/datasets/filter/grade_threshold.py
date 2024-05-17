@@ -11,12 +11,21 @@ from src.typing.typing import XData, YData
 
 @dataclass
 class GradeThreshold:
-    """Keep samples with grade >= specified score."""
+    """Keep samples with grade >= specified score.
+
+    :param threshold: The threshold to use.
+    """
 
     threshold: float = 3.5
 
     def __call__(self, xdata: XData, ydata: YData, year: str) -> tuple[npt.NDArray[Any], pd.DataFrame]:
-        """Return the filtered/subsampled data."""
+        """Return the filtered/subsampled data.
+
+        :param xdata: The X data.
+        :param ydata: The Y data.
+        :param year: The "year" to use.
+        :return: The filtered data.
+        """
         # Read the metadata for the appropriate year
         metadata = ydata[f"meta_{year}"]
         indices = pd.Series()
