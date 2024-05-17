@@ -81,6 +81,7 @@ train_sys:
           - _target_: hydra.utils.get_class
             path: torch.optim.AdamW
         lr: 1e-4
+    - _target_: src.modules.training.postprocessing.post_ensemble.AlternatingEnsembleModelPredictionsReweight
     - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
     - _target_: src.modules.training.postprocessing.smooth_file.SmoothFile
       smooth_factor: 0.75
