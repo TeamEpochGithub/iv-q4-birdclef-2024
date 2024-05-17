@@ -115,7 +115,7 @@ class EnergyCutmix(torch.nn.Module):
             if torch.rand(1) < self.p:
                 donor = x[shuffled_indices[i]]
                 receiver = x[i]
-                donor_start, donor_end, receiver_start, receiver_end = self.find_window(donor, receiver, (cutoff_rates[i] * x.shape[-1]).int().item(), stride=100)
+                donor_start, donor_end, receiver_start, receiver_end = self.find_window(donor, receiver, (cutoff_rates[i] * x.shape[-1]).int().item(), stride=300)
                 augmented_x[i,:,receiver_start:receiver_end] = donor[:,donor_start:donor_end]
                 augmented_y[i] = torch.clip(y[i] + y[shuffled_indices[i]], 0, 1)
         return augmented_x, augmented_y
