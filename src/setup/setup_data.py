@@ -33,7 +33,7 @@ def setup_train_x_data(raw_path: str, years: list[int]) -> XData:
         data_path = raw_path + str(year) + "/" + "train_audio/"
         metadata = pd.read_csv(metadata_path)
         metadata["samplename"] = metadata.filename.map(lambda x: x.split("/")[0] + "-" + x.split("/")[-1].split(".")[0])
-        metadata = metadata[metadata['secondary_labels'] == '[]'].reset_index(drop=True)
+        #metadata = metadata[metadata['secondary_labels'] == '[]'].reset_index(drop=True)
 
         # Load the bird_2024 data
         filenames = metadata.filename
@@ -80,7 +80,7 @@ def setup_train_y_data(raw_path: str, years: list[str]) -> YData:
         metadata_path = raw_path + str(year) + "/" + "train_metadata.csv"
         metadata = pd.read_csv(metadata_path)
         metadata["samplename"] = metadata.filename.map(lambda x: x.split("/")[0] + "-" + x.split("/")[-1].split(".")[0])
-        metadata = metadata[metadata['secondary_labels'] == '[]'].reset_index(drop=True)
+        #metadata = metadata[metadata['secondary_labels'] == '[]'].reset_index(drop=True)
 
         ydata[f"meta_{year}"] = metadata
 

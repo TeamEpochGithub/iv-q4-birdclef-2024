@@ -1,7 +1,7 @@
 defaults:
   - base_train
   - hydra/logging
-  - model: aug # Add models or ensembles
+  - model: energy_cutmix # Add models or ensembles
   - wandb: train
 
 ###############
