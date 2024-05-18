@@ -1,7 +1,4 @@
 exclude: ^(external/|venv/|.venv/|tests/|notebooks/|submission/|data/)
-ci:
-  skip:
-    - mypy  # TODO(Jeffrey): Fix MyPy on CI
 repos:
   - repo: local  # Remove this when a new version of pre-commit-hooks (>4.6.0) is released
     hooks:
@@ -19,7 +16,7 @@ repos:
       # - id: check-illegal-windows-names  # Uncomment this when a new version of pre-commit-hooks (>4.6.0) is released
       - id: check-json
       - id: pretty-format-json
-        args: [ --autofix, --no-sort-keys ]
+        args: [ "--autofix", "--no-sort-keys" ]
       - id: check-merge-conflict
       - id: check-shebang-scripts-are-executable
       - id: check-symlinks
@@ -32,10 +29,10 @@ repos:
       - id: end-of-file-fixer
       - id: fix-byte-order-marker
       - id: name-tests-test
-        args: [ --pytest-test-first ]
+        args: [ "--pytest-test-first" ]
       - id: trailing-whitespace
   - repo: https://github.com/abravalheri/validate-pyproject
-    rev: v0.16
+    rev: v0.17
     hooks:
       - id: validate-pyproject
   - repo: https://github.com/pre-commit/pygrep-hooks
@@ -51,11 +48,11 @@ repos:
     hooks:
       - id: pymarkdown
         args:
-          - -d
-          - md013, MD041  # Line length, First line in file should be a top level heading
-          - scan
+          - "-d"
+          - "md013, MD041"  # Line length, First line in file should be a top level heading
+          - "scan"
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.3
+    rev: v0.4.4
     hooks:
       - id: ruff-format
       - id: ruff
@@ -71,11 +68,11 @@ repos:
       - id: mypy
         additional_dependencies:  # TODO(Jeffrey): Auto-update this list based on pyproject.toml or requirements-dev.lock
           - numpy==1.26.3
-          - pandas-stubs
+          - pandas-stubs>=2.2.2.240514
           - scikit-learn==1.4.2
-          - tqdm==4.64.1
+          - types-tqdm>=4.66.0.20240417
           - epochalyst==0.3.2
-          - seaborn==0.13.2
+          - types-seaborn>=0.13.2.20240417
           - matplotlib==3.8.4
           - plotly==5.22.0
           - torch==2.2.2
@@ -93,4 +90,7 @@ repos:
           - onnxruntime==1.17.3
           - kornia==0.7.2
           - timm==0.9.16
-        args: [ --disallow-any-generics, --disallow-untyped-defs, --disable-error-code=import-untyped]
+        args:
+          - "--fast-module-lookup"
+          - "--disallow-any-generics"
+          - "--disable-error-code=import-untyped"

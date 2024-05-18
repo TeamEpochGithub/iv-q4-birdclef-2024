@@ -89,7 +89,7 @@ class XData:
             raise AttributeError("No data available for 2024")
 
         sliced_meta_2024 = pd.DataFrame(self.meta_2024.iloc[indexer])  # type: ignore[index]
-        sliced_bird_2024 = self.bird_2024[indexer]  # type: ignore[index]
+        sliced_bird_2024 = self.bird_2024[indexer]
 
         return XData(
             meta_2024=sliced_meta_2024,
@@ -114,6 +114,25 @@ class XData:
         :return: The string representation
         """
         return "XData"
+
+    @property
+    def years(self) -> tuple[str, ...]:
+        """The "years" present in the data."""
+        return tuple(year.split("_")[1] for year in self.__dict__ if year[:5] == "bird_" and self[year] is not None)
+
+    def __len__(self) -> int:
+        """Get the total number of sounds in the data across all years.
+
+        :return: The total number of sounds
+        """
+        return sum([len(self[f"bird_{year}"]) for year in self.years])
+
+    def __bool__(self) -> bool:
+        """Check if there is any data present.
+
+        :return: Whether there is any data present
+        """
+        return any(self[f"bird_{year}"] is not None for year in self.years)
 
 
 @dataclass
@@ -218,3 +237,22 @@ class YData:
         :return: The string representation
         """
         return "YData"
+
+    @property
+    def years(self) -> tuple[str, ...]:
+        """Return the "years" present in the data."""
+        return tuple(year.split("_")[1] for year in self.__dict__ if year[:6] == "label_" and self[year] is not None)
+
+    def __len__(self) -> int:
+        """Get the total number of sounds in the data across all years.
+
+        :return: The total number of sounds
+        """
+        return sum([len(self[f"label_{year}"]) for year in self.years])
+
+    def __bool__(self) -> bool:
+        """Check if there is any data present.
+
+        :return: Whether there is any data present
+        """
+        return any(self[f"label_{year}"] is not None for year in self.years)

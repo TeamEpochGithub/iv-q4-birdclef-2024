@@ -38,7 +38,7 @@ def setup_wandb(
 
     config = OmegaConf.to_container(cfg, resolve=True)
     run = wandb.init(
-        config=replace_list_with_dict(config),  # type: ignore[arg-type]
+        config=replace_list_with_dict(config),
         project=project_name,
         entity="team-epoch-iv",
         name=name,

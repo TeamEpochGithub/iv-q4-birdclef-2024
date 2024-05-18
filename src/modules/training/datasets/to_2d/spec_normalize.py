@@ -1,10 +1,9 @@
 """Normalizer for Spectrograms."""
 
 import torch
-from torch import nn
 
 
-class SpecNormalize(nn.Module):
+class SpecNormalize(torch.nn.Module):
     """Normalization module for spectrograms.
 
     :param eps: The epsilon value to add to the denominator.

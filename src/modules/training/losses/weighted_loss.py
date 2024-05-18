@@ -5,12 +5,11 @@ from os import PathLike
 
 import numpy as np
 import torch
-from torch import nn
 
 from src.utils.logger import logger
 
 
-class WeightedLoss(nn.Module, ABC):
+class WeightedLoss(torch.nn.Module, ABC):
     """Weighted BCE Loss implementation, for combating class imbalance in classification tasks.
 
     :param weights_path: The path to the weights file.

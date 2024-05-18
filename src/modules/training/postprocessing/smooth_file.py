@@ -7,6 +7,7 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 from tqdm import tqdm
+from typing_extensions import Never
 
 from src.modules.training.verbose_training_block import VerboseTrainingBlock
 
@@ -24,19 +25,21 @@ class SmoothFile(VerboseTrainingBlock):
     power: float = 2
     kernel: Sequence[float] | None = None
 
-    def custom_train(self, x: npt.NDArray[np.float32], y: npt.NDArray[np.float32], **train_args: Any) -> tuple[Any, Any]:
+    def custom_train(self, x: npt.NDArray[np.float32], y: npt.NDArray[np.float32], **train_args: Never) -> tuple[Any, Any]:
         """Return the input data and labels.
 
         :param x: The input data in shape (n_samples=48n, n_features=182)
         :param y: The labels in shape (n_samples=48n, n_features=182)
+        :param train_args: (UNUSED) Additional arguments
         :return: The input data and labels
         """
         return x, y
 
-    def custom_predict(self, x: npt.NDArray[np.float32], **pred_args: Any) -> npt.NDArray[np.float32]:
+    def custom_predict(self, x: npt.NDArray[np.float32], **pred_args: Never) -> npt.NDArray[np.float32]:
         """Apply smoothing to the predictions.
 
         :param x: The input data in shape (n_samples=48n, n_features=182)
+        :param pred_args: (UNUSED) Additional arguments
         :return: The predictions
         """
         if self.kernel is None:

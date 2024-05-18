@@ -89,7 +89,7 @@ class ROCAUC(Scorer):
                 # Use the mask to index the labels from y_true
                 y_true_year = y_true_year[indices]
                 # from the preds index the years data, then index that year using indices
-                y_pred_year = year_preds[f"{year}"][indices]  # type: ignore[index]
+                y_pred_year = year_preds[f"{year}"][indices]
             else:
                 y_pred_year = year_preds[f"{year}"]
 

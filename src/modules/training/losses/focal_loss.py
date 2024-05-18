@@ -4,10 +4,9 @@ from typing import Literal
 
 import torch
 import torchvision
-from torch import nn
 
 
-class FocalLoss(nn.Module):
+class FocalLoss(torch.nn.Module):
     """Focal loss implementation, for combating class imbalance in classification tasks.
 
     :param alpha: The alpha parameter.

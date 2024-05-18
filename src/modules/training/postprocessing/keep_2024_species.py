@@ -24,6 +24,7 @@ class Keep2024Species(VerboseTrainingBlock):
 
         :param x: The input data in shape (n_samples=48n, n_features=182)
         :param y: The labels in shape (n_samples=48n, n_features=182)
+        :param train_args: (UNUSED) The training arguments
         :return: The input data and labels
         """
         return x, y
@@ -34,6 +35,7 @@ class Keep2024Species(VerboseTrainingBlock):
         Keep in mind that 2024 must be the first year in the input data.
 
         :param x: The input data in shape (n_samples=48n, n_features=182)
+        :param pred_args: (UNUSED) The prediction arguments
         :return: The predictions
         """
         return x[:, :182]

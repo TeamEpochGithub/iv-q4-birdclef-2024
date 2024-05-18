@@ -3,12 +3,11 @@
 from typing import Any, Literal
 
 import torch
-from torch import nn
 
 from src.utils.logger import logger
 
 
-class Timm(nn.Module):
+class Timm(torch.nn.Module):
     """Timm model for 2D image classification.
 
     :param in_channels: Number of input channels
@@ -16,6 +15,11 @@ class Timm(nn.Module):
     :param model: The model to use
     :param activation: The activation function to use
     """
+
+    in_channels: int
+    out_channels: int
+    activation: Literal["sigmoid"] | None
+    model: torch.nn.Module
 
     def __init__(self, in_channels: int, out_channels: int, model_name: str, activation: Literal["sigmoid"] | None = None, **kwargs: Any) -> None:
         """Initialize the Timm model.
