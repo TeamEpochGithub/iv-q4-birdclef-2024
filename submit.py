@@ -32,6 +32,7 @@ def run_submit(cfg: DictConfig) -> None:
     """Run the main script for submitting the predictions.
 
     :param cfg: The config object. Created with Hydra.
+    :raise ValueError: If predictions are None.
     """
     print_section_separator("Q4 - BirdCLEF - Submit")
 

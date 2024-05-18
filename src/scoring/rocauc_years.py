@@ -1,6 +1,6 @@
 """ROC AUC scorer from Kaggle."""
 
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -18,7 +18,12 @@ from src.typing.typing import YData
 
 @dataclass
 class ROCAUC(Scorer):
-    """ROC AUC scorer from Kaggle."""
+    """ROC AUC scorer from Kaggle.
+
+    :param name: The name of the scorer.
+    :param grade_threshold: The grade threshold.
+    :param only_primary: Whether to only use the primary labels.
+    """
 
     name: str = "roc_auc"
     grade_threshold: float | None = None
@@ -34,16 +39,17 @@ class ROCAUC(Scorer):
         :param years: The datasets to use.
         :param output_dir: The output directory.
         :param kwargs: Additional keyword arguments.
+        :raise ValueError: If metadata is required for this scorer, or if no positive labels are present in y_true, or if columns have non-numeric dtypes.
         :return: The ROC AUC score.
         """
         # Get metadata from the keyword arguments if not None
         scores: dict[str, float] = {}
         # separate the preds for the years
-        year_preds: dict[str, float] = {}
+        year_preds: dict[str, npt.NDArray[Any]] = {}
         start_idx = 0
 
         # Retrieve the necessary keyword arguments
-        test_indices: Mapping[str, Iterable[int]] = kwargs["test_indices"]
+        test_indices: Mapping[str, Sequence[int]] = kwargs["test_indices"]
         years: Iterable[str] = kwargs["years"]
         output_dir: str = kwargs.get("output_dir", "")
 
@@ -52,8 +58,8 @@ class ROCAUC(Scorer):
 
         # Do the year splitting the same way as in XData and YData
         for year in years:
-            year_preds[str(year)] = y_pred[start_idx : start_idx + len(test_indices[str(year)])]  # type: ignore[arg-type, assignment]
-            start_idx += len(test_indices[str(year)])  # type: ignore[arg-type]
+            year_preds[str(year)] = y_pred[start_idx : start_idx + len(test_indices[str(year)])]
+            start_idx += len(test_indices[str(year)])
 
         # Loop over the years
         for year in years:
@@ -90,7 +96,7 @@ class ROCAUC(Scorer):
             # Convert
             solution = y_true_year
             # Select the correct columns from the pred using the label_lookup
-            label_indices = [label_lookup.columns.get_loc(col) for col in y_true_year.columns]
+            label_indices = np.array([label_lookup.columns.get_loc(col) for col in y_true_year.columns])
 
             submission = pd.DataFrame(np.clip(y_pred_year[:, label_indices], 0, 1), columns=solution.columns)
 
@@ -116,9 +122,9 @@ class ROCAUC(Scorer):
         :param submission: The predicted labels.
         :param scored_columns: The scored columns.
         :param output_dir: The output directory.
+        :param year: The year.
         """
         # Calculate the ROC AUC score for each class
-
         class_roc_auc = roc_auc_score(solution[scored_columns].values, submission[scored_columns].values, average=None)
 
         fig, ax = plt.subplots(1, 1, figsize=(20, 60))

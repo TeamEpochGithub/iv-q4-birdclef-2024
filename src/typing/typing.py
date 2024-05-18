@@ -17,12 +17,14 @@ PandasIlocIndexer: TypeAlias = int | slice | Sequence[int] | Sequence[bool]
 class XData:
     """Dataclass to hold X data.
 
-    :param meta_2024: Metadata of BirdClef2024:
-    :param meta_2023: Metadata of BirdClef2023:
-    :param meta_2022: Metadata of BirdClef2022:
-    :param meta_2021: Metadata of BirdClef2021:
-    :param meta_kenya: Metadata of Kenya:
+    :param meta_2024: Metadata of BirdClef2024
+    :param meta_2024add: Additional metadata of BirdClef2024
+    :param meta_2023: Metadata of BirdClef2023
+    :param meta_2022: Metadata of BirdClef2022
+    :param meta_2021: Metadata of BirdClef2021
+    :param meta_kenya: Metadata of Kenya
     :param bird_2024: Audiodata of BirdClef2024
+    :param bird_2024add: Additional audiodata of BirdClef2024
     :param bird_2023: Audiodata of BirdClef2023
     :param bird_2022: Audiodata of BirdClef2022
     :param bird_2021: Audiodata of BirdClef2021
@@ -55,6 +57,7 @@ class XData:
         """Index the data according to the indexer type.
 
         :param indexer: The indexer to use
+        :raise AttributeError: If trying to index non-existent 2024
         :return: The data requested
         """
         if isinstance(indexer, Mapping):
@@ -94,39 +97,51 @@ class XData:
         )
 
     def __setitem__(self, key: str, value: pd.DataFrame | npt.NDArray[Any] | None) -> None:
-        """Set the value of key."""
+        """Set the value of key.
+
+        :param key: The key to set
+        :param value: The value to set
+        :raise KeyError: If the key is not a valid attribute of XData
+        """
         if hasattr(self, key):
             setattr(self, key, value)
         else:
             raise KeyError(f"'{key}' is not a valid attribute of XData")
 
     def __repr__(self) -> str:
-        """Return a string representation of the object."""
+        """Return a string representation of the object.
+
+        :return: The string representation
+        """
         return "XData"
 
 
 @dataclass
 class YData:
-    """Dataclass to hold X data.
+    """Dataclass to hold Y data.
 
-    :param meta_2024: Metadata of BirdClef2024:
-    :param meta_2023: Metadata of BirdClef2023:
-    :param meta_2022: Metadata of BirdClef2022:
-    :param meta_2021: Metadata of BirdClef2021:
+    :param meta_2024: Metadata of BirdClef2024
+    :param meta_2024add: Additional metadata of BirdClef2024
+    :param meta_2023: Metadata of BirdClef2023
+    :param meta_2022: Metadata of BirdClef2022
+    :param meta_2021: Metadata of BirdClef2021
+    :param meta_kenya: Metadata of Kenya
     :param label_2024: Labels of BirdClef2024
+    :param label_2024add: Additional labels of BirdClef2024
     :param label_2023: Labels of BirdClef2023
     :param label_2022: Labels of BirdClef2022
     :param label_2021: Labels of BirdClef2021
+    :param label_kenya: Labels of Kenya
     """
 
-    meta_2024add: pd.DataFrame | None = None
     meta_2024: pd.DataFrame | None = None
+    meta_2024add: pd.DataFrame | None = None
     meta_2023: pd.DataFrame | None = None
     meta_2022: pd.DataFrame | None = None
     meta_2021: pd.DataFrame | None = None
     meta_kenya: pd.DataFrame | None = None
-    label_2024add: pd.DataFrame | None = None
     label_2024: pd.DataFrame | None = None
+    label_2024add: pd.DataFrame | None = None
     label_2023: pd.DataFrame | None = None
     label_2022: pd.DataFrame | None = None
     label_2021: pd.DataFrame | None = None
@@ -142,7 +157,12 @@ class YData:
     def __getitem__(self, indexer: str) -> pd.DataFrame: ...
 
     def __getitem__(self, indexer: PandasIlocIndexer | Mapping[str, Any] | str) -> YData | pd.DataFrame:
-        """Index the data according to the indexer type."""
+        """Index the data according to the indexer type.
+
+        :param indexer: The indexer to use
+        :raise AttributeError: If trying to index non-existent 2024
+        :return: The data requested
+        """
         if isinstance(indexer, Mapping):
             sliced_fileds = {}
             # Slice all the years by the appropriate indices and save to a dict
@@ -181,12 +201,20 @@ class YData:
         )
 
     def __setitem__(self, key: str, value: pd.DataFrame | npt.NDArray[Any] | None) -> None:
-        """Set the value of key."""
+        """Set the value of key.
+
+        :param key: The key to set
+        :param value: The value to set
+        :raise KeyError: If the key is not a valid attribute of YData
+        """
         if hasattr(self, key):
             setattr(self, key, value)
         else:
             raise KeyError(f"'{key}' is not a valid attribute of YData")
 
     def __repr__(self) -> str:
-        """Return a string representation of the object."""
+        """Return a string representation of the object.
+
+        :return: The string representation
+        """
         return "YData"

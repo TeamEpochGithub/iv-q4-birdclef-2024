@@ -34,7 +34,11 @@ class Splitter:
         self.instantiated_splitter = self.splitter(n_splits=self.n_splits, shuffle=self.shuffle, random_state=self.random_state)
 
     def split(self, data: YData) -> Generator[list[list[dict[int, Any]]], list[list[dict[int, Any]]], None]:
-        """Split the datasets for each year and yield the appropriate dicts."""
+        """Split the datasets for each year and yield the appropriate dicts.
+
+        :param data: The YData object to split.
+        :yields: The split datasets.
+        """
         splits: list[list[dict[int, Any]]]
         splits = [[{}, {}] for _ in range(self.n_splits)]
         for year in self.years:

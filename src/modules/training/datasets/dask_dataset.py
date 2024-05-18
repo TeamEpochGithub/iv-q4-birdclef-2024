@@ -52,7 +52,10 @@ class DaskDataset(Dataset[tuple[torch.Tensor, torch.Tensor]]):
             self.X[f"bird_{self.year}"] = filtered_x
 
     def __len__(self) -> int:
-        """Get the length of the dataset."""
+        """Get the length of the dataset.
+
+        :return: The length of the dataset.
+        """
         return 0 if self.X is None else len(self.X[f"bird_{self.year}"])
 
     def get_y(self) -> torch.Tensor:
@@ -60,7 +63,7 @@ class DaskDataset(Dataset[tuple[torch.Tensor, torch.Tensor]]):
 
         :return: The labels.
         """
-        return torch.from_numpy(self.y[f"label_{self.year}"].to_numpy())  # type: ignore[union-attr, attr-defined, index]
+        return torch.from_numpy(self.y[f"label_{self.year}"].to_numpy()) if self.y is not None else torch.tensor([])
 
     def __getitems__(self, indices: Iterable[int]) -> tuple[torch.Tensor, torch.Tensor | None]:
         """Get multiple items from the dataset and apply augmentations if necessary.

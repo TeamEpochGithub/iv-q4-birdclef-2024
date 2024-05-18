@@ -16,5 +16,9 @@ class Reshape:
     shape: Iterable[int]
 
     def __call__(self, input_tensor: torch.Tensor) -> torch.Tensor:
-        """Return a reshaped version of the input tensor."""
+        """Return a reshaped version of the input tensor.
+
+        :param input_tensor: The input tensor.
+        :return: The reshaped tensor.
+        """
         return input_tensor.view(input_tensor.shape[0], 1, *self.shape)

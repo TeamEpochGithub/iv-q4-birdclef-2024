@@ -17,6 +17,7 @@ from src.setup.setup_data import setup_train_x_data, setup_train_y_data
 from src.setup.setup_pipeline import setup_pipeline
 from src.setup.setup_runtime_args import setup_train_args
 from src.setup.setup_wandb import setup_wandb
+from src.typing.typing import XData
 from src.utils.lock import Lock
 from src.utils.logger import logger
 from src.utils.set_torch_seed import set_torch_seed
@@ -45,6 +46,7 @@ def run_train_cfg(cfg: DictConfig) -> None:
     """Train a model pipeline with a train-test split.
 
     :param cfg: The config object. Created with Hydra.
+    :raise ValueError: If test size is 0 and n_splits is not 0.
     """
     print_section_separator("Q4 - BirdCLEF - Training")
 
@@ -73,14 +75,12 @@ def run_train_cfg(cfg: DictConfig) -> None:
         "storage_type": ".pkl",
         "storage_path": f"{processed_data_path}",
     }
-    # cache_args = {}  # type: ignore[var-annotated]
     # Read the data if required and split it in X, y
     x_cache_exists = model_pipeline.get_x_cache_exists(cache_args)
     # y_cache_exists = model_pipeline.get_y_cache_exists(cache_args)
 
-    X = None
+    X: XData | None = None
     if not x_cache_exists:
-        # X = setup_train_x_data(cfg.data_path, cfg.cache_path)
         X = setup_train_x_data(cfg.raw_path, cfg.years)
 
     # If not cache exists, we need to load the data
@@ -91,11 +91,12 @@ def run_train_cfg(cfg: DictConfig) -> None:
         if cfg.splitter.n_splits != 0:
             raise ValueError("Test size is 0, but n_splits is not 0. Also please set n_splits to 0 if you want to run train full.")
         logger.info("Training full.")
-        train_indices, test_indices = {year: list(range(len(X[f"bird_{year}"]))) for year in cfg.years}, {year: [] for year in cfg.years}  # type: ignore[arg-type, union-attr, index, var-annotated]
+        train_indices: dict[str, list[int]] = {year: list(range(len(X[f"bird_{year}"]))) for year in cfg.years}  # type: ignore[index]
+        test_indices: dict[str, list[int] | dict[str, list[int]]] = {year: [] for year in cfg.years}
         fold = -1
     else:
         logger.info("Using splitter to split data into train and test sets.")
-        train_indices, test_indices = next(instantiate(cfg.splitter).split(y))  # type: ignore[index]
+        train_indices, test_indices = next(instantiate(cfg.splitter).split(y))
         fold = 0
 
     logger.info(f"Train/Test size: {[len(year_indices) for year_indices in train_indices.values()]}/{[len(year_indices) for year_indices in test_indices.values()]}")

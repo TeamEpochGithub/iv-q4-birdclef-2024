@@ -66,12 +66,12 @@ class MainTrainer(TorchTrainer, Logger):
         x_test = x[test_indices]
         y_test = y[test_indices]
 
-        train_dataset = DaskDataset(X=x_train, y=y_train, year=self.year, **self.dataset_args)  # type: ignore[arg-type]
+        train_dataset = DaskDataset(X=x_train, y=y_train, year=self.year, **self.dataset_args)
         if test_indices is not None:
             test_dataset_args = self.dataset_args.copy()
             test_dataset_args["aug_1d"] = None
             test_dataset_args["aug_2d"] = None
-            test_dataset = DaskDataset(X=x_test, y=y_test, year=self.year, **test_dataset_args)  # type: ignore[arg-type]
+            test_dataset = DaskDataset(X=x_test, y=y_test, year=self.year, **test_dataset_args)
         else:
             test_dataset = None
 
@@ -157,8 +157,10 @@ class MainTrainer(TorchTrainer, Logger):
         )
 
     def _load_model(self) -> None:
-        """Load the model from the model_directory folder."""
-        # Check if the model exists
+        """Load the model from the model_directory folder.
+
+        :raises FileNotFoundError: If the model is not found.
+        """
         if not Path(f"{self._model_directory}/{self.get_hash()}.pt").exists():
             raise FileNotFoundError(
                 f"Model not found in {self._model_directory}/{self.get_hash()}.pt",

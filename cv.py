@@ -17,11 +17,12 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 
 from src.config.cv_config import CVConfig
+from src.scoring.scorer import Scorer
 from src.setup.setup_data import setup_train_x_data, setup_train_y_data
 from src.setup.setup_pipeline import setup_pipeline
 from src.setup.setup_runtime_args import setup_train_args
 from src.setup.setup_wandb import setup_wandb
-from src.typing.typing import YData
+from src.typing.typing import XData, YData
 from src.utils.lock import Lock
 from src.utils.logger import logger
 from src.utils.set_torch_seed import set_torch_seed
@@ -85,11 +86,11 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     x_cache_exists = model_pipeline.get_x_cache_exists(cache_args)
     # y_cache_exists = model_pipeline.get_y_cache_exists(cache_args)
 
-    X = None
+    X: XData | None = None
     if not x_cache_exists:
         X = setup_train_x_data(cfg.raw_path, cfg.years)
 
-    y = setup_train_y_data(cfg.raw_path, cfg.years)
+    y: YData = setup_train_y_data(cfg.raw_path, cfg.years)
 
     # Instantiate scorer
     scorer = instantiate(cfg.scorer)
@@ -98,9 +99,6 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     # Split indices into train and test
     # splitter_data = setup_splitter_data()
     logger.info("Using splitter to split data into train and test sets.")
-
-    if not isinstance(y, YData):
-        raise TypeError("Y Should be YData")
 
     for fold_no, (train_indices, test_indices) in enumerate(instantiate(cfg.splitter).split(y)):
         copy_x = copy.deepcopy(X)
@@ -113,7 +111,7 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     avg_score: dict[str, float]
     avg_score = {}
     for score in scores:
-        for year in score:  # type: ignore[union-attr]
+        for year in score:
             if avg_score.get(year) is not None:
                 avg_score[year] += score[year] / len(scores)
             else:
@@ -130,18 +128,18 @@ def run_cv_cfg(cfg: DictConfig) -> None:
 
 def run_fold(
     fold_no: int,
-    X: Any,  # noqa: ANN401
-    y: Any,  # noqa: ANN401
+    X: XData | None,
+    y: YData,
     train_indices: list[int],
     test_indices: list[int],
     cfg: DictConfig,
-    scorer: Any,  # noqa: ANN401
+    scorer: Scorer,
     output_dir: Path,
     cache_args: dict[str, Any],
 ) -> tuple[dict[str, float], Any]:
     """Run a single fold of the cross validation.
 
-    :param i: The fold number.
+    :param fold_no: The fold number.
     :param X: The input data.
     :param y: The labels.
     :param train_indices: The indices of the training data.
@@ -149,7 +147,7 @@ def run_fold(
     :param cfg: The config file.
     :param scorer: The scorer to use.
     :param output_dir: The output directory for the prediction plots.
-    :param processed_y: The processed labels.
+    :param cache_args: The cache arguments.
     :return: The score of the fold and the predictions.
     """
     # Print section separator

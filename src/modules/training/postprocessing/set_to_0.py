@@ -22,7 +22,12 @@ class SetTo0(VerboseTrainingBlock):
     to_0_thresh: float = 0.1
 
     def custom_train(self, x: npt.NDArray[np.float32], y: npt.NDArray[np.float32], **train_args: Any) -> tuple[Any, Any]:
-        """Return the input data and labels."""
+        """Return the input data and labels.
+
+        :param x: The input data in shape (n_samples=48n, n_features=182)
+        :param y: The labels in shape (n_samples=48n, n_features=182)
+        :return: The input data and labels
+        """
         return x, y
 
     def custom_predict(self, x: npt.NDArray[np.float32], **pred_args: Any) -> npt.NDArray[np.float32]:

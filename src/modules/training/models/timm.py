@@ -1,6 +1,6 @@
 """Timm model for 2D image classification."""
 
-from typing import Any
+from typing import Any, Literal
 
 import torch
 from torch import nn
@@ -13,16 +13,19 @@ class Timm(nn.Module):
 
     :param in_channels: Number of input channels
     :param out_channels: Number of output channels
-    :param model_name: Model to use
+    :param model: The model to use
+    :param activation: The activation function to use
     """
 
-    def __init__(self, in_channels: int, out_channels: int, model_name: str, activation: str | None = None, **kwargs: dict[str, Any]) -> None:
+    def __init__(self, in_channels: int, out_channels: int, model_name: str, activation: Literal["sigmoid"] | None = None, **kwargs: Any) -> None:
         """Initialize the Timm model.
 
         :param in_channels: The number of input channels.
         :param out_channels: The number of output channels.
         :param model_name: The model to use.
         :param activation: The activation function to use.
+        :param kwargs: Additional arguments for the model.
+        :raise ImportError: If timm is not installed.
         """
         try:
             import timm

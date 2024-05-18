@@ -16,7 +16,7 @@ def to_submission_format(predictions: npt.NDArray[np.float32], test_path: str | 
     :param predictions: The predictions of the model.
     :param test_path: The path to the test data.
     :param species_path: The path to the species data.
-
+    :raise ValueError: If the number of species in predictions does not match the number of species in the dataset.
     :return: The predictions in the submission format.
     """
     file_list = [file.stem for file in Path(test_path).glob("*.ogg")]

@@ -20,7 +20,12 @@ class Keep2024Species(VerboseTrainingBlock):
         y: npt.NDArray[np.floating[Any]],
         **train_args: Never,
     ) -> tuple[npt.NDArray[np.floating[Any]], npt.NDArray[np.floating[Any]]]:
-        """Return the input data and labels."""
+        """Return the input data and labels.
+
+        :param x: The input data in shape (n_samples=48n, n_features=182)
+        :param y: The labels in shape (n_samples=48n, n_features=182)
+        :return: The input data and labels
+        """
         return x, y
 
     def custom_predict(self, x: npt.NDArray[np.floating[Any]], **pred_args: Never) -> npt.NDArray[np.floating[Any]]:

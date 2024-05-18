@@ -1,5 +1,7 @@
 """Focal loss implementation, for combating class imbalance in classification tasks."""
 
+from typing import Literal
+
 import torch
 import torchvision
 from torch import nn
@@ -15,9 +17,9 @@ class FocalLoss(nn.Module):
 
     alpha: float
     gamma: float
-    reduction: str
+    reduction: Literal["none", "mean", "sum"]
 
-    def __init__(self, alpha: float = 0.25, gamma: float = 2, reduction: str = "mean") -> None:
+    def __init__(self, alpha: float = 0.25, gamma: float = 2, reduction: Literal["none", "mean", "sum"] = "mean") -> None:
         """Initialize the focal loss.
 
         :param alpha: The alpha parameter.

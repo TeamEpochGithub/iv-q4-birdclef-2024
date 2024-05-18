@@ -8,7 +8,6 @@ import ast
 import os
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Any
 
 import librosa
 import numpy as np
@@ -139,10 +138,9 @@ def one_hot_label(metadata: pd.DataFrame) -> pd.DataFrame:
     return one_hot
 
 
-def setup_inference_data(path: str | os.PathLike[str]) -> Any:  # noqa: ANN401
+def setup_inference_data(path: str | os.PathLike[str]) -> XData:
     """Create data for inference with pipeline.
 
-    :param raw_path: Raw path
     :param path: Usually raw path is a parameter
     :return: Inference data
     """
@@ -157,9 +155,9 @@ def setup_inference_data(path: str | os.PathLike[str]) -> Any:  # noqa: ANN401
     return XData(bird_2024=bird_2024)
 
 
-def setup_splitter_data() -> Any:  # noqa: ANN401
+def setup_splitter_data() -> None:
     """Create data for splitter.
 
-    :return: Splitter data
+    :return: None
     """
-    return None
+    return

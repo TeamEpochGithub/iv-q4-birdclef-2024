@@ -22,7 +22,10 @@ class Lock:
             self.lock_file = f".lock_{os.environ['CUDA_VISIBLE_DEVICES'].replace(',', '_')}"
 
     def __enter__(self) -> Self:
-        """Create the lock file."""
+        """Create the lock file.
+
+        :return: The lock object.
+        """
         logger.info("Acquiring lock")
 
         # Check if locked by checking if the file exists

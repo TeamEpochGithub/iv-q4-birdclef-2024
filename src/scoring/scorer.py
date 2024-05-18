@@ -9,7 +9,12 @@ from src.typing.typing import YData
 
 
 class Scorer(ABC):
-    """Abstract scorer class from which other scorers inherit from."""
+    """Abstract scorer class from which other scorers inherit from.
+
+    :param name: The name of the scorer.
+    """
+
+    name: str
 
     def __init__(self, name: str) -> None:
         """Initialize the scorer with a name.

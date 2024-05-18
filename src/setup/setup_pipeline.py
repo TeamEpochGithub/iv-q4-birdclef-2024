@@ -16,6 +16,7 @@ def setup_pipeline(cfg: DictConfig, *, is_train: bool = True) -> ModelPipeline |
 
     :param cfg: The model pipeline config. Root node should be a ModelPipeline
     :param is_train: Whether the pipeline is used for training
+    :raise ValueError: If neither model nor ensemble is specified in the config
     :return: The instantiated pipeline
     """
     logger.info("Instantiating the pipeline")

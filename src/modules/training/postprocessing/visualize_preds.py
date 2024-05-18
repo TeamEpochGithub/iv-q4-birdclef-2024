@@ -1,6 +1,7 @@
 """Visualize predictions block that creates a stacked line chart."""
 
 import os
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -18,7 +19,11 @@ from src.modules.training.verbose_training_block import VerboseTrainingBlock
 
 @dataclass
 class VisualizePreds(VerboseTrainingBlock):
-    """Visualize predictions block that creates a stacked line chart."""
+    """Visualize predictions block that creates a stacked line chart.
+
+    :param n: The number of 5-second intervals to visualize.
+    :param threshold: The threshold for the top N lines.
+    """
 
     n: int = 10
     threshold: float = 0.1
@@ -29,13 +34,19 @@ class VisualizePreds(VerboseTrainingBlock):
         y: npt.NDArray[np.floating[Any]],
         **train_args: Never,
     ) -> tuple[npt.NDArray[np.floating[Any]], npt.NDArray[np.floating[Any]]]:
-        """Return the input data and labels."""
+        """Return the input data and labels.
+
+        :param x: The input data in shape (n_samples=48n, n_features=182)
+        :param y: The labels in shape (n_samples=48n, n_features=182)
+        :return: The input data and labels
+        """
         return x, y
 
-    def custom_predict(self, x: npt.NDArray[np.floating[Any]], **pred_args: Never) -> npt.NDArray[np.floating[Any]]:
+    def custom_predict(self, x: npt.NDArray[np.floating[Any]], **pred_args: str) -> npt.NDArray[np.floating[Any]]:
         """Make multiple plots to visualize the predictions.
 
         :param x: The input data in shape (n_samples=48n, n_features=182)
+        :param pred_args: The prediction arguments.
         :return: The predictions
         """
         # If on Kaggle, skip visualization
@@ -63,10 +74,13 @@ class VisualizePreds(VerboseTrainingBlock):
 
         return x
 
-    def heatmap(self, predictions: npt.NDArray[np.floating[Any]], classes: list[str], file_name: str, output_dir: str) -> None:
-        """Create a heatmap of the predictions for a 4 minute file.
+    def heatmap(self, predictions: npt.NDArray[np.floating[Any]], classes: Sequence[str], file_name: str, output_dir: str) -> None:
+        """Create a heatmap of the predictions for a 4-minute file.
 
         :param predictions: The predictions in shape (n_samples=48, n_features=182)
+        :param classes: The bird classes
+        :param file_name: The name of the file
+        :param output_dir: The output directory
         """
         minutes = self.sections_to_time_labels(predictions)
 
@@ -81,10 +95,13 @@ class VisualizePreds(VerboseTrainingBlock):
         plt.savefig(f"{output_dir}/{file_name}", dpi=300)
         plt.close()
 
-    def top_n_lines(self, predictions: npt.NDArray[np.floating[Any]], classes: list[str], file_name: str, output_dir: str) -> None:
+    def top_n_lines(self, predictions: npt.NDArray[np.floating[Any]], classes: Sequence[str], file_name: str, output_dir: str) -> None:
         """Create a line chart of the top N classes over time.
 
         :param predictions: The predictions in shape (n_samples=48, n_features=182)
+        :param classes: The bird classes
+        :param file_name: The name of the file
+        :param output_dir: The output directory
         """
         threshold = self.threshold
         class_above_threshold = np.max(predictions, axis=0) > threshold
