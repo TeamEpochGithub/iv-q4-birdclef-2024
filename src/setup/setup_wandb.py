@@ -1,7 +1,7 @@
 """File containing functions related to setting up Weights and Biases."""
 
 import re
-from collections.abc import Callable, Iterable, Mapping
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any, TypeVar, cast
 
@@ -96,7 +96,7 @@ def setup_wandb(
 _T = TypeVar("_T")
 
 
-def replace_list_with_dict(o: Mapping[str, Any] | Iterable[Any] | _T) -> dict[str | int, Any] | _T:
+def replace_list_with_dict(o: dict[str, Any] | list[Any] | _T) -> dict[str | int, Any] | _T:
     """Recursively replace lists with integer index dicts.
 
     This is necessary for wandb to properly show any parameters in the config that are contained in a list.
@@ -104,8 +104,8 @@ def replace_list_with_dict(o: Mapping[str, Any] | Iterable[Any] | _T) -> dict[st
     :param o: Initially the dict, or any object recursively inside it.
     :return: Integer index dict.
     """
-    if isinstance(o, Mapping):
+    if isinstance(o, dict):
         return {k: replace_list_with_dict(v) for k, v in o.items()}
-    if isinstance(o, Iterable):
+    if isinstance(o, list):
         return {i: replace_list_with_dict(v) for i, v in enumerate(o)}
     return o

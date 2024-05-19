@@ -176,13 +176,13 @@ class MainTrainer(TorchTrainer, Logger):
             checkpoint = torch.load(f"{self._model_directory}/{self.get_hash()}.pt", map_location="cpu")
 
         # Load the weights from the checkpoint
-        if isinstance(checkpoint, torch.nn.DataParallel):
+        if isinstance(checkpoint, torch.nn.DataParallel | torch.nn.parallel.DistributedDataParallel):
             model = checkpoint.module
         else:
             model = checkpoint
 
         # Set the current model to the loaded model
-        if isinstance(self.model, torch.nn.DataParallel):
+        if isinstance(self.model, torch.nn.DataParallel | torch.nn.parallel.DistributedDataParallel):
             self.model.module.load_state_dict(model.state_dict())
         else:
             self.model.load_state_dict(model.state_dict())

@@ -19,7 +19,7 @@ from src.typing.typing import XData, YData
 from src.utils.logger import logger
 
 
-def setup_train_x_data(raw_path: str | os.PathLike[str], years: Iterable[int]) -> XData:
+def setup_train_x_data(raw_path: str | os.PathLike[str], years: Iterable[str]) -> XData:
     """Create train x data for pipeline.
 
     :param raw_path: Raw path
@@ -35,7 +35,7 @@ def setup_train_x_data(raw_path: str | os.PathLike[str], years: Iterable[int]) -
         metadata_path = raw_year_path / "train_metadata.csv"
         data_path = raw_year_path / "train_audio"
         metadata = pd.read_csv(metadata_path)
-        metadata["samplename"] = metadata["filename"].map(lambda x: x.split("/")[0] + "-" + x.split("/")[-1].split(".")[0])
+        metadata["samplename"] = metadata["filename"].str.replace("/", "-").str.replace(".ogg", "").str.replace(".mp3", "")
 
         # Load the bird_2024 data
         filenames = [data_path / filename for filename in metadata["filename"]]
@@ -80,7 +80,7 @@ def setup_train_y_data(raw_path: str | os.PathLike[str], years: Iterable[str]) -
     for year in years:
         metadata_path = Path(raw_path) / str(year) / "train_metadata.csv"
         metadata = pd.read_csv(metadata_path)
-        metadata["samplename"] = metadata.filename.map(lambda x: x.split("/")[0] + "-" + x.split("/")[-1].split(".")[0])
+        metadata["samplename"] = metadata["filename"].str.replace("/", "-").str.replace(".ogg", "").str.replace(".mp3", "")
 
         ydata[f"meta_{year}"] = metadata
 
