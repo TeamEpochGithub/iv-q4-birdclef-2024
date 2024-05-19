@@ -1,7 +1,7 @@
 defaults:
   - base_submit
   - hydra/logging
-  - model: ancient-rain-721 # Add models or ensembles
+  - model: eff_b0_300 # Add models or ensembles
 
 # Use this when uploading to Kaggle
 

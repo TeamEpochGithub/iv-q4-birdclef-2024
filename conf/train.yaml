@@ -1,7 +1,7 @@
 defaults:
   - base_train
   - hydra/logging
-  - model: convnext-post-2024google-silences-birds # Add models or ensembles
+  - model: eff_b0_300 # Add models or ensembles
   - wandb: train
 
 ###############
@@ -12,14 +12,14 @@ defaults:
 processed_path: data/processed/
 raw_path: data/raw/
 
-years: [ "2024", "2024gbird", "2024gsil"]
+years: [ "2024"]
 cache_path: data/cache
 #data_path: data/raw/train_data/dummy.npy
 data_path: data/raw/2024/train_audio/
 metadata_path: data/raw/2024/train_metadata.csv
 
 # Do this if you want train full.
-test_size: 0.2
+test_size: 0
 
 scorer:
   _target_: src.scoring.rocauc_years.ROCAUC # Add scorer
@@ -33,10 +33,10 @@ splitter:
     _args_:
       - _target_: hydra.utils.get_class
         path: sklearn.model_selection.StratifiedKFold
-  n_splits: 5 # Set to 0 if you want train full.
+  n_splits: 0 # Set to 0 if you want train full.
   shuffle: true
   random_state: 42
 
-  years: [ "2024", "2024gbird", "2024gsil"]
+  years: [ "2024"]
 
 allow_multiple_instances: true

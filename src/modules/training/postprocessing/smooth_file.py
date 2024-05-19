@@ -14,7 +14,7 @@ class SmoothFile(VerboseTrainingBlock):
     """Smooth the predictions based on the current 4 minute audio file."""
 
     smooth_factor: float = 1
-    power: float = 2
+    power: float = 1
     kernel: list[float] | None = None
 
     def custom_train(self, x: npt.NDArray[np.float32], y: npt.NDArray[np.float32], **train_args: Any) -> tuple[Any, Any]:
