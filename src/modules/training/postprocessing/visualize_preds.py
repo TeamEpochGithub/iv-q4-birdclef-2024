@@ -20,7 +20,7 @@ class VisualizePreds(VerboseTrainingBlock):
     """Visualize predictions block that creates a stacked line chart."""
 
     n: int = 10
-    threshold: float = 0.1
+    threshold: float = 0.01
 
     def custom_train(
         self,
