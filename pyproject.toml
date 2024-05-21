@@ -1,10 +1,3 @@
-[build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools]
-py-modules = ["dashboard", "external", "src", "cv", "run_dashboard", "submit", "train"]
-
 [project]
 name = "q4-bird-clef"
 version = "0.0.1"
@@ -15,7 +8,7 @@ authors = [
     { name = "Tolga Kopar", email = "cahittolgakopar@gmail.com" },
     { name = "Kristóf Sándor", email = "Emherk512@gmail.com" },
 ]
-description = "Team Epoch's base application for competing in machine learning competitions"
+description = "Team Epoch's solution to the BirdCLEF 2024 competition."
 license = { file = "LICENSE" }
 readme = "README.md"
 requires-python = ">=3.10"
@@ -46,6 +39,11 @@ dependencies = [
     "timm>=0.9.16",
 ]
 
+[project.scripts]
+train = "train:run_train"
+cv = "cv:run_cv"
+submit = "submit:run_submit"
+
 [tool.rye]
 managed = true
 lock-with-sources = true
@@ -66,3 +64,28 @@ dev-dependencies = [
 name = "pytorch"
 url = "https://download.pytorch.org/whl/torch_stable.html"
 type = "find-links"
+
+[tool.rye.scripts]
+download-models = { call = "submission.download_models:download_models" }
+manage-datasets = { call = "submission.manage_datasets:manage_datasets" }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src", "external", "cv", "submit", "train"]
+
+[tool.pydoclint]
+style = "sphinx"
+arg-type-hints-in-docstring = false
+arg-type-hints-in-signature = true
+skip-checking-short-docstrings = false
+check-return-types = false
+show-filenames-in-every-violation-message = true
+ignore = [
+    "DOC103",  # Docstring arguments are different from function arguments. Too often a false positive.
+]

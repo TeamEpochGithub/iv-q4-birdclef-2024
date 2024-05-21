@@ -1,4 +1,5 @@
 """Take the first or last segment. Pad if necessary."""
+
 import random
 from dataclasses import dataclass
 
@@ -10,7 +11,10 @@ from src.modules.training.datasets.sampler.sampler import Sampler
 
 @dataclass
 class FirstOrLast(Sampler):
-    """Take the first or last segment. Pad if necessary."""
+    """Take the first or last segment. Pad if necessary.
+
+    :param length: The desired length.
+    """
 
     length: int
 

@@ -1,4 +1,5 @@
 """Submission sampler the input to the given length."""
+
 from dataclasses import dataclass
 
 import numpy as np

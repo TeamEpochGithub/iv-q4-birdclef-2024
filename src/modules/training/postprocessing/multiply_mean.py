@@ -1,4 +1,5 @@
 """Module for multiplying the predictions with the mean of the current 4 minute audio file."""
+
 from dataclasses import dataclass
 from typing import Any
 

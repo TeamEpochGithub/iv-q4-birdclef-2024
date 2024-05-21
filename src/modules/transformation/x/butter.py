@@ -1,6 +1,7 @@
 """Butter filter for signals."""
+
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -8,6 +9,7 @@ from dask import delayed
 from numpy import typing as npt
 from scipy.signal import butter, lfilter
 from tqdm import tqdm
+from typing_extensions import Never
 
 from src.modules.transformation.verbose_transformation_block import VerboseTransformationBlock
 from src.typing.typing import XData
@@ -24,7 +26,7 @@ class ButterFilter(VerboseTransformationBlock):
     :param sampling_rate: The sampling rate
     """
 
-    years: list[str] = field(default_factory=lambda: ["2024"])
+    years: Iterable[str] = field(default_factory=lambda: ["2024"])
     lower: float = 1250.0
     upper: float = 20000.0
     order: int = 5
@@ -35,10 +37,11 @@ class ButterFilter(VerboseTransformationBlock):
         nyquist = 0.5 * self.sampling_rate
         self.normal_cutoff = self.lower / nyquist
 
-    def custom_transform(self, data: XData, **kwargs: Any) -> XData:
+    def custom_transform(self, data: XData, **kwargs: Never) -> XData:
         """Filter the audio signals with a butter filter.
 
         :param data: The X data to transform (bird)
+        :param kwargs: (UNUSED) Additional arguments
         :return: The transformed data
         """
         for year in self.years:
@@ -62,11 +65,10 @@ class ButterFilter(VerboseTransformationBlock):
     def butter_lowpass_filter(self, data: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
         """Filter the data with a butter filter.
 
-        Taken from "https://www.kaggle.com/code/nartaa/features-head-starter.
+        Taken from https://www.kaggle.com/code/nartaa/features-head-starter.
+
         :param data: The data to filter
-        :param cutoff_freq: The cutoff frequency
-        :param sampling_rate: The sampling rate
-        :param order: The order of the filter
+        :return: The filtered data
         """
         b, a = butter(self.order, self.normal_cutoff, btype="low", analog=False, output="ba")
         return lfilter(b, a, data, axis=0).astype(np.float32)
@@ -75,11 +77,10 @@ class ButterFilter(VerboseTransformationBlock):
     def butter_highpass_filter(self, data: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
         """Filter the data with a butter filter.
 
-        Taken from "https://www.kaggle.com/code/nartaa/features-head-starter.
+        Taken from https://www.kaggle.com/code/nartaa/features-head-starter.
+
         :param data: The data to filter
-        :param cutoff_freq: The cutoff frequency
-        :param sampling_rate: The sampling rate
-        :param order: The order of the filter
+        :return: The filtered data
         """
         b, a = butter(self.order, self.normal_cutoff, btype="high", analog=False, output="ba")
         return lfilter(b, a, data, axis=0).astype(np.float32)

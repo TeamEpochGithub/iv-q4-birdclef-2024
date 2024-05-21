@@ -1,4 +1,6 @@
 """A logger that logs to the terminal and to W&B."""
+
+from collections.abc import Mapping
 from typing import Any
 
 import wandb
@@ -39,7 +41,7 @@ class Logger(_Logger):
         """
         logger.warning(message)
 
-    def log_to_external(self, message: dict[str, Any], **kwargs: Any) -> None:
+    def log_to_external(self, message: Mapping[str, Any], **kwargs: Any) -> None:
         """Log a message to an external service.
 
         :param message: The message to log
@@ -68,3 +70,10 @@ class Logger(_Logger):
         """
         if wandb.run:
             wandb.define_metric(metric, step_metric=metric_type)
+
+    def log_section_separator(self, message: str) -> None:
+        """Log a section separator.
+
+        :param message: The message to log
+        """
+        super().log_section_separator(message)

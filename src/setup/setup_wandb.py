@@ -1,8 +1,9 @@
 """File containing functions related to setting up Weights and Biases."""
+
 import re
 from collections.abc import Callable
 from pathlib import Path
-from typing import cast
+from typing import Any, TypeVar, cast
 
 import wandb
 from omegaconf import DictConfig, OmegaConf
@@ -24,6 +25,9 @@ def setup_wandb(
     :param output_dir: The directory to the Hydra outputs.
     :param name: The name of the run.
     :param group: The namer of the group of the run.
+    :raise ValueError: If the project name is not set.
+    :raise RuntimeError: If the initialization of Weights & Biases fails.
+    :return: The Weights & Biases run object.
     """
     logger.debug("Initializing Weights & Biases")
 
@@ -34,7 +38,7 @@ def setup_wandb(
 
     config = OmegaConf.to_container(cfg, resolve=True)
     run = wandb.init(
-        config=replace_list_with_dict(config),  # type: ignore[arg-type]
+        config=replace_list_with_dict(config),
         project=project_name,
         entity="team-epoch-iv",
         name=name,
@@ -47,7 +51,7 @@ def setup_wandb(
         reinit=True,
     )
 
-    if isinstance(run, wandb.sdk.lib.RunDisabled) or run is None:  # Can't be True after wandb.init, but this casts wandb.run to be non-None, which is necessary for MyPy
+    if isinstance(run, wandb.sdk.lib.RunDisabled) or run is None:  # Can't be True after wandb.init, but this casts wandb.run to be non-None
         raise RuntimeError("Failed to initialize Weights & Biases")
 
     if cfg.wandb.log_config:
@@ -89,7 +93,10 @@ def setup_wandb(
     return run
 
 
-def replace_list_with_dict(o: object) -> object:
+_T = TypeVar("_T")
+
+
+def replace_list_with_dict(o: dict[str, Any] | list[Any] | _T) -> dict[str | int, Any] | _T:
     """Recursively replace lists with integer index dicts.
 
     This is necessary for wandb to properly show any parameters in the config that are contained in a list.
@@ -98,8 +105,7 @@ def replace_list_with_dict(o: object) -> object:
     :return: Integer index dict.
     """
     if isinstance(o, dict):
-        for k, v in o.items():
-            o[k] = replace_list_with_dict(v)
-    elif isinstance(o, list):
-        o = {i: replace_list_with_dict(v) for i, v in enumerate(o)}
+        return {k: replace_list_with_dict(v) for k, v in o.items()}
+    if isinstance(o, list):
+        return {i: replace_list_with_dict(v) for i, v in enumerate(o)}
     return o

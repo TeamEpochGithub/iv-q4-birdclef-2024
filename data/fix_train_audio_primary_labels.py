@@ -2,8 +2,9 @@
 This script is used to reflect those fixes in the audio file names in the train_audio directory."""
 from pathlib import Path
 from shutil import copy
+from typing import Final
 
-FIXES = {
+FIXES: Final[dict[str, str]] = {
     "marsan/XC184468.ogg": "woosan/XC184468.ogg",
     "commoo3/XC724832.ogg": "eurcoo/XC724832.ogg",
     "comkin1/XC460945.ogg": "eurcoo/XC460945.ogg",
@@ -13,7 +14,7 @@ FIXES = {
 }
 
 
-TRAIN_AUDIO_PATH = Path("./data/raw/train_audio/")
+TRAIN_AUDIO_PATH: Final[Path] = Path("./data/raw/train_audio/")
 
 def fix_audio_primary_labels() -> None:
     """Copy the audio files with fixed primary labels to the correct directory."""

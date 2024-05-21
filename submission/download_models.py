@@ -5,7 +5,7 @@ from epochalyst.logging.section_separator import print_section_separator
 from omegaconf import OmegaConf
 
 
-def download_models():
+def download_models() -> None:
     """Download the models from the wandb run specified by the user."""
     print_section_separator("Download models")
 

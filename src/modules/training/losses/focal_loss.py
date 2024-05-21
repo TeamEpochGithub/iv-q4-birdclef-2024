@@ -1,14 +1,24 @@
 """Focal loss implementation, for combating class imbalance in classification tasks."""
 
+from typing import Literal
+
 import torch
 import torchvision
-from torch import nn
 
 
-class FocalLoss(nn.Module):
-    """Focal loss implementation, for combating class imbalance in classification tasks."""
+class FocalLoss(torch.nn.Module):
+    """Focal loss implementation, for combating class imbalance in classification tasks.
 
-    def __init__(self, alpha: float = 0.25, gamma: float = 2, reduction: str = "mean") -> None:
+    :param alpha: The alpha parameter.
+    :param gamma: The gamma parameter.
+    :param reduction: The reduction method.
+    """
+
+    alpha: float
+    gamma: float
+    reduction: Literal["none", "mean", "sum"]
+
+    def __init__(self, alpha: float = 0.25, gamma: float = 2, reduction: Literal["none", "mean", "sum"] = "mean") -> None:
         """Initialize the focal loss.
 
         :param alpha: The alpha parameter.
@@ -25,7 +35,6 @@ class FocalLoss(nn.Module):
 
         :param inputs: The model predictions.
         :param targets: The true labels.
-
         :return: The focal loss.
         """
         # Flatten label and prediction tensors
@@ -39,7 +48,15 @@ class FocalLoss(nn.Module):
 
 
 class FocalLossBCE(FocalLoss):
-    """Focal loss implementation, for combating class imbalance in classification tasks."""
+    """Focal loss implementation, for combating class imbalance in classification tasks.
+
+    :param bce_weight: The weight of the BCE loss.
+    :param focal_weight: The weight of the focal loss.
+    """
+
+    bce: torch.nn.BCEWithLogitsLoss
+    bce_weight: float
+    focal_weight: float
 
     def __init__(self, bce_weight: float = 1.0, focal_weight: float = 1.0) -> None:
         """Initialize the focal loss.
@@ -57,7 +74,6 @@ class FocalLossBCE(FocalLoss):
 
         :param inputs: The model predictions.
         :param targets: The true labels.
-
         :return: The focal loss.
         """
         # Flatten label and prediction tensors
