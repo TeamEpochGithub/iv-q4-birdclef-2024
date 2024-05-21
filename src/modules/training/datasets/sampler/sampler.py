@@ -21,5 +21,9 @@ class Sampler(ABC):
 
     @delayed
     def __call__(self, array: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
-        """Apply the sampler as a dask delayed function."""
+        """Apply the sampler as a dask delayed function.
+
+        :param array: The input array.
+        :return: The sampled array.
+        """
         return self.sample(array)

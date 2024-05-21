@@ -1,15 +1,16 @@
 """Module for example training block."""
+
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import numpy.typing as npt
-import onnxruntime as onnxrt  # type: ignore[import-not-found]
+import onnxruntime as onnxrt
 import torch
 import wandb
 from epochalyst.pipeline.model.training.torch_trainer import TorchTrainer
-from torch import Tensor, nn
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
@@ -23,7 +24,13 @@ from src.typing.typing import XData, YData
 
 @dataclass
 class MainTrainer(TorchTrainer, Logger):
-    """Main training block."""
+    """Main training block.
+
+    :param dataset_args: The arguments for the dataset.
+    :param year: The year to use for the dataset.
+    :param dataloader_args: The arguments for the dataloader.
+    :param weights_path: The path to the weights for the sampler.
+    """
 
     dataset_args: dict[str, Any] = field(default_factory=dict)
     year: str = "2024"
@@ -39,7 +46,13 @@ class MainTrainer(TorchTrainer, Logger):
             model_artifact.add_file(f"{self._model_directory}/{self.get_hash()}.pt")
             wandb.log_artifact(model_artifact)
 
-    def create_datasets(self, x: XData, y: YData, train_indices: list[int], test_indices: list[int]) -> tuple[Dataset[tuple[Tensor, ...]], Dataset[tuple[Tensor, ...]]]:
+    def create_datasets(
+        self,
+        x: XData,
+        y: YData,
+        train_indices: Sequence[int],
+        test_indices: Sequence[int],
+    ) -> tuple[Dataset[tuple[torch.Tensor, ...]], Dataset[tuple[torch.Tensor, ...]] | None]:
         """Create the datasets for training and validation.
 
         :param x: The input data.
@@ -54,12 +67,12 @@ class MainTrainer(TorchTrainer, Logger):
         x_test = x[test_indices]
         y_test = y[test_indices]
 
-        train_dataset = DaskDataset(X=x_train, y=y_train, year=self.year, **self.dataset_args)  # type: ignore[arg-type]
-        if test_indices is not None:
+        train_dataset = DaskDataset(X=x_train, y=y_train, year=self.year, **self.dataset_args)
+        if test_indices:
             test_dataset_args = self.dataset_args.copy()
             test_dataset_args["aug_1d"] = None
             test_dataset_args["aug_2d"] = None
-            test_dataset = DaskDataset(X=x_test, y=y_test, year=self.year, **test_dataset_args)  # type: ignore[arg-type]
+            test_dataset = DaskDataset(X=x_test, y=y_test, year=self.year, **test_dataset_args)
         else:
             test_dataset = None
 
@@ -68,7 +81,7 @@ class MainTrainer(TorchTrainer, Logger):
     def create_prediction_dataset(
         self,
         x: XData,
-    ) -> Dataset[tuple[Tensor, ...]]:
+    ) -> Dataset[tuple[torch.Tensor, ...]]:
         """Create the prediction dataset for submission used in custom_predict.
 
         :param x: The input data.
@@ -85,9 +98,9 @@ class MainTrainer(TorchTrainer, Logger):
 
     def create_dataloaders(
         self,
-        train_dataset: Dataset[tuple[Tensor, ...]],
-        test_dataset: Dataset[tuple[Tensor, ...]],
-    ) -> tuple[DataLoader[tuple[Tensor, ...]], DataLoader[tuple[Tensor, ...]]]:
+        train_dataset: Dataset[tuple[torch.Tensor, ...]],
+        test_dataset: Dataset[tuple[torch.Tensor, ...]],
+    ) -> tuple[DataLoader[tuple[torch.Tensor, ...]], DataLoader[tuple[torch.Tensor, ...]]]:
         """Create the dataloaders for training and validation.
 
         :param train_dataset: The training dataset.
@@ -115,7 +128,7 @@ class MainTrainer(TorchTrainer, Logger):
         )
         return train_loader, test_loader
 
-    def create_training_sampler(self, train_dataset: Dataset[tuple[Tensor, ...]]) -> DataLoader[tuple[Tensor, ...]]:
+    def create_training_sampler(self, train_dataset: Dataset[tuple[torch.Tensor, ...]]) -> DataLoader[tuple[torch.Tensor, ...]]:
         """Create the training sampler for training.
 
         :param train_dataset: The training dataset.
@@ -145,7 +158,10 @@ class MainTrainer(TorchTrainer, Logger):
         )
 
     def _load_model(self) -> None:
-        """Load the model from the model_directory folder."""
+        """Load the model from the model_directory folder.
+
+        :raises FileNotFoundError: If the model is not found.
+        """
         if isinstance(self.model, EnsembleModel) or (
             isinstance(self.model, torch.nn.DataParallel | torch.nn.parallel.DistributedDataParallel) and isinstance(self.model.module, EnsembleModel)
         ):
@@ -176,13 +192,13 @@ class MainTrainer(TorchTrainer, Logger):
             checkpoint = torch.load(model_path, map_location="cpu")
 
         # Load the weights from the checkpoint
-        if isinstance(checkpoint, nn.DataParallel):
+        if isinstance(checkpoint, torch.nn.DataParallel | torch.nn.parallel.DistributedDataParallel):
             model = checkpoint.module
         else:
             model = checkpoint
 
         # Set the current model to the loaded model
-        if isinstance(self.model, nn.DataParallel):
+        if isinstance(self.model, torch.nn.DataParallel | torch.nn.parallel.DistributedDataParallel):
             self.model.module.load_state_dict(model.state_dict())
         else:
             self.model.load_state_dict(model.state_dict())
@@ -193,7 +209,7 @@ class MainTrainer(TorchTrainer, Logger):
 
     def predict_on_loader(
         self,
-        loader: DataLoader[tuple[Tensor, ...]],
+        loader: DataLoader[tuple[torch.Tensor, ...]],
     ) -> npt.NDArray[np.float32]:
         """Predict on the loader.
 
@@ -237,7 +253,7 @@ class MainTrainer(TorchTrainer, Logger):
         # ONNX with CPU
         return self.onnx_predict(loader)
 
-    def onnx_predict(self, loader: DataLoader[tuple[Tensor, ...]]) -> npt.NDArray[np.float32]:
+    def onnx_predict(self, loader: DataLoader[tuple[torch.Tensor, ...]]) -> npt.NDArray[np.float32]:
         """Predict on the loader using ONNX.
 
         :param loader: The loader to predict on.
@@ -263,7 +279,7 @@ class MainTrainer(TorchTrainer, Logger):
         return np.array(predictions)
 
 
-def collate_fn(batch: tuple[Tensor, ...]) -> tuple[Tensor, ...]:
+def collate_fn(batch: tuple[torch.Tensor, ...]) -> tuple[torch.Tensor, ...]:
     """Collate function for the dataloader.
 
     :param batch: The batch to collate.

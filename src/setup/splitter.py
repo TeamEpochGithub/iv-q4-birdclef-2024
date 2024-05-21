@@ -1,9 +1,9 @@
 """Wrapper class fo sklearn splitters that returns dicts."""
+
 from collections.abc import Generator
 from dataclasses import dataclass, field
 from typing import Any
 
-import sklearn
 import sklearn.model_selection
 
 from src.typing.typing import YData
@@ -11,7 +11,14 @@ from src.typing.typing import YData
 
 @dataclass
 class Splitter:
-    """Wrapper class fo sklearn splitters that returns dicts."""
+    """Wrapper class fo sklearn splitters that returns dicts.
+
+    :param splitter: The sklearn splitter to use.
+    :param n_splits: The number of splits to use.
+    :param shuffle: Whether to shuffle the data.
+    :param random_state: The random state to use.
+    :param years: The years to split.
+    """
 
     splitter: Any = sklearn.model_selection.StratifiedKFold
     n_splits: int = 5
@@ -27,7 +34,11 @@ class Splitter:
         self.instantiated_splitter = self.splitter(n_splits=self.n_splits, shuffle=self.shuffle, random_state=self.random_state)
 
     def split(self, data: YData) -> Generator[list[list[dict[int, Any]]], list[list[dict[int, Any]]], None]:
-        """Split the datasets for each year and yield the appropriate dicts."""
+        """Split the datasets for each year and yield the appropriate dicts.
+
+        :param data: The YData object to split.
+        :yields: The split datasets.
+        """
         splits: list[list[dict[int, Any]]]
         splits = [[{}, {}] for _ in range(self.n_splits)]
         for year in self.years:

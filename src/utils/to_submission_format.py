@@ -1,4 +1,5 @@
 """File contains the function to_submission_format() which converts the output of the model to the submission format."""
+
 import os
 from pathlib import Path
 
@@ -9,13 +10,13 @@ import pandas as pd
 from src.utils.logger import logger
 
 
-def to_submission_format(predictions: npt.NDArray[np.float32], test_path: str, species_path: str) -> pd.DataFrame:
+def to_submission_format(predictions: npt.NDArray[np.float32], test_path: str | os.PathLike[str], species_path: str | os.PathLike[str]) -> pd.DataFrame:
     """Convert the predictions to the submission format.
 
     :param predictions: The predictions of the model.
     :param test_path: The path to the test data.
     :param species_path: The path to the species data.
-
+    :raise ValueError: If the number of species in predictions does not match the number of species in the dataset.
     :return: The predictions in the submission format.
     """
     file_list = [file.stem for file in Path(test_path).glob("*.ogg")]

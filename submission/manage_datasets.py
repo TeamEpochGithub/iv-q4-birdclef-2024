@@ -15,7 +15,7 @@ TM_HASH = [
 ]
 
 
-def verify_config():
+def verify_config() -> None:
     print_section_separator("Verify the config files.")
     # Check if kaggle API is setup and installed
     try:
@@ -66,7 +66,7 @@ def verify_config():
     print("Config files have been verified.")
 
 
-def update_dependencies():
+def update_dependencies() -> None:
     print_section_separator("Update the dependencies.")
 
     if os.path.exists(DEPENDENCIES_SAVE_PATH):
@@ -81,7 +81,7 @@ def update_dependencies():
     else:
         os.makedirs(DEPENDENCIES_SAVE_PATH)
 
-    print('Copying the requirements.txt file and excluding -e')
+    print('Copying the kaggle_requirements.txt file and excluding -e')
     with open(SOURCE_CODE_PATH / 'kaggle_requirements.txt', 'r') as f:
         lines = f.readlines()
     with open(DEPENDENCIES_SAVE_PATH / 'kaggle_requirements.txt', 'w') as f:
@@ -108,7 +108,7 @@ def update_dependencies():
     print('Copying the dataset-metadata.json file')
     shutil.copy('config/dependencies.json', DEPENDENCIES_SAVE_PATH / 'dataset-metadata.json')
 
-    print('Excluding --find-files in requirements.txt')
+    print('Excluding --find-files in kaggle_requirements.txt')
     with open(DEPENDENCIES_SAVE_PATH / 'kaggle_requirements.txt', 'r') as f:
         lines = f.readlines()
     with open(DEPENDENCIES_SAVE_PATH / 'kaggle_requirements.txt', 'w') as f:
@@ -123,7 +123,7 @@ def update_dependencies():
     os.system(f'kaggle datasets version -p ./dependencies -m "Update Dependencies"')
 
 
-def update_source():
+def update_source() -> None:
     """Update the source code dataset."""
     if os.path.exists(SOURCE_CODE_SAVE_PATH):
         shutil.rmtree(SOURCE_CODE_SAVE_PATH)
@@ -170,7 +170,7 @@ def update_source():
     os.system(f'kaggle datasets version -p ./source-code -m "Update Source Code"')
 
 
-def manage_datasets():
+def manage_datasets() -> None:
     # Verify the config
     verify_config()
 

@@ -10,6 +10,10 @@ class Scale(torch.nn.Module):
     """Exponential scale 1d augmentation.
 
     Randomly scales the input signal by a factor sampled from a log-uniform distribution.
+
+    :param p: The probability of applying the augmentation.
+    :param lower: The lower bound of the log-uniform distribution.
+    :param higher: The higher bound of the log-uniform distribution.
     """
 
     p: float = 0.5
