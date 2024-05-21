@@ -1,0 +1,6 @@
+defaults:
+  - /model/convnext-post-10-epochs@steps.0
+  - /model/effb0-10-epochs@steps.1
+
+_target_: src.modules.training.alternating_ensemble.AlternatingEnsemble
+_convert_: partial

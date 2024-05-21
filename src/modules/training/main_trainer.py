@@ -17,6 +17,8 @@ from tqdm import tqdm
 from src.modules.logging.logger import Logger
 from src.modules.training.datasets.dask_dataset import DaskDataset
 from src.modules.training.datasets.sampler.submission import SubmissionSampler
+from src.modules.training.models.ensemble_model import EnsembleModel
+from src.modules.training.models.pretrained_model import PretrainedModel
 from src.typing.typing import XData, YData
 
 
@@ -160,20 +162,34 @@ class MainTrainer(TorchTrainer, Logger):
 
         :raises FileNotFoundError: If the model is not found.
         """
-        if not Path(f"{self._model_directory}/{self.get_hash()}.pt").exists():
+        if isinstance(self.model, EnsembleModel) or (
+            isinstance(self.model, torch.nn.DataParallel | torch.nn.parallel.DistributedDataParallel) and isinstance(self.model.module, EnsembleModel)
+        ):
+            self.log_to_terminal("Not loading ensemble model. Make sure to load the individual models.")
+            return
+
+        if isinstance(self.model, PretrainedModel) or (
+            isinstance(self.model, torch.nn.DataParallel | torch.nn.parallel.DistributedDataParallel) and isinstance(self.model.module, PretrainedModel)
+        ):
+            self.log_to_terminal("Not loading pretrained model in the main trainer. The model should load in the PretrainedModel class")
+            return
+
+        # Check if the model exists
+        model_path = Path(self._model_directory) / (self.get_hash() + ".pt")
+        if not model_path.exists():
             raise FileNotFoundError(
-                f"Model not found in {self._model_directory}/{self.get_hash()}.pt",
+                f"Model not found in {model_path.as_posix()}",
             )
 
         # Load model
         self.log_to_terminal(
-            f"Loading model from {self._model_directory}/{self.get_hash()}.pt",
+            f"Loading model from {model_path.as_posix()}",
         )
         # If device is cuda, load the model to the device
         if self.device == "cuda":
-            checkpoint = torch.load(f"{self._model_directory}/{self.get_hash()}.pt")
+            checkpoint = torch.load(model_path)
         else:
-            checkpoint = torch.load(f"{self._model_directory}/{self.get_hash()}.pt", map_location="cpu")
+            checkpoint = torch.load(model_path, map_location="cpu")
 
         # Load the weights from the checkpoint
         if isinstance(checkpoint, torch.nn.DataParallel | torch.nn.parallel.DistributedDataParallel):
@@ -188,7 +204,7 @@ class MainTrainer(TorchTrainer, Logger):
             self.model.load_state_dict(model.state_dict())
 
         self.log_to_terminal(
-            f"Model loaded from {self._model_directory}/{self.get_hash()}.pt",
+            f"Model loaded from {model_path.as_posix()}",
         )
 
     def predict_on_loader(
@@ -225,7 +241,6 @@ class MainTrainer(TorchTrainer, Logger):
             )
 
         # Predict on the loader
-
         if self.device.type == "cuda":
             self.log_to_terminal("Predicting on the test data - Normal")
             with torch.no_grad(), tqdm(loader, unit="batch", disable=False) as tepoch:

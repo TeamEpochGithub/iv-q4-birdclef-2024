@@ -3,7 +3,9 @@ defaults:
   - _self_
 
 x_sys:
-
+  steps:
+    - _target_: src.modules.transformation.x.nan_to_zero.NanToZero
+      years: [ "2024" ]
 y_sys:
 
 train_sys:
@@ -20,20 +22,15 @@ train_sys:
            _target_: functools.partial
            _args_:
              - _target_: hydra.utils.get_class
-               path: torchaudio.transforms.MelSpectrogram #nnAudio.features.mel.MelSpectrogram
-          output_shape: [224, 224]
+               path: torchaudio.transforms.MelSpectrogram
+          output_shape: [256, 256]
           scale:
             _target_: src.modules.training.datasets.to_2d.spec_normalize.SpecNormalize
-
-        #  _target_: src.modules.training.datasets.to_2d.reshape.Reshape
-        #  shape: [400,400]
         labeler:
           _target_: src.modules.training.datasets.labeler.psd_labeler.PSDLabeler
         filter_:
           _target_: src.modules.training.datasets.filter.grade_threshold.GradeThreshold
           threshold: 0
-        process_delayed:
-          - _target_: src.modules.transformation.x.nan_to_zero.NanToZero
         aug_1d:
           _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
           x_transforms:
@@ -49,16 +46,11 @@ train_sys:
               p: 0.5
         aug_2d:
           _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
-          x_transforms:
-            - _target_: kornia.augmentation.RandomErasing
-              p: 0.25
           xy_transforms:
             - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.CutMix
-              p: 1
-            - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.MixUp
-              p: 0.8
+              p: 0.5
       dataloader_args:
-        num_workers: 16
+        num_workers: 8
         prefetch_factor: 2
         persistent_workers: false
       n_folds: 0 # 0 for train full,
@@ -66,11 +58,12 @@ train_sys:
       patience: 15
       batch_size: 64
       model:
-        _target_: src.modules.training.models.timm.Timm #Ensure that activation is sigmoid for non Logits loss functions.
-        in_channels: 1
-        out_channels: 182
-        model_name: "eca_nfnet_l0"
-        activation: "sigmoid"
+        _target_: src.modules.training.models.ensemble_model.AlternatingEnsembleModel
+        models:
+          - _target_: src.modules.training.models.pretrained_model.PretrainedModel
+            model_path: "tm/a8d11385aac1b94481fe9f02a49b5123_5_f0.pt"  # wandb.ai/team-epoch-iv/detect-bird/runs/k4o2zfhf
+          - _target_: src.modules.training.models.pretrained_model.PretrainedModel
+            model_path: "tm/e2864152f48e322c408bcca9cc4ec30f_0.pt"  # wandb.ai/team-epoch-iv/detect-bird/runs/tgjga2tg
       scheduler:
         _target_: functools.partial
         _args_:
@@ -88,5 +81,8 @@ train_sys:
           - _target_: hydra.utils.get_class
             path: torch.optim.AdamW
         lr: 1e-4
+    - _target_: src.modules.training.postprocessing.post_ensemble.AlternatingEnsembleModelPredictionsReweight
+      n_models: 2
+    - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
     - _target_: src.modules.training.postprocessing.smooth_file.SmoothFile
-      smooth_factor: 0.1
+      smooth_factor: 0.75
