@@ -1,6 +1,5 @@
 """Module for smoothing the predictions based on the current 4-minute audio file."""
 
-from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -22,8 +21,8 @@ class SmoothFile(VerboseTrainingBlock):
     """
 
     smooth_factor: float = 1
-    power: float = 2
-    kernel: Sequence[float] | None = None
+    power: float = 1
+    kernel: list[float] | None = None
 
     def custom_train(self, x: npt.NDArray[np.float32], y: npt.NDArray[np.float32], **train_args: Never) -> tuple[Any, Any]:
         """Return the input data and labels.

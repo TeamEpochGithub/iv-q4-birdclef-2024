@@ -7,12 +7,13 @@ x_sys:
   - _target_: src.modules.transformation.x.nan_to_zero.NanToZero
     years:
     - '2024'
+    - '2024google'
 y_sys: null
 train_sys:
   _target_: src.modules.training.verbose_training_pipeline.VerboseTrainingPipeline
   steps:
   - _target_: src.modules.training.main_trainer.MainTrainer
-    year: '2024'
+    year: 'union_2024_2024google'
     dataset_args:
       sampler:
         _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
@@ -56,7 +57,7 @@ train_sys:
       num_workers: 8
       prefetch_factor: 2
       persistent_workers: false
-    n_folds: 0
+    n_folds: 5
     epochs: 50
     patience: 14
     batch_size: 64
@@ -83,9 +84,9 @@ train_sys:
       - _target_: hydra.utils.get_class
         path: torch.optim.AdamW
       lr: 0.0005
+#  - _target_: src.modules.training.postprocessing.smooth_file.SmoothFile
+#    smooth_factor: 0.75
   - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
-  - _target_: src.modules.training.postprocessing.smooth_file.SmoothFile
-    smooth_factor: 0.75
 pred_sys:
   _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline
   title: Postprocessing pipeline

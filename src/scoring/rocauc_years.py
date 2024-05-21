@@ -65,8 +65,11 @@ class ROCAUC(Scorer):
         for year in years:
             logger.info(f"Calculating ROC AUC for year {year}")
 
-            metadata: pd.DataFrame | None = y_true[f"meta_{year}"].iloc[test_indices[str(year)]]  # type: ignore[call-overload]
-            y_true_year: pd.DataFrame | None = y_true[f"label_{year}"].iloc[test_indices[str(year)]]  # type: ignore[call-overload]
+            metadata = y_true[f"meta_{year}"].iloc[test_indices[str(year)]]  # type: ignore[call-overload]
+            y_true_year = y_true[f"label_{year}"].iloc[test_indices[str(year)]]  # type: ignore[call-overload]
+            if y_true_year.sum().sum() == 0:
+                logger.warning(f"No positive labels in y_true for year {year}, skipping ROC AUC calculation.")
+                continue
             # Check if metadata is not None
             if metadata is None or y_true_year is None:
                 raise ValueError("Metadata is required for this scorer.")
@@ -82,7 +85,7 @@ class ROCAUC(Scorer):
                 # Also slice metadata
                 metadata = metadata[indices]
 
-            if self.only_primary:
+            if self.only_primary and "secondary_labels" in metadata.columns:
                 # Get the indices from the metadata where secondary label is an empty list as string
                 indices = metadata["secondary_labels"] == "[]"
 

@@ -26,7 +26,7 @@ class VisualizePreds(VerboseTrainingBlock):
     """
 
     n: int = 10
-    threshold: float = 0.1
+    threshold: float = 0.01
 
     def custom_train(
         self,
