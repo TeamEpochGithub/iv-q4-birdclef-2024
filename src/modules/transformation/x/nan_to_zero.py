@@ -1,4 +1,6 @@
 """Example transformation block for the transformation pipeline."""
+
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -6,6 +8,7 @@ import numpy as np
 import numpy.typing as npt
 from dask import delayed
 from tqdm import tqdm
+from typing_extensions import Never
 
 from src.modules.transformation.verbose_transformation_block import VerboseTransformationBlock
 from src.typing.typing import XData
@@ -15,13 +18,13 @@ from src.typing.typing import XData
 class NanToZero(VerboseTransformationBlock):
     """An example transformation block for the transformation pipeline."""
 
-    years: list[str] = field(default_factory=lambda: ["2024"])
+    years: Iterable[str] = field(default_factory=lambda: ["2024"])
 
-    def custom_transform(self, data: XData) -> XData:
+    def custom_transform(self, data: XData, **kwargs: Never) -> XData:
         """Apply a custom transformation to the data.
 
         :param data: The data to transform
-        :param kwargs: Any additional arguments
+        :param kwargs: (UNUSED) Any additional arguments
         :return: The transformed data
         """
         for year in self.years:

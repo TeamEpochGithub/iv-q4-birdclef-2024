@@ -1,17 +1,13 @@
 """Lock that makes sure only one instance of the script is running at a time."""
+
 import os
-import sys
 import time
 from types import TracebackType
+from typing import Literal
+
+from typing_extensions import Self
 
 from src.utils.logger import logger
-
-if sys.version_info < (3, 11):  # Self was added in Python 3.11
-    from typing import Literal
-
-    from typing_extensions import Self
-else:
-    from typing import Literal, Self
 
 
 class Lock:
@@ -26,7 +22,10 @@ class Lock:
             self.lock_file = f".lock_{os.environ['CUDA_VISIBLE_DEVICES'].replace(',', '_')}"
 
     def __enter__(self) -> Self:
-        """Create the lock file."""
+        """Create the lock file.
+
+        :return: The lock object.
+        """
         logger.info("Acquiring lock")
 
         # Check if locked by checking if the file exists

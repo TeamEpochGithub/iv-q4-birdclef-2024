@@ -1,4 +1,5 @@
 """Keep only the predictions of the bird species featured in the BirdCLEF 2024 dataset when using the datasets from other years."""
+
 from dataclasses import dataclass
 from typing import Any
 
@@ -19,7 +20,13 @@ class Keep2024Species(VerboseTrainingBlock):
         y: npt.NDArray[np.floating[Any]],
         **train_args: Never,
     ) -> tuple[npt.NDArray[np.floating[Any]], npt.NDArray[np.floating[Any]]]:
-        """Return the input data and labels."""
+        """Return the input data and labels.
+
+        :param x: The input data in shape (n_samples=48n, n_features=182)
+        :param y: The labels in shape (n_samples=48n, n_features=182)
+        :param train_args: (UNUSED) The training arguments
+        :return: The input data and labels
+        """
         return x, y
 
     def custom_predict(self, x: npt.NDArray[np.floating[Any]], **pred_args: Never) -> npt.NDArray[np.floating[Any]]:
@@ -28,6 +35,7 @@ class Keep2024Species(VerboseTrainingBlock):
         Keep in mind that 2024 must be the first year in the input data.
 
         :param x: The input data in shape (n_samples=48n, n_features=182)
+        :param pred_args: (UNUSED) The prediction arguments
         :return: The predictions
         """
         return x[:, :182]

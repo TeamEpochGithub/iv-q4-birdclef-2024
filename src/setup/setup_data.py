@@ -3,9 +3,11 @@
 - Since these methods are very competition specific none have been implemented here yet.
 - Usually you'll have one data setup for training and another for making submissions.
 """
+
 import ast
-import glob
-from typing import Any
+import os
+from collections.abc import Iterable
+from pathlib import Path
 
 import librosa
 import numpy as np
@@ -17,7 +19,7 @@ from src.typing.typing import XData, YData
 from src.utils.logger import logger
 
 
-def setup_train_x_data(raw_path: str, years: list[int]) -> XData:
+def setup_train_x_data(raw_path: str | os.PathLike[str], years: Iterable[str]) -> XData:
     """Create train x data for pipeline.
 
     :param raw_path: Raw path
@@ -29,14 +31,14 @@ def setup_train_x_data(raw_path: str, years: list[int]) -> XData:
     xdata = XData()
 
     for year in years:
-        metadata_path = raw_path + str(year) + "/" + "train_metadata.csv"
-        data_path = raw_path + str(year) + "/" + "train_audio/"
+        raw_year_path = Path(raw_path) / str(year)
+        metadata_path = raw_year_path / "train_metadata.csv"
+        data_path = raw_year_path / "train_audio"
         metadata = pd.read_csv(metadata_path)
-        metadata["samplename"] = metadata.filename.map(lambda x: x.split("/")[0] + "-" + x.split("/")[-1].split(".")[0])
+        metadata["samplename"] = metadata["filename"].str.replace("/", "-").str.replace(".ogg", "").str.replace(".mp3", "")
 
         # Load the bird_2024 data
-        filenames = metadata.filename
-        filenames = [data_path + filename for filename in filenames]
+        filenames = [data_path / filename for filename in metadata["filename"]]
 
         bird = np.array([load_audio_train(filename) for filename in filenames])
         xdata[f"bird_{year}"] = bird
@@ -46,7 +48,7 @@ def setup_train_x_data(raw_path: str, years: list[int]) -> XData:
 
 
 @delayed
-def load_audio_train(path: str) -> npt.NDArray[np.float32]:
+def load_audio_train(path: str | os.PathLike[str]) -> npt.NDArray[np.float32]:
     """Load audio data lazily using librosa.
 
     :param path: Path to the audio file
@@ -56,7 +58,7 @@ def load_audio_train(path: str) -> npt.NDArray[np.float32]:
 
 
 @delayed
-def load_audio_submit(path: str) -> npt.NDArray[np.float32]:
+def load_audio_submit(path: str | os.PathLike[str]) -> npt.NDArray[np.float32]:
     """Load audio data lazily using librosa.
 
     :param path: Path to the audio file
@@ -65,7 +67,7 @@ def load_audio_submit(path: str) -> npt.NDArray[np.float32]:
     return librosa.load(path, sr=32000, dtype=np.float32)[0] / 100
 
 
-def setup_train_y_data(raw_path: str, years: list[str]) -> YData:
+def setup_train_y_data(raw_path: str | os.PathLike[str], years: Iterable[str]) -> YData:
     """Create train y data for pipeline.
 
     :param raw_path: path to the raw data
@@ -76,9 +78,9 @@ def setup_train_y_data(raw_path: str, years: list[str]) -> YData:
     ydata = YData()
 
     for year in years:
-        metadata_path = raw_path + str(year) + "/" + "train_metadata.csv"
+        metadata_path = Path(raw_path) / str(year) / "train_metadata.csv"
         metadata = pd.read_csv(metadata_path)
-        metadata["samplename"] = metadata.filename.map(lambda x: x.split("/")[0] + "-" + x.split("/")[-1].split(".")[0])
+        metadata["samplename"] = metadata["filename"].str.replace("/", "-").str.replace(".ogg", "").str.replace(".mp3", "")
 
         ydata[f"meta_{year}"] = metadata
 
@@ -136,15 +138,14 @@ def one_hot_label(metadata: pd.DataFrame) -> pd.DataFrame:
     return one_hot
 
 
-def setup_inference_data(path: str) -> Any:  # noqa: ANN401
+def setup_inference_data(path: str | os.PathLike[str]) -> XData:
     """Create data for inference with pipeline.
 
-    :param raw_path: Raw path
     :param path: Usually raw path is a parameter
     :return: Inference data
     """
     # Load all files in the path that end with .ogg with glob
-    filenames = glob.glob(path + "/*.ogg")
+    filenames = list(Path(path).glob("*.ogg"))
 
     logger.info(f"Filenames: {filenames[:10]}...")
 
@@ -154,9 +155,9 @@ def setup_inference_data(path: str) -> Any:  # noqa: ANN401
     return XData(bird_2024=bird_2024)
 
 
-def setup_splitter_data() -> Any:  # noqa: ANN401
+def setup_splitter_data() -> None:
     """Create data for splitter.
 
-    :return: Splitter data
+    :return: None
     """
-    return None
+    return
