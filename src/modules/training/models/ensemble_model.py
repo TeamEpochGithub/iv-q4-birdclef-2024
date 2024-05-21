@@ -2,6 +2,7 @@
 
 Yes, we use ensembles as models now because our codebase hates any other ensembling techniques than voting.
 """
+
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from typing import Annotated, Final

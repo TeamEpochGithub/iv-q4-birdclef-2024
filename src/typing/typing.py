@@ -134,6 +134,7 @@ class XData:
         """
         return any(self[f"bird_{year}"] is not None for year in self.years)
 
+
 @dataclass
 class YData:
     """Dataclass to hold Y data.

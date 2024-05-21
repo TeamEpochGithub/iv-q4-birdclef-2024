@@ -1,4 +1,5 @@
 """Post ensembling pipeline with post processing blocks."""
+
 from collections.abc import Sequence
 from typing import NoReturn
 

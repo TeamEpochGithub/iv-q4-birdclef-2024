@@ -1,4 +1,5 @@
 """A module that uses a pretrained model for inference."""
+
 from os import PathLike
 from pathlib import Path
 

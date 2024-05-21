@@ -1,6 +1,7 @@
 """Ensemble that alternates which model to use for prediction."""
+
 from collections.abc import Iterable
-from typing import Any, Final, TypeVar
+from typing import Any, Final, TypeVar, cast
 
 import numpy as np
 import numpy.typing as npt
@@ -42,7 +43,9 @@ class AlternatingEnsemble(PostEnsemble):
         for year in x.years:
             for i_model in range(len(self.steps)):
                 model_windows = [
-                    sound.reshape((NUM_WINDOWS, WINDOW_SIZE))[i_window] for sound in x[f"bird_{year}"] for i_window in range(i_model, NUM_WINDOWS, len(self.steps))
+                    sound.reshape((NUM_WINDOWS, WINDOW_SIZE))[i_window]
+                    for sound in cast(npt.NDArray[Any], x[f"bird_{year}"])
+                    for i_window in range(i_model, NUM_WINDOWS, len(self.steps))
                 ]
                 model_data[i_model][f"bird_{year}"] = np.concatenate(model_windows)  # TODO(Jeffrey): Delay the concatenation
 
