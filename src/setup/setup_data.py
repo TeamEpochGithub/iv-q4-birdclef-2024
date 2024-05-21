@@ -33,6 +33,7 @@ def setup_train_x_data(raw_path: str, years: list[int]) -> XData:
         data_path = raw_path + str(year) + "/" + "train_audio/"
         metadata = pd.read_csv(metadata_path)
         metadata["samplename"] = metadata.filename.map(lambda x: x.split("/")[0] + "-" + x.split("/")[-1].split(".")[0])
+        #metadata = metadata[metadata['secondary_labels'] == '[]'].reset_index(drop=True)
 
         # Load the bird_2024 data
         filenames = metadata.filename
@@ -79,6 +80,7 @@ def setup_train_y_data(raw_path: str, years: list[str]) -> YData:
         metadata_path = raw_path + str(year) + "/" + "train_metadata.csv"
         metadata = pd.read_csv(metadata_path)
         metadata["samplename"] = metadata.filename.map(lambda x: x.split("/")[0] + "-" + x.split("/")[-1].split(".")[0])
+        #metadata = metadata[metadata['secondary_labels'] == '[]'].reset_index(drop=True)
 
         ydata[f"meta_{year}"] = metadata
 
@@ -111,10 +113,11 @@ def one_hot_primary_secondary(metadata: pd.DataFrame) -> pd.DataFrame:
             continue
         for secondary_label in ast.literal_eval(secondary_labels):
             try:
-                one_hot.iloc[i, primary_labels_dict[secondary_label]] = 0.5
+                one_hot.iloc[i, primary_labels_dict[secondary_label]] = 0.0
             except KeyError:  # noqa: PERF203
                 errors.append((i, secondary_label))
     logger.debug(f"Errors: {errors}")
+
     return one_hot
 
 
@@ -148,7 +151,7 @@ def setup_inference_data(path: str) -> Any:  # noqa: ANN401
     :return: Inference data
     """
     # Load all files in the path that end with .ogg with glob
-    filenames = glob.glob(path + "/*.ogg")
+    filenames = glob.glob(path + "/*.ogg") + glob.glob(path + "/*.wav")
 
     logger.info(f"Filenames: {filenames[:10]}...")
 

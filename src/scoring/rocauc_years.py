@@ -52,6 +52,8 @@ class ROCAUC:
 
             metadata = y_true[f"meta_{year}"].iloc[test_indices[str(year)]]  # type: ignore[union-attr]
             y_true_year = y_true[f"label_{year}"].iloc[test_indices[str(year)]]  # type: ignore[union-attr]
+            if y_true_year.sum().sum() <= 0:
+                continue
             # Check if metadata is not None
             if metadata is None:
                 raise ValueError("Metadata is required for this scorer.")
@@ -67,7 +69,7 @@ class ROCAUC:
                 # Also slice metadata
                 metadata = metadata[indices]
 
-            if self.only_primary:
+            if self.only_primary and year != 'kenya':
                 # Get the indices from the metadata where secondary label is an empty list as string
                 indices = metadata["secondary_labels"] == "[]"
 
