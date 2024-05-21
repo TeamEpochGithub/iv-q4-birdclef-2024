@@ -239,6 +239,8 @@ class MainTrainer(TorchTrainer, Logger):
                     collate_fn if hasattr(loader.dataset, "__getitems__") else None  # type: ignore[arg-type]
                 ),
             )
+
+        # Predict on the loader
         if self.device.type == "cuda":
             self.log_to_terminal("Predicting on the test data - Normal")
             with torch.no_grad(), tqdm(loader, unit="batch", disable=False) as tepoch:

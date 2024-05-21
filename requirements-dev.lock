@@ -11,6 +11,9 @@
 --find-links https://download.pytorch.org/whl/torch_stable.html
 
 -e file:.
+absl-py==1.4.0
+    # via tensorboard
+    # via tensorflow
 agogos==0.4
     # via epochalyst
 aiofiles==23.2.1
@@ -35,6 +38,8 @@ arrow==1.3.0
     # via isoduration
 asttokens==2.4.1
     # via stack-data
+astunparse==1.6.3
+    # via tensorflow
 async-lru==2.0.4
     # via jupyterlab
 async-timeout==4.0.3
@@ -52,6 +57,8 @@ beautifulsoup4==4.12.3
 bleach==6.1.0
     # via kaggle
     # via nbconvert
+cachetools==5.3.3
+    # via google-auth
 certifi==2024.2.2
     # via httpcore
     # via httpx
@@ -63,7 +70,7 @@ cffi==1.16.0
     # via soundfile
 cfgv==3.4.0
     # via pre-commit
-charset-normalizer==2.1.1
+charset-normalizer==3.3.2
     # via requests
 click==8.1.7
     # via dask
@@ -108,7 +115,7 @@ executing==2.0.1
     # via stack-data
 fastjsonschema==2.19.1
     # via nbformat
-filelock==3.13.1
+filelock==3.14.0
     # via huggingface-hub
     # via torch
     # via triton
@@ -117,6 +124,7 @@ fire==0.6.0
     # via randomname
 flatbuffers==24.3.25
     # via onnxruntime
+    # via tensorflow
 fonttools==4.51.0
     # via matplotlib
 fqdn==1.5.1
@@ -124,16 +132,30 @@ fqdn==1.5.1
 frozenlist==1.4.1
     # via aiohttp
     # via aiosignal
-fsspec==2024.2.0
+fsspec==2024.3.1
     # via dask
     # via huggingface-hub
     # via torch
+gast==0.5.4
+    # via tensorflow
 gitdb==4.0.11
     # via gitpython
 gitpython==3.1.43
     # via wandb
+google-auth==2.29.0
+    # via google-auth-oauthlib
+    # via tensorboard
+google-auth-oauthlib==1.0.0
+    # via tensorboard
+google-pasta==0.2.0
+    # via tensorflow
+grpcio==1.63.0
+    # via tensorboard
+    # via tensorflow
 h11==0.14.0
     # via httpcore
+h5py==3.11.0
+    # via tensorflow
 httpcore==1.0.5
     # via httpx
 httpx==0.27.0
@@ -146,7 +168,7 @@ hydra-core==1.3.2
     # via q4-bird-clef
 identify==2.5.36
     # via pre-commit
-idna==3.4
+idna==3.7
     # via anyio
     # via httpx
     # via jsonschema
@@ -171,7 +193,7 @@ isoduration==20.11.0
     # via jsonschema
 jedi==0.19.1
     # via ipython
-jinja2==3.1.3
+jinja2==3.1.4
     # via jupyter-server
     # via jupyterlab
     # via jupyterlab-server
@@ -222,16 +244,18 @@ jupyter-server==2.14.0
     # via notebook-shim
 jupyter-server-terminals==0.5.3
     # via jupyter-server
-jupyterlab==4.1.6
+jupyterlab==4.1.8
     # via notebook
 jupyterlab-pygments==0.3.0
     # via nbconvert
-jupyterlab-server==2.24.0
+jupyterlab-server==2.27.1
     # via jupyterlab
     # via notebook
 jupyterlab-widgets==3.0.10
     # via ipywidgets
 kaggle==1.6.12
+keras==2.14.0
+    # via tensorflow
 kiwisolver==1.4.5
     # via matplotlib
 kornia==0.7.2
@@ -240,15 +264,20 @@ kornia-rs==0.1.3
     # via kornia
 lazy-loader==0.4
     # via librosa
+libclang==18.1.1
+    # via tensorflow
 librosa==0.10.2
     # via q4-bird-clef
 llvmlite==0.42.0
     # via numba
 locket==1.0.0
     # via partd
+markdown==3.6
+    # via tensorboard
 markupsafe==2.1.5
     # via jinja2
     # via nbconvert
+    # via werkzeug
 matplotlib==3.8.4
     # via q4-bird-clef
     # via seaborn
@@ -257,6 +286,8 @@ matplotlib-inline==0.1.7
     # via ipython
 mistune==3.0.2
     # via nbconvert
+ml-dtypes==0.2.0
+    # via tensorflow
 mpmath==1.3.0
     # via sympy
 msgpack==1.0.8
@@ -275,7 +306,7 @@ nbformat==5.10.4
     # via nbconvert
 nest-asyncio==1.6.0
     # via ipykernel
-networkx==3.2.1
+networkx==3.3
     # via torch
 nodeenv==1.8.0
     # via pre-commit
@@ -286,14 +317,17 @@ notebook-shim==0.2.4
     # via notebook
 numba==0.59.1
     # via librosa
-numpy==1.26.3
+numpy==1.26.4
     # via contourpy
     # via epochalyst
+    # via h5py
     # via librosa
     # via matplotlib
+    # via ml-dtypes
     # via numba
     # via onnx
     # via onnxruntime
+    # via opt-einsum
     # via pandas
     # via pyarrow
     # via q4-bird-clef
@@ -301,44 +335,76 @@ numpy==1.26.3
     # via scipy
     # via seaborn
     # via soxr
+    # via tensorboard
+    # via tensorflow
+    # via tensorflow-hub
     # via torchvision
+nvidia-cublas-cu11==11.11.3.6
+    # via nvidia-cudnn-cu11
+    # via nvidia-cusolver-cu11
+    # via tensorflow
+    # via tensorrt
 nvidia-cublas-cu12==12.1.3.1
     # via nvidia-cudnn-cu12
     # via nvidia-cusolver-cu12
     # via torch
+nvidia-cuda-cupti-cu11==11.8.87
+    # via tensorflow
 nvidia-cuda-cupti-cu12==12.1.105
     # via torch
+nvidia-cuda-nvcc-cu11==11.8.89
+    # via tensorflow
 nvidia-cuda-nvrtc-cu12==12.1.105
     # via torch
+nvidia-cuda-runtime-cu11==11.8.89
+    # via tensorflow
+    # via tensorrt
 nvidia-cuda-runtime-cu12==12.1.105
     # via torch
+nvidia-cudnn-cu11==8.7.0.84
+    # via tensorflow
+    # via tensorrt
 nvidia-cudnn-cu12==8.9.2.26
     # via torch
+nvidia-cufft-cu11==10.9.0.58
+    # via tensorflow
 nvidia-cufft-cu12==11.0.2.54
     # via torch
+nvidia-curand-cu11==10.3.0.86
+    # via tensorflow
 nvidia-curand-cu12==10.3.2.106
     # via torch
+nvidia-cusolver-cu11==11.4.1.48
+    # via tensorflow
 nvidia-cusolver-cu12==11.4.5.107
     # via torch
+nvidia-cusparse-cu11==11.7.5.86
+    # via tensorflow
 nvidia-cusparse-cu12==12.1.0.106
     # via nvidia-cusolver-cu12
     # via torch
+nvidia-nccl-cu11==2.16.5
+    # via tensorflow
 nvidia-nccl-cu12==2.19.3
     # via torch
-nvidia-nvjitlink-cu12==12.1.105
+nvidia-nvjitlink-cu12==12.4.127
     # via nvidia-cusolver-cu12
     # via nvidia-cusparse-cu12
 nvidia-nvtx-cu12==12.1.105
     # via torch
+oauthlib==3.2.2
+    # via requests-oauthlib
 omegaconf==2.3.0
     # via hydra-core
 onnx==1.16.0
     # via q4-bird-clef
 onnxruntime==1.17.3
     # via q4-bird-clef
+opt-einsum==3.3.0
+    # via tensorflow
 overrides==7.7.0
     # via jupyter-server
-packaging==22.0
+packaging==24.0
     # via dask
     # via huggingface-hub
     # via hydra-core
@@ -356,6 +422,7 @@ packaging==22.0
     # via pytest
     # via qtconsole
     # via qtpy
+    # via tensorflow
 pandas==2.2.2
     # via dask-expr
     # via q4-bird-clef
@@ -368,7 +435,7 @@ partd==1.4.2
     # via dask
 pexpect==4.9.0
     # via ipython
-pillow==10.2.0
+pillow==10.3.0
     # via matplotlib
     # via torchvision
 platformdirs==4.2.1
@@ -382,7 +449,7 @@ pluggy==1.5.0
     # via pytest
 pooch==1.8.1
     # via librosa
-pre-commit==3.7.0
+pre-commit==3.7.1
 prometheus-client==0.20.0
     # via jupyter-server
 prompt-toolkit==3.0.43
@@ -391,6 +458,9 @@ prompt-toolkit==3.0.43
 protobuf==4.25.3
     # via onnx
     # via onnxruntime
+    # via tensorboard
+    # via tensorflow
+    # via tensorflow-hub
     # via wandb
 psutil==5.9.8
     # via ipykernel
@@ -402,6 +472,11 @@ pure-eval==0.2.2
     # via stack-data
 pyarrow==16.0.0
     # via dask-expr
+pyasn1==0.6.0
+    # via pyasn1-modules
+    # via rsa
+pyasn1-modules==0.4.0
+    # via google-auth
 pycparser==2.22
     # via cffi
 pygments==2.18.0
@@ -450,12 +525,16 @@ referencing==0.35.1
     # via jsonschema
     # via jsonschema-specifications
     # via jupyter-events
-requests==2.28.1
+requests==2.31.0
     # via huggingface-hub
     # via jupyterlab-server
     # via kaggle
     # via pooch
+    # via requests-oauthlib
+    # via tensorboard
     # via wandb
+requests-oauthlib==2.0.0
+    # via google-auth-oauthlib
 rfc3339-validator==0.1.4
     # via jsonschema
     # via jupyter-events
@@ -465,6 +544,8 @@ rfc3986-validator==0.1.1
 rpds-py==0.18.1
     # via jsonschema
     # via referencing
+rsa==4.9
+    # via google-auth
 safetensors==0.4.3
     # via timm
 scikit-learn==1.4.2
@@ -483,15 +564,21 @@ setproctitle==1.3.3
     # via wandb
 setuptools==69.5.1
     # via nodeenv
+    # via tensorboard
+    # via tensorflow
     # via wandb
 six==1.16.0
     # via asttokens
+    # via astunparse
     # via bleach
     # via docker-pycreds
     # via fire
+    # via google-pasta
     # via kaggle
     # via python-dateutil
     # via rfc3339-validator
+    # via tensorboard
+    # via tensorflow
 smmap==5.0.1
     # via gitdb
 sniffio==1.3.1
@@ -510,13 +597,28 @@ sympy==1.12
     # via torch
 tenacity==8.3.0
     # via plotly
+tensorboard==2.14.1
+    # via tensorflow
+tensorboard-data-server==0.7.2
+    # via tensorboard
+tensorflow==2.14.1
+tensorflow-estimator==2.14.0
+    # via tensorflow
+tensorflow-hub==0.16.1
+tensorflow-io-gcs-filesystem==0.37.0
+    # via tensorflow
+tensorrt==8.5.3.1
+    # via tensorflow
 termcolor==2.4.0
     # via fire
+    # via tensorflow
 terminado==0.18.1
     # via jupyter-server
     # via jupyter-server-terminals
 text-unidecode==1.3
     # via python-slugify
+tf-keras==2.15.0
+    # via tensorflow-hub
 threadpoolctl==3.5.0
     # via scikit-learn
 timm==0.9.16
@@ -549,7 +651,7 @@ tornado==6.4
     # via jupyterlab
     # via notebook
     # via terminado
-tqdm==4.64.1
+tqdm==4.66.4
     # via huggingface-hub
     # via kaggle
     # via q4-bird-clef
@@ -573,23 +675,24 @@ triton==2.2.0
     # via torch
 types-python-dateutil==2.9.0.20240316
     # via arrow
-typing-extensions==4.9.0
+typing-extensions==4.11.0
     # via anyio
     # via async-lru
     # via huggingface-hub
     # via ipython
     # via librosa
     # via q4-bird-clef
+    # via tensorflow
     # via torch
 tzdata==2024.1
     # via pandas
 uri-template==1.3.0
     # via jsonschema
-urllib3==1.26.13
+urllib3==2.2.1
     # via kaggle
     # via requests
     # via sentry-sdk
-virtualenv==20.26.1
+virtualenv==20.26.2
     # via pre-commit
 wandb==0.17.0
     # via q4-bird-clef
@@ -602,8 +705,14 @@ webencodings==0.5.1
     # via tinycss2
 websocket-client==1.8.0
     # via jupyter-server
+werkzeug==3.0.3
+    # via tensorboard
+wheel==0.43.0
+    # via astunparse
 widgetsnbextension==4.0.10
     # via ipywidgets
+wrapt==1.14.1
+    # via tensorflow
 xeno-canto==3.0
 yarl==1.9.4
     # via aiohttp
