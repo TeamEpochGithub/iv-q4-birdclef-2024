@@ -40,9 +40,8 @@ class ROCAUC:
         label_lookup = pd.concat([y_true[f"label_{year}"] for year in years]).fillna(0).reset_index(drop=True)
 
         # Do the year splitting the same way as in XData and YData
-        for year in years:
-            year_preds[str(year)] = y_pred[start_idx : start_idx + len(test_indices[str(year)])]  # type: ignore[arg-type, assignment]
-            start_idx += len(test_indices[str(year)])  # type: ignore[arg-type]
+        for i, year in enumerate(years):
+            year_preds[str(year)] = y_pred[i]  # type: ignore[arg-type, assignment]
 
         # Loop over the years
         for year in years:
@@ -67,7 +66,7 @@ class ROCAUC:
                 # Also slice metadata
                 metadata = metadata[indices]
 
-            if self.only_primary:
+            if self.only_primary and year != 'kenya':
                 # Get the indices from the metadata where secondary label is an empty list as string
                 indices = metadata["secondary_labels"] == "[]"
 
@@ -83,7 +82,8 @@ class ROCAUC:
             # Select the correct columns from the pred using the label_lookup
             label_indices = [label_lookup.columns.get_loc(col) for col in y_true_year.columns]
 
-            submission = pd.DataFrame(np.clip(y_pred_year[:, label_indices], 0, 1), columns=solution.columns)
+            # Hard coded to 2024 + kenya
+            submission = pd.DataFrame(np.clip(y_pred_year[:, [i % 182 for i in label_indices]], 0, 1), columns=solution.columns)
 
             if not pd.api.types.is_numeric_dtype(submission.values):
                 bad_dtypes = {x: submission[x].dtype for x in submission.columns if not pd.api.types.is_numeric_dtype(submission[x])}

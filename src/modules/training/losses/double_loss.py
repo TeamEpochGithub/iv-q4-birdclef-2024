@@ -18,5 +18,4 @@ class DoubleLoss(torch.nn.Module):
     def forward(self, task_inputs: torch.Tensor, task_targets: torch.Tensor, call_inputs: torch.Tensor, call_targets: torch.Tensor) -> torch.Tensor:
         task_loss = self.task_loss(task_inputs, task_targets)
         call_loss = self.call_loss(call_inputs, call_targets)
-        total_loss = task_loss + call_loss
-        return total_loss
+        return task_loss, call_loss
