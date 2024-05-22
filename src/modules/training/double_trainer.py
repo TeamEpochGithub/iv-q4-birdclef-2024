@@ -1,6 +1,7 @@
 import gc
 from abc import abstractmethod
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 import numpy.typing as npt
@@ -15,6 +16,7 @@ from tqdm import tqdm
 
 from src.modules.training.datasets.dask_dataset import DaskDataset
 from src.modules.training.datasets.double_dataset import DoubleDataset
+from src.modules.training.datasets.sampler.submission import SubmissionSampler
 from src.modules.training.main_trainer import MainTrainer
 from src.typing.typing import XData, YData
 
@@ -50,6 +52,25 @@ class DoubleTrainer(MainTrainer):
         test_dataset = DoubleDataset(target_dataset_test, disc_dataset_test)
 
         return train_dataset, test_dataset
+
+    def create_prediction_dataset(
+        self,
+        x: XData,
+    ) -> Dataset[tuple[Tensor, ...]]:
+        """Create the prediction dataset for submission used in custom_predict.
+
+        :param x: The input data.
+        :return: The prediction dataset.
+        """
+        pred_dataset_args = self.dataset_args.copy()
+        if pred_dataset_args.get("aug_1d") is not None:
+            del pred_dataset_args["aug_1d"]
+        if pred_dataset_args.get("aug_2d") is not None:
+            del pred_dataset_args["aug_2d"]
+        pred_dataset_args["sampler"] = SubmissionSampler()
+
+        task_dataset = DaskDataset(X=x, year="2024", **pred_dataset_args)
+        return DoubleDataset(task_dataset=task_dataset, discriminator_dataset=None)
 
     def _train_one_epoch(
             self,
@@ -174,7 +195,7 @@ class DoubleTrainer(MainTrainer):
         if self.device.type == "cuda":
             loader = DataLoader(
                 loader.dataset,
-                batch_size=loader.batch_size,
+                batch_size=1,
                 shuffle=False,
                 collate_fn=(
                     collate_fn if hasattr(loader.dataset, "__getitems__") else None  # type: ignore[arg-type]
@@ -184,7 +205,7 @@ class DoubleTrainer(MainTrainer):
         else:  # ONNX with CPU
             loader = DataLoader(
                 loader.dataset,
-                batch_size=loader.batch_size,
+                batch_size=1,
                 shuffle=False,
                 collate_fn=(
                     collate_fn if hasattr(loader.dataset, "__getitems__") else None  # type: ignore[arg-type]
@@ -212,10 +233,44 @@ class DoubleTrainer(MainTrainer):
                     # disc_predictions.extend(disc_pred)
 
             self.log_to_terminal("Done predicting")
-            return np.array(task_predictions), None # np.array(disc_predictions)
+            return np.array(task_predictions) # np.array(disc_predictions)
         # ONNX with CPU
         return self.onnx_predict(loader)
     
+    def onnx_predict(self, loader: DataLoader[tuple[Tensor, ...]]) -> npt.NDArray[np.float32]:
+        """Predict on the loader using ONNX.
+
+        :param loader: The loader to predict on.
+        :return: The predictions.
+        """
+        self.log_to_terminal("Predicting on the test data - ONNX")
+        # Get 1 item from the dataloader
+        input_tensor = next(iter(loader))[0][0].to(self.device).float()
+        input_names = ["actual_input"]
+        output_names = ["output"]
+        torch.onnx.export(self.model, input_tensor, f"{self.get_hash()}.onnx", verbose=False, input_names=input_names, output_names=output_names)
+        onnx_model = onnxrt.InferenceSession(f"{self.get_hash()}.onnx")
+        predictions = []
+        with torch.no_grad(), tqdm(loader, unit="batch", disable=False) as tepoch:
+            for data in tepoch:
+                (Xtask, ytask), (Xcall, ycall) = data
+                if Xtask is not None:
+                    Xtask = Xtask.to(self.device).float()
+                if ytask is not None:
+                    ytask = ytask.to(self.device).float()
+                if Xcall is not None:
+                    Xcall = Xcall.to(self.device).float()
+                if ycall is not None:
+                    ycall = ycall.to(self.device).float()
+
+                y_pred = onnx_model.run(output_names, {input_names[0]: Xtask.numpy()})[0]
+                predictions.extend(y_pred)
+
+        self.log_to_terminal("Done predicting")
+        # Remove the saved onnx model
+        Path(f"{self.get_hash()}.onnx").unlink()
+        return np.array(predictions)
+
 
 def collate_fn(batch: tuple[Tensor, ...]) -> tuple[Tensor, ...]:
     """Collate function for the dataloader.

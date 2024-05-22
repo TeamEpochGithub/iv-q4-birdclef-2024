@@ -41,7 +41,7 @@ class ROCAUC:
 
         # Do the year splitting the same way as in XData and YData
         for i, year in enumerate(years):
-            year_preds[str(year)] = y_pred[i]  # type: ignore[arg-type, assignment]
+            year_preds[str(year)] = y_pred  # type: ignore[arg-type, assignment]
 
         # Loop over the years
         for year in years:

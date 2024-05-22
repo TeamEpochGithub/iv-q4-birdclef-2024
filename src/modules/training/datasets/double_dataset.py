@@ -26,8 +26,10 @@ class DoubleDataset(Dataset):
 
     def __getitems__(self, indices: list[int]) -> tuple[Any, Any]:
         """Get multiple items from the dataset and apply augmentations if necessary."""
-        remapped_indices = np.random.choice(len(self.discriminator_dataset), len(indices), replace=False)
         task_out = self.task_dataset.__getitems__(indices)
-        disc_out = self.discriminator_dataset.__getitems__(remapped_indices)
-
+        if self.discriminator_dataset is not None:
+            remapped_indices = np.random.choice(len(self.discriminator_dataset), len(indices), replace=False)
+            disc_out = self.discriminator_dataset.__getitems__(remapped_indices)
+        else:
+            return task_out, (None, None)
         return task_out, disc_out

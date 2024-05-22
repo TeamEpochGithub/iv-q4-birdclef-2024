@@ -7,14 +7,12 @@ x_sys:
   - _target_: src.modules.transformation.x.nan_to_zero.NanToZero
     years:
     - '2024'
-    - 'kenya'
 y_sys: null
 train_sys:
   _target_: src.modules.training.verbose_training_pipeline.VerboseTrainingPipeline
   steps:
-  - _target_: src.modules.training.double_trainer.DoubleTrainer
-    years: ['2024', 'kenya']
-    lambda_: 0.001
+  - _target_: src.modules.training.main_trainer.MainTrainer
+    year: '2024'
     dataset_args:
       sampler:
         _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
@@ -29,15 +27,13 @@ train_sys:
         output_shape:
         - 224
         - 224
-
+        scale:
+          _target_: src.modules.training.datasets.to_2d.spec_normalize.SpecNormalize
       labeler:
         _target_: src.modules.training.datasets.labeler.psd_labeler.PSDLabeler
       filter_:
         _target_: src.modules.training.datasets.filter.grade_threshold.GradeThreshold
         threshold: 0
-      process_delayed:
-        - _target_: src.modules.transformation.x.rescale.Rescale
-          years: ['2024', 'kenya']
       aug_1d:
         _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
         x_transforms:
@@ -47,32 +43,27 @@ train_sys:
         - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomAmplitudeShift
           p: 0.5
         xy_transforms:
-        - _target_: src.modules.training.augmentations.time_series_augmentations.EnergyCutmix
+        - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.CutMix1D
           p: 0.5
         - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.MixUp1D
           p: 0.5
       aug_2d:
         _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
         xy_transforms:
-          - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.MixUp
-            p: 0.5
-
+        - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.CutMix
+          p: 0.5
     dataloader_args:
-      num_workers: 16
-      prefetch_factor: 1
+      num_workers: 8
+      prefetch_factor: 2
       persistent_workers: false
     n_folds: 5
     epochs: 50
     patience: 15
     batch_size: 64
     model:
-      _target_: src.modules.training.models.double_model.DoubleModel
-      model:
-        _target_: src.modules.training.models.timm.Timm
-        in_channels: 1
-        out_channels: 184
-        model_name: convnext_tiny
-        activation: sigmoid
+      _target_: src.modules.training.models.fdy_sed.CRNN
+      n_input_ch: 1
+      n_class: 182
     scheduler:
       _target_: functools.partial
       _args_:
@@ -83,20 +74,15 @@ train_sys:
       t_initial: 50
       cycle_limit: 1
     criterion:
-      _target_: src.modules.training.losses.double_loss.DoubleLoss
-      task_loss: 
-        _target_: torch.nn.BCELoss
-      call_loss: 
-        _target_: torch.nn.BCELoss
+      _target_: torch.nn.BCELoss
     optimizer:
       _target_: functools.partial
       _args_:
       - _target_: hydra.utils.get_class
         path: torch.optim.AdamW
       lr: 0.0005
-
-  - _target_: src.modules.training.postprocessing.keep_2024_species.Keep2024Species
-  - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
+  - _target_: src.modules.training.postprocessing.smooth_file.SmoothFile
+    smooth_factor: 0.75
 pred_sys:
   _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline
   title: Postprocessing pipeline
