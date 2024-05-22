@@ -1,7 +1,7 @@
 defaults:
   - base_submit
   - hydra/logging
-  - model: best_2024_kenya # Add models or ensembles
+  - model: double_loss_model # Add models or ensembles
 
 # Use this when uploading to Kaggle
 

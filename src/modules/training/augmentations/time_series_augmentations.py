@@ -42,33 +42,6 @@ class EnergyCutmix(torch.nn.Module):
     low: float = 0.25
     high: float = 0.75
 
-    # def find_minmax_energy_windows(self, audio_tensor: torch.Tensor, window_size: int, stride: int):
-    #     # Compute the squared values of the audio tensor
-    #     squared_audio = audio_tensor ** 2     
-        
-    #     # Apply convolution to compute the sliding window sums
-    #     energy_windows = torch.nn.functional.avg_pool1d(squared_audio, window_size, stride=stride, padding=0)
-        
-    #     # Remove the unnecessary dimensions
-    #     energy_windows = energy_windows.squeeze()
-        
-    #     # The length of the energy_windows will be len(audio_tensor) - window_size + 1
-    #     # Compute the start and end indices for the valid range
-    #     valid_length = energy_windows.size(0)
-        
-    #     # Find the maximum energy window and its index
-    #     max_energy, max_index = torch.max(energy_windows, dim=0)
-    #     min_energy, min_index = torch.min(energy_windows, dim=0)
-
-    #     # Compute the start and end indices for the max energy window
-    #     start_index_max = max_index.item() * stride
-    #     end_index_max = start_index_max + window_size
-    #     # Now for the min window
-    #     start_index_min = min_index.item() * stride
-    #     end_index_min = start_index_min + window_size
-        
-    #     return max_energy.item(), (start_index_max, end_index_max) , min_energy.item(), (start_index_min, end_index_min)
-
     def find_window(self, donor, receiver, window_size, stride):
         """Extract the strongest window from donor and the weakest from th receiver. Return the indices for both windows."""
         donor_power = donor ** 2

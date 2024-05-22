@@ -14,7 +14,7 @@ train_sys:
   steps:
   - _target_: src.modules.training.double_trainer.DoubleTrainer
     years: ['2024', 'kenya']
-    lambda_: 0.01
+    lambda_: 0.005
     dataset_args:
       sampler:
         _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
@@ -29,21 +29,32 @@ train_sys:
         output_shape:
         - 224
         - 224
-        scale:
-          _target_: src.modules.training.datasets.to_2d.spec_normalize.SpecNormalize
+
       labeler:
         _target_: src.modules.training.datasets.labeler.psd_labeler.PSDLabeler
       filter_:
         _target_: src.modules.training.datasets.filter.grade_threshold.GradeThreshold
         threshold: 0
+      process_delayed:
+        - _target_: src.modules.transformation.x.rescale.Rescale
       aug_1d:
-          _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
-          x_transforms:
-            - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomPhaseShift
-              p: 0.5
-              shift_limit: 0.5
-            - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomAmplitudeShift
-              p: 0.5
+        _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
+        x_transforms:
+        - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomPhaseShift
+          p: 0.5
+          shift_limit: 0.5
+        - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomAmplitudeShift
+          p: 0.5
+        xy_transforms:
+        - _target_: src.modules.training.augmentations.time_series_augmentations.EnergyCutmix
+          p: 0.5
+        - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.MixUp1D
+          p: 0.5
+      aug_2d:
+        _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
+        xy_transforms:
+          - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.MixUp
+            p: 0.5
 
     dataloader_args:
       num_workers: 16
@@ -82,8 +93,7 @@ train_sys:
       - _target_: hydra.utils.get_class
         path: torch.optim.AdamW
       lr: 0.0005
-  - _target_: src.modules.training.postprocessing.smooth_file.SmoothFile
-    smooth_factor: 0.75
+
   - _target_: src.modules.training.postprocessing.keep_2024_species.Keep2024Species
 pred_sys:
   _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline
