@@ -106,7 +106,7 @@ class DoubleTrainer(MainTrainer):
         # Remove the cuda cache
         torch.cuda.empty_cache()
         gc.collect()
-        losses = [task_losses[i] + call_losses[i] for i in range(len(task_losses))]
+        losses = [task_losses[i] + self.lambda_ * call_losses[i] for i in range(len(task_losses))]
         return sum(losses) / len(losses)
 
     def _val_one_epoch(
@@ -145,7 +145,7 @@ class DoubleTrainer(MainTrainer):
                 call_losses.append(call_loss.item())
                 pbar.set_description(desc=desc)
                 pbar.set_postfix(task_loss=sum(task_losses) / len(task_losses),call_loss=sum((call_losses)) / len(call_losses))
-        losses = [task_losses[i] + call_losses[i] for i in range(len(task_losses))]
+        losses = [task_losses[i] + self.lambda_ * call_losses[i] for i in range(len(task_losses))]
         return sum(losses) / len(losses)
 
 

@@ -113,3 +113,31 @@ plt.figure()
 plt.plot(augmented.numpy())
 plt.title('Augmented')
 plt.show()"""
+
+@dataclass
+class SumMixUp(torch.nn.Module):
+
+    p: float = 0.5
+    mode: str = "hard"
+
+    def __call__(self, x: torch.Tensor, y: torch.Tensor):
+        """Appply MixUp to the batch of 1D signal.
+
+        :param x: Input features. (N,C,L)|(N,L)
+        :param y: Input labels. (N,C)
+        :return: The augmented features and labels
+        """
+        indices = torch.arange(x.shape[0], device=x.device, dtype=torch.int)
+        shuffled_indices = torch.randperm(indices.shape[0])
+        lambda_ = torch.rand(x.shape[0], device=x.device)
+        if self.mode == 'hard':
+            lambda_ = lambda_ * 0.4 + 0.3
+
+        augmented_x = x.clone()
+        augmented_y = y.clone().float()
+        for i in range(x.shape[0]):
+            if torch.rand(1) < self.p:
+                augmented_x[i] = lambda_ * x[i] + (1 - lambda_[i]) * x[shuffled_indices[i]]
+                if self.mode == 'hard':
+                    augmented_y[i] = torch.clamp(y[i] + y[shuffled_indices[i]], 0, 1)
+        return augmented_x, augmented_y

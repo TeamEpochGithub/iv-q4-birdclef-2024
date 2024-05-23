@@ -19,7 +19,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 # Makes hydra give full error messages
 os.environ["HYDRA_FULL_ERROR"] = "1"
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 # Set up the config store, necessary for type checking of config yaml
 cs = ConfigStore.instance()
 cs.store(name="base_submit", node=SubmitConfig)

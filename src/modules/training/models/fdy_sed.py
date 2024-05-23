@@ -256,7 +256,7 @@ class CRNN(nn.Module):
         if freq != 1:
             print("warning! frequency axis is large: " + str(freq))
             x = x.permute(0, 2, 1, 3)
-            x = x.contiguous.view(bs, frame, ch*freq)
+            x = x.contiguous().view(bs, frame, ch*freq)
         else:
             x = x.squeeze(-1)
             x = x.permute(0, 2, 1) # x size : [bs, frames, chan]
