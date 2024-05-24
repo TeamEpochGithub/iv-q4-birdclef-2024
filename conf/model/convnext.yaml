@@ -53,7 +53,7 @@ train_sys:
 
             - _target_: audiomentations.AddBackgroundNoise
               p: 0.5
-              sounds_path: /home/tolga/Documents/q4-bird-clef/data/raw/esc50/audio/
+              sounds_path: data/raw/esc50/audio/
               min_snr_db: -3.0
               max_snr_db: 3.0
               noise_transform: 
@@ -111,3 +111,4 @@ train_sys:
         - _target_: hydra.utils.get_class
           path: torch.optim.AdamW
       lr: 2e-4
+  - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
