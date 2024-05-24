@@ -234,14 +234,23 @@ class CRNN(nn.Module):
 
         self.dropout = nn.Dropout(conv_dropout)
         self.sigmoid = nn.Sigmoid()
-        self.dense = nn.Linear(n_RNN_cell * 2, n_class)
+        self.dense = nn.Linear(n_RNN_cell * 2, 10)
 
         if self.attention:
-            self.dense_softmax = nn.Linear(n_RNN_cell * 2, n_class)
+            self.dense_softmax = nn.Linear(n_RNN_cell * 2, 10)
             if self.attention == "time":
                 self.softmax = nn.Softmax(dim=1)          # softmax on time dimension
             elif self.attention == "class":
                 self.softmax = nn.Softmax(dim=-1)         # softmax on class dimension
+        # Load the pre-trained weights
+        if torch.cuda.is_available():
+            pretrained = torch.load('/home/tolga/Downloads/best_student.pt')
+            self.load_state_dict(pretrained)
+        # Now update the last layers to use the proper output classes
+        self.dense = nn.Linear(n_RNN_cell*2, n_class)
+        if self.attention:
+            self.dense_softmax = nn.Linear(n_RNN_cell * 2, n_class)
+
 
     def forward(self, x): #input size : [bs, freqs, frames]
         if len(x.shape) == 4:

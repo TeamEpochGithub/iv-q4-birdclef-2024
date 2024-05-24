@@ -25,8 +25,8 @@ train_sys:
           - _target_: hydra.utils.get_class
             path: torchaudio.transforms.MelSpectrogram
         output_shape:
-        - 128
-        - 256
+        - 224
+        - 224
         scale:
           _target_: src.modules.training.datasets.to_2d.spec_normalize.SpecNormalize
       labeler:
@@ -34,80 +34,58 @@ train_sys:
       filter_:
         _target_: src.modules.training.datasets.filter.grade_threshold.GradeThreshold
         threshold: 0
-      process_delayed:
-        - _target_: src.modules.transformation.x.rescale.Rescale
       aug_1d:
         _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
         x_transforms:
-      #   - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomPhaseShift
-      #     p: 0.5
-      #     shift_limit: 0.5
+        - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomPhaseShift
+          p: 0
+          shift_limit: 0.5
         - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomAmplitudeShift
           p: 0.5
-        - _target_: src.modules.training.augmentations.audiomentations_compose.AudiomentationsCompose
-          compose: 
-            _target_: audiomentations.Compose
-            transforms:
-            - _target_: audiomentations.PolarityInversion
-              p: 0.5
-
-            - _target_: audiomentations.AddBackgroundNoise
-              p: 0.5
-              sounds_path: /home/tolga/Documents/q4-bird-clef/data/raw/esc50/audio/
-              min_snr_db: -3.0
-              max_snr_db: 3.0
-              noise_transform: 
-                _target_: audiomentations.PolarityInversion
-                p: 0.5
-
-            - _target_: audiomentations.AddColorNoise
-              p: 0.5
-              min_snr_db: -3.0
-              max_snr_db: 3.0
-            - _target_: audiomentations.PitchShift
-              p: 0.5
-
-            - _target_: audiomentations.Shift
-              p: 0.5
-
         xy_transforms:
-        - _target_: src.modules.training.augmentations.time_series_augmentations.EnergyCutmix
+        - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.CutMix1D
           p: 0.5
         - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.MixUp1D
           p: 0.5
       aug_2d:
         _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
         xy_transforms:
-        - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.MixUp
+        - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.CutMix
           p: 0.5
     dataloader_args:
       num_workers: 16
-      prefetch_factor: 1
+      prefetch_factor: 2
       persistent_workers: false
     n_folds: 5
     epochs: 50
     patience: 15
     batch_size: 64
     model:
-      _target_: src.modules.training.models.timm.Timm #Ensure that activation is sigmoid for non Logits loss functions.
+      _target_: src.modules.training.models.timm.Timm
       in_channels: 1
       out_channels: 182
-      model_name: "convnext_tiny"
-      activation: "sigmoid"
+      model_name: convnext_tiny
+      activation: sigmoid
     scheduler:
       _target_: functools.partial
       _args_:
-        - _target_: hydra.utils.get_class
-          path: timm.scheduler.cosine_lr.CosineLRScheduler
-      warmup_t: 5
-      warmup_lr_init: 1e-5
-      t_initial: 90
+      - _target_: hydra.utils.get_class
+        path: timm.scheduler.cosine_lr.CosineLRScheduler
+      warmup_t: 3
+      warmup_lr_init: 1.0e-05
+      t_initial: 50
       cycle_limit: 1
     criterion:
       _target_: torch.nn.BCELoss
     optimizer:
       _target_: functools.partial
       _args_:
-        - _target_: hydra.utils.get_class
-          path: torch.optim.AdamW
-      lr: 2e-4
+      - _target_: hydra.utils.get_class
+        path: torch.optim.AdamW
+      lr: 0.0005
+  - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
+pred_sys:
+  _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline
+  title: Postprocessing pipeline
+label_sys:
+  _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline

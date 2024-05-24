@@ -1,7 +1,7 @@
 defaults:
   - base_submit
   - hydra/logging
-  - model: double_loss_model # Add models or ensembles
+  - model: fdy_sed # Add models or ensembles
 
 # Use this when uploading to Kaggle
 
