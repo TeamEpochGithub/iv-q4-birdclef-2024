@@ -1,9 +1,10 @@
 """Module for example training block."""
 
+import signal
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, NoReturn
 
 import numpy as np
 import numpy.typing as npt
@@ -269,11 +270,20 @@ class MainTrainer(TorchTrainer, Logger):
         torch.onnx.export(self.model, input_tensor, f"{self.get_hash()}.onnx", verbose=False, input_names=input_names, output_names=output_names)
         onnx_model = onnxrt.InferenceSession(f"{self.get_hash()}.onnx")
         predictions = []
-        with torch.no_grad(), tqdm(loader, unit="batch", disable=False) as tepoch:
-            for data in tepoch:
-                X_batch = data[0].to(self.device).float()
-                y_pred = onnx_model.run(output_names, {input_names[0]: X_batch.numpy()})[0]
-                predictions.extend(y_pred)
+
+        signal.signal(signal.SIGALRM, handle_timeout)
+        signal.alarm(5000)  # TODO(Jeffrey): Set this in the config
+
+        try:
+            with torch.no_grad(), tqdm(loader, unit="batch", disable=False) as tepoch:
+                for data in tepoch:
+                    X_batch = data[0].to(self.device).float()
+                    y_pred = onnx_model.run(output_names, {input_names[0]: X_batch.numpy()})[0]
+                    predictions.extend(y_pred)
+        except TimeoutError:
+            self.log_to_terminal("Time limit reached. Stopping predictions.")
+        finally:
+            signal.alarm(0)
 
         self.log_to_terminal("Done predicting")
         # Remove the saved onnx model
@@ -289,3 +299,11 @@ def collate_fn(batch: tuple[torch.Tensor, ...]) -> tuple[torch.Tensor, ...]:
     """
     X, y = batch
     return X, y
+
+
+def handle_timeout(signum: int, frame: Any) -> NoReturn:
+    """Handle the timeout signal.
+
+    :raise TimeoutError: If the timeout is reached.
+    """
+    raise TimeoutError("Timed limit reached")
