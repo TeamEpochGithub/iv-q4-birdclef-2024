@@ -19,28 +19,36 @@ from src.typing.typing import XData, YData
 from src.utils.logger import logger
 
 
-def setup_train_x_data(raw_path: str | os.PathLike[str], years: Iterable[str]) -> XData:
+def setup_train_x_data(raw_path: str | os.PathLike[str], years: Iterable[str], max_recordings_per_species: int | None = None) -> XData:
     """Create train x data for pipeline.
 
     :param raw_path: Raw path
     :param years: The years you want to use the data from
-
+    :param max_recordings_per_species: Maximum number of recordings per species.
     :return: XData object
     """
-    # Instantiate an empty XData object to later fill with data
     xdata = XData()
+    all_metadata: list[pd.DataFrame] = []
 
     for year in years:
         raw_year_path = Path(raw_path) / str(year)
         metadata_path = raw_year_path / "train_metadata.csv"
-        data_path = raw_year_path / "train_audio"
         metadata = pd.read_csv(metadata_path)
+        metadata["year"] = year
         metadata["samplename"] = metadata["filename"].str.replace("/", "-").str.replace(".ogg", "").str.replace(".mp3", "")
+        all_metadata.append(metadata)
 
-        # Load the bird_2024 data
-        filenames = [data_path / filename for filename in metadata["filename"]]
+    all_metadata: pd.DataFrame = pd.concat(all_metadata).reset_index(drop=True)
 
-        bird = np.array([load_audio_train(filename) for filename in filenames])
+    if max_recordings_per_species is not None and max_recordings_per_species > -1:
+        all_metadata: pd.DataFrame = all_metadata.groupby("primary_label").head(max_recordings_per_species).reset_index(drop=True)  # type: ignore[no-redef]
+
+    for year in years:
+        raw_year_path = Path(raw_path) / str(year)
+        data_path = raw_year_path / "train_audio"
+        metadata = all_metadata[all_metadata["year"] == year]
+
+        bird = np.array([load_audio_train(data_path / filename) for filename in metadata["filename"]])
         xdata[f"bird_{year}"] = bird
         xdata[f"meta_{year}"] = metadata
 
@@ -54,7 +62,11 @@ def load_audio_train(path: str | os.PathLike[str]) -> npt.NDArray[np.float32]:
     :param path: Path to the audio file
     :return: Audio data
     """
-    return librosa.load(path, sr=32000, dtype=np.float32)[0]
+    try:
+        return librosa.load(path, sr=32000, dtype=np.float32)[0]
+    except FileNotFoundError:
+        logger.error(f"File not found: {path}")
+        return np.zeros(32000, dtype=np.float32)
 
 
 @delayed
@@ -64,24 +76,34 @@ def load_audio_submit(path: str | os.PathLike[str]) -> npt.NDArray[np.float32]:
     :param path: Path to the audio file
     :return: Audio data
     """
-    return librosa.load(path, sr=32000, dtype=np.float32)[0] / 100
+    return librosa.load(path, sr=32000, dtype=np.float32)[0]
 
 
-def setup_train_y_data(raw_path: str | os.PathLike[str], years: Iterable[str]) -> YData:
+def setup_train_y_data(raw_path: str | os.PathLike[str], years: Iterable[str], max_recordings_per_species: int = -1) -> YData:
     """Create train y data for pipeline.
 
     :param raw_path: path to the raw data
     :param years: The years you want to use the data from
-
+    :param max_recordings_per_species: Maximum number of recordings per species. -1 means no cap.
     :return: YData object
     """
     ydata = YData()
+    all_metadata: list[pd.DataFrame] = []
 
     for year in years:
         metadata_path = Path(raw_path) / str(year) / "train_metadata.csv"
         metadata = pd.read_csv(metadata_path)
+        metadata["year"] = year
         metadata["samplename"] = metadata["filename"].str.replace("/", "-").str.replace(".ogg", "").str.replace(".mp3", "")
+        all_metadata.append(metadata)
 
+    all_metadata: pd.DataFrame = pd.concat(all_metadata).reset_index(drop=True)
+
+    if max_recordings_per_species > -1:
+        all_metadata: pd.DataFrame = all_metadata.groupby("primary_label").head(max_recordings_per_species).reset_index(drop=True)  # type: ignore[no-redef]
+
+    for year in years:
+        metadata = all_metadata[all_metadata["year"] == year]
         ydata[f"meta_{year}"] = metadata
 
         if "labels" in metadata.columns:

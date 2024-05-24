@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Generator, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, TypeAlias, cast, overload
 
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+from typing_extensions import Self
 
 PandasIlocIndexer: TypeAlias = int | slice | Sequence[int] | Sequence[bool]
 
@@ -39,14 +40,14 @@ class XData:
     meta_2022: pd.DataFrame | None = None
     meta_2021: pd.DataFrame | None = None
     meta_kenya: pd.DataFrame | None = None
-    bird_2024gsil: pd.DataFrame | None = None
-    bird_2024gbird: pd.DataFrame | None = None
-    bird_2024add: npt.NDArray[Any] | None = None
-    bird_2024: npt.NDArray[Any] | None = None
-    bird_2023: npt.NDArray[Any] | None = None
-    bird_2022: npt.NDArray[Any] | None = None
-    bird_2021: npt.NDArray[Any] | None = None
-    bird_kenya: npt.NDArray[Any] | None = None
+    bird_2024gsil: npt.NDArray[np.float32] | None = None
+    bird_2024gbird: npt.NDArray[np.float32] | None = None
+    bird_2024add: npt.NDArray[np.float32] | None = None
+    bird_2024: npt.NDArray[np.float32] | None = None
+    bird_2023: npt.NDArray[np.float32] | None = None
+    bird_2022: npt.NDArray[np.float32] | None = None
+    bird_2021: npt.NDArray[np.float32] | None = None
+    bird_kenya: npt.NDArray[np.float32] | None = None
 
     @overload
     def __getitem__(self, indexer: PandasIlocIndexer) -> XData: ...
@@ -55,9 +56,9 @@ class XData:
     def __getitem__(self, indexer: Mapping[str, Any]) -> XData: ...
 
     @overload
-    def __getitem__(self, indexer: str) -> pd.DataFrame | npt.NDArray[Any]: ...
+    def __getitem__(self, indexer: str) -> pd.DataFrame | npt.NDArray[np.float32]: ...
 
-    def __getitem__(self, indexer: PandasIlocIndexer | Mapping[str, Any] | str) -> XData | pd.DataFrame | npt.NDArray[Any]:
+    def __getitem__(self, indexer: PandasIlocIndexer | Mapping[str, Any] | str) -> XData | pd.DataFrame | npt.NDArray[np.float32]:
         """Index the data according to the indexer type.
 
         :param indexer: The indexer to use
@@ -100,7 +101,7 @@ class XData:
             bird_2024=sliced_bird_2024,
         )
 
-    def __setitem__(self, key: str, value: pd.DataFrame | npt.NDArray[Any] | None) -> None:
+    def __setitem__(self, key: str, value: pd.DataFrame | npt.NDArray[np.float32] | None) -> None:
         """Set the value of key.
 
         :param key: The key to set
@@ -109,6 +110,17 @@ class XData:
         """
         if hasattr(self, key):
             setattr(self, key, value)
+        else:
+            raise KeyError(f"'{key}' is not a valid attribute of {self}")
+
+    def __delitem__(self, key: str) -> None:
+        """Delete the value of key.
+
+        :param key: The key to delete
+        :raise KeyError: If the key is not a valid attribute of XData
+        """
+        if hasattr(self, key):
+            setattr(self, key, None)
         else:
             raise KeyError(f"'{key}' is not a valid attribute of XData")
 
@@ -124,6 +136,14 @@ class XData:
         """The "years" present in the data."""
         return tuple(year.split("_")[1] for year in self.__dict__ if year[:5] == "bird_" and self[year] is not None)
 
+    def __contains__(self, item: str) -> bool:
+        """Check if the item is present in the data.
+
+        :param item: The item to check
+        :return: Whether the item is present
+        """
+        return item in self.__dict__ and self[item] is not None
+
     def __len__(self) -> int:
         """Get the total number of sounds in the data across all years.
 
@@ -137,6 +157,21 @@ class XData:
         :return: Whether there is any data present
         """
         return any(self[f"bird_{year}"] is not None for year in self.years)
+
+    def __iter__(self) -> Self:
+        """Iterate over itself.
+
+        :return: Self
+        """
+        return self
+
+    def __next__(self) -> Generator[tuple[str, pd.DataFrame, npt.NDArray[np.float32]], None, None]:
+        """Get the next year's data.
+
+        :return: The year, metadata, and audiodata
+        """
+        for year in self.years:
+            yield year, cast(pd.DataFrame, self[f"meta_{year}"]), cast(npt.NDArray[np.float32], self[f"bird_{year}"])
 
 
 @dataclass
@@ -237,6 +272,17 @@ class YData:
         if hasattr(self, key):
             setattr(self, key, value)
         else:
+            raise KeyError(f"'{key}' is not a valid attribute of {self}")
+
+    def __delitem__(self, key: str) -> None:
+        """Delete the value of key.
+
+        :param key: The key to delete
+        :raise KeyError: If the key is not a valid attribute of YData
+        """
+        if hasattr(self, key):
+            setattr(self, key, None)
+        else:
             raise KeyError(f"'{key}' is not a valid attribute of YData")
 
     def __repr__(self) -> str:
@@ -251,6 +297,14 @@ class YData:
         """Return the "years" present in the data."""
         return tuple(year.split("_")[1] for year in self.__dict__ if year[:6] == "label_" and self[year] is not None)
 
+    def __contains__(self, item: str) -> bool:
+        """Check if the item is present in the data.
+
+        :param item: The item to check
+        :return: Whether the item is present
+        """
+        return item in self.__dict__ and self[item] is not None
+
     def __len__(self) -> int:
         """Get the total number of sounds in the data across all years.
 
@@ -264,3 +318,18 @@ class YData:
         :return: Whether there is any data present
         """
         return any(self[f"label_{year}"] is not None for year in self.years)
+
+    def __iter__(self) -> Self:
+        """Iterate over itself.
+
+        :return: Self
+        """
+        return self
+
+    def __next__(self) -> Generator[tuple[str, pd.DataFrame, pd.DataFrame], None, None]:
+        """Get the next year's data.
+
+        :return: The year, metadata, and labels
+        """
+        for year in self.years:
+            yield year, self[f"meta_{year}"], self[f"label_{year}"]
