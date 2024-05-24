@@ -11,6 +11,7 @@ class AddBackgroundNoiseWrapper():
     min_snr_db: float = -3.0
     max_snr_db: float = 3.0
     noise_transform: Any = audiomentations.PolarityInversion(p=0.5)
+    aug: Any = None
 
     def __post_init__(self):
         if torch.cuda.is_available():
