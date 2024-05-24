@@ -1,7 +1,7 @@
 defaults:
   - base_submit
   - hydra/logging
-  - model: alternate-ensemble-k4o2zfhf-tgjga2tg
+  - model: convnext-post-add  # Add models or ensembles
 
 # Use this when uploading to Kaggle
 

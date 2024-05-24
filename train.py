@@ -81,10 +81,10 @@ def run_train_cfg(cfg: DictConfig) -> None:
 
     X: XData | None = None
     if not x_cache_exists:
-        X = setup_train_x_data(cfg.raw_path, cfg.years)
+        X = setup_train_x_data(cfg.raw_path, cfg.years, cfg.max_recordings_per_species)
 
     # If not cache exists, we need to load the data
-    y = setup_train_y_data(cfg.raw_path, cfg.years)
+    y = setup_train_y_data(cfg.raw_path, cfg.years, cfg.max_recordings_per_species)
 
     # For this simple splitter, we only need y.
     if cfg.test_size == 0:
