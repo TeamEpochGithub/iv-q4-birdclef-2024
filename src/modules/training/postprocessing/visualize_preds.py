@@ -19,7 +19,7 @@ from src.modules.training.verbose_training_block import VerboseTrainingBlock
 class VisualizePreds(VerboseTrainingBlock):
     """Visualize predictions block that creates a stacked line chart."""
 
-    n: int = 30
+    n: int = 10
     threshold: float = 0.1
 
     def custom_train(

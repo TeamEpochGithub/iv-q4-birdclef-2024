@@ -25,8 +25,8 @@ train_sys:
           - _target_: hydra.utils.get_class
             path: torchaudio.transforms.MelSpectrogram
         output_shape:
-        - 128
-        - 256
+        - 224
+        - 224
         scale:
           _target_: src.modules.training.datasets.to_2d.spec_normalize.SpecNormalize
       labeler:
@@ -51,7 +51,7 @@ train_sys:
             - _target_: audiomentations.PolarityInversion
               p: 0.5
 
-            - _target_: audiomentations.AddBackgroundNoise
+            - _target_: src.modules.training.augmentations.add_background_noise_wrapper.AddBackgroundNoiseWrapper
               p: 0.5
               sounds_path: data/raw/esc50/audio/
               min_snr_db: -3.0
@@ -85,8 +85,8 @@ train_sys:
       prefetch_factor: 1
       persistent_workers: false
     n_folds: 5
-    epochs: 50
-    patience: 15
+    epochs: 100
+    patience: 25
     batch_size: 64
     model:
       _target_: src.modules.training.models.timm.Timm #Ensure that activation is sigmoid for non Logits loss functions.
