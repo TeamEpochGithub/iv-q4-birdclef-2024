@@ -16,7 +16,6 @@ class AudiomentationsCompose:
         augmented_x = x.clone()
         for i in range(x.shape[0]):
             augmented_x[i] = torch.from_numpy(self.compose(x[i].squeeze().numpy(), self.sr))
-        print(self)
         return augmented_x
     
     def __repr__(self):
