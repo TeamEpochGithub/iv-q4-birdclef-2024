@@ -39,9 +39,9 @@ train_sys:
       aug_1d:
         _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
         x_transforms:
-      #   - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomPhaseShift
-      #     p: 0.5
-      #     shift_limit: 0.5
+        - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomPhaseShift
+          p: 0.5
+          shift_limit: 0.5
         - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomAmplitudeShift
           p: 0.5
         - _target_: src.modules.training.augmentations.audiomentations_compose.AudiomentationsCompose
@@ -92,14 +92,14 @@ train_sys:
       _target_: src.modules.training.models.timm.Timm #Ensure that activation is sigmoid for non Logits loss functions.
       in_channels: 1
       out_channels: 182
-      model_name: "convnext_tiny"
+      model_name: "levit_conv_384"
       activation: "sigmoid"
     scheduler:
       _target_: functools.partial
       _args_:
         - _target_: hydra.utils.get_class
           path: timm.scheduler.cosine_lr.CosineLRScheduler
-      warmup_t: 5
+      warmup_t: 0
       warmup_lr_init: 1e-5
       t_initial: 90
       cycle_limit: 1
@@ -110,5 +110,5 @@ train_sys:
       _args_:
         - _target_: hydra.utils.get_class
           path: torch.optim.AdamW
-      lr: 2e-4
+      lr: 5e-4
   - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
