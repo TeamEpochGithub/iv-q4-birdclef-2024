@@ -74,7 +74,9 @@ def custom_predict(self, x: Any, **pred_args: Any) -> npt.NDArray[np.float32]:  
             pred_dataset,
             batch_size=curr_batch_size,
             shuffle=False,
-            collate_fn=(collate_fn if hasattr(pred_dataset, "__getitems__") else None),  # type: ignore[arg-type]
+            collate_fn=(collate_fn if hasattr(pred_dataset, "__getitems__") else None),  # type: ignore[arg-type],
+            # num_workers=16,
+            # prefetch_factor=1
         )
 
         # Predict with a single model
@@ -188,6 +190,8 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     corrs = {}
     # Find the pairwise correlation between all the arrays
     pairs.append((0,0))
+    # make directory for output plots
+    os.makedirs(output_dir/Path('fold_correlations'))
     for pair in pairs:
         corr = np.corrcoef(x=fold_preds[pair[0]], y=fold_preds[pair[1]],rowvar=False)
         corrs[pair] = corr[:182, 182:364]
@@ -196,7 +200,8 @@ def run_cv_cfg(cfg: DictConfig) -> None:
         diag_corr = sum([corrs[pair][i,i] for i in range(corrs[pair].shape[0])]) / 182
         corrs[pair] = diag_corr
         plt.title(f'pair {pair} diag_corr:{diag_corr}')
-        plt.show()
+        plt.savefig(output_dir/Path('fold_correlations')/Path(f'{pair}.png'))
+
     mean_corr = 0
     for pair in corrs:
         mean_corr += corrs[pair]
