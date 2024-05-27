@@ -53,11 +53,11 @@ train_sys:
         - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.CutMix
           p: 0.5
     dataloader_args:
-      num_workers: 8
+      num_workers: 16
       prefetch_factor: 2
       persistent_workers: true
     n_folds: 0
-    epochs: 50
+    epochs: 20
     patience: 15
     batch_size: 64
     model:
@@ -83,11 +83,11 @@ train_sys:
       - _target_: hydra.utils.get_class
         path: torch.optim.AdamW
       lr: 0.001
-  - _target_: src.modules.training.postprocessing.set_to_0.SetTo0
-  - _target_: src.modules.training.postprocessing.smooth_file.SmoothFile
-    smooth_factor: 0.75
-pred_sys:
-  _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline
-  title: Postprocessing pipeline
-label_sys:
-  _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline
+#   - _target_: src.modules.training.postprocessing.set_to_0.SetTo0
+#   - _target_: src.modules.training.postprocessing.smooth_file.SmoothFile
+#     smooth_factor: 0.75
+# pred_sys:
+#   _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline
+#   title: Postprocessing pipeline
+# label_sys:
+#   _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline

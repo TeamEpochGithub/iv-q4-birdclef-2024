@@ -160,8 +160,8 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     for fold_no, (train_indices, test_indices) in enumerate(instantiate(cfg.splitter).split(y)):
         copy_x = copy.deepcopy(X)
 
-        # score, predictions = run_fold(fold_no, X, y, train_indices, test_indices, cfg, scorer, output_dir, cache_args)
-        # scores.append(score)
+        score, predictions = run_fold(fold_no, X, y, train_indices, test_indices, cfg, scorer, output_dir, cache_args)
+        scores.append(score)
 
         X = copy_x
         # Setup the inference pipeline

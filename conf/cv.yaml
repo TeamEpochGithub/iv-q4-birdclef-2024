@@ -1,7 +1,7 @@
 defaults:
   - base_cv
   - hydra/logging
-  - model: convnext # Add models or ensembles
+  - model: effb0 # Add models or ensembles
   - wandb: train
 
 ###############
