@@ -74,7 +74,7 @@ train_sys:
          p: 0.5
        - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.MixUp1D
          p: 0.5
-       - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.CutMix1d
+       - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.CutMix1D
          p: 0.5
       aug_2d:
        _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
@@ -100,6 +100,8 @@ train_sys:
       out_channels: 182
       model_name: "convnext_tiny"
       activation: "sigmoid"
+      drop_rate: 0
+      drop_path_rate: 0
     scheduler:
       _target_: functools.partial
       _args_:

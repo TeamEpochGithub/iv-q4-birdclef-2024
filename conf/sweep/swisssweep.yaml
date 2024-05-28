@@ -1,150 +1,98 @@
-program: cv.py
+command:
+  - python3
+  - ${program}
+  - ${args_no_hyphens}
 method: bayes
 metric:
   goal: maximize
-  name: "Sweep score"
+  name: Sweepscore
+program: cv.py
+project: detect-bird
+name: Swisssweep
 parameters:
-  model:
-    parameters:
-      train_sys:
-        parameters:
-          steps:
-            parameters:
-              "0":
-                parameters:
-                  batch_size:
-                    max: 128
-                    min: 16
-                    distribution: int_uniform
-                  optimizer:
-                    parameters:
-                      lr:
-                        max: 0.002
-                        min: 0.00005
-                        distribution: q_log_uniform
-                  epochs:
-                    max: 75
-                    min: 20
-                    distribution: int_uniform
-                  model:
-                    parameters:
-                      model_name:
-                        values:
-                          - "efficientnet_b0"
-                          - "convnext_tiny"
-                          - "eca_nfnet_l0"
-                          - "resnet34"
-                          - "resnet50"
-                          - "vgg11"
-                          - "vgg19"
-                          - "levit_conv_192"
-                          - "levit_128"
-                          - "efficientnet_b4"
-                          - "efficientnetv2_s"
-                          - "beit_base_patch16_224"
-                      drop_rate:
-                        max: 0.5
-                        min: 0.0
-                        distribution: uniform
-                      drop_path_rate:
-                        max: 0.5
-                        min: 0.0
-                        distribution: uniform
-                  dataset_args:
-                    parameters:
-                      aug_1d:
-                        parameters:
-                          x_transforms:
-                            parameters:
-                              "0": # RandomPhaseShift
-                                parameters:
-                                  p:
-                                    max: 1
-                                    min: 0
-                                    distribution: uniform
-                              "1": # RandomAmplitudeShift
-                                parameters:
-                                  p:
-                                      max: 1
-                                      min: 0
-                                      distribution: uniform
-                              "2": # audiomentations compose
-                                parameters:
-                                  compose:
-                                    parameters:
-                                      transforms:
-                                        parameters:
-                                          "0": # PolarityInversion
-                                            parameters:
-                                              p:
-                                                max: 1
-                                                min: 0
-                                                distribution: uniform
-                                          "1": # AddBackgroundNoiseWrapper
-                                            parameters:
-                                              p:
-                                                max: 1
-                                                min: 0
-                                                distribution: uniform
-                                          "2": # AddColorNoise
-                                            parameters:
-                                              p:
-                                                max: 1
-                                                min: 0
-                                                distribution: uniform
-                                          "3": # PitchShift
-                                            parameters:
-                                              p:
-                                                max: 1
-                                                min: 0
-                                                distribution: uniform
-                                          "4": # Shift
-                                            parameters:
-                                              p:
-                                                max: 1
-                                                min: 0
-                                                distribution: uniform
-                          xy_transforms:
-                            parameters:
-                              "0": # EnergyCutmix
-                                parameters:
-                                  p:
-                                    max: 1
-                                    min: 0
-                                    distribution: uniform
-                              "1": # MixUp1D
-                                parameters:
-                                  p:
-                                    max: 1
-                                    min: 0
-                                    distribution: uniform
-                              "2": # CutMix1d
-                                parameters:
-                                  p:
-                                    max: 1
-                                    min: 0
-                                    distribution: uniform
-                      aug_2d:
-                        parameters:
-                            x_transforms:
-                                parameters:
-                                "0": # RandomErasing
-                                    parameters:
-                                    p:
-                                        max: 1
-                                        min: 0
-                                        distribution: uniform
-                            xy_transforms:
-                                parameters:
-                                "0": # MixUp
-                                    parameters:
-                                    p:
-                                        max: 1
-                                        min: 0
-                                        distribution: uniform
-                                "1": # CutMix
-                                    parameters:
-                                    p:
-                                        max: 1
-                                        min: 0
-                                        distribution: uniform
+  model.train_sys.steps.0.batch_size:
+    distribution: int_uniform
+    max: 128
+    min: 16
+  model.train_sys.steps.0.epochs:
+    distribution: int_uniform
+    max: 75
+    min: 20
+  model.train_sys.steps.0.optimizer.lr:
+    distribution: q_log_uniform
+    max: 0.002
+    min: 0.00005
+  model.train_sys.steps.0.model.model_name:
+    values:
+      - efficientnet_b0
+      - convnext_tiny
+      - eca_nfnet_l0
+      - resnet34
+      - resnet50
+      - vgg11
+      - vgg19
+      - levit_conv_192
+      - levit_128
+      - efficientnet_b4
+      - efficientnetv2_s
+      - beit_base_patch16_224
+  model.train_sys.steps.0.model.drop_rate:
+    distribution: uniform
+    max: 0.5
+    min: 0.0
+  model.train_sys.steps.0.model.drop_path_rate:
+    distribution: uniform
+    max: 0.5
+    min: 0.0
+  model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.0.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.1.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.2.compose.transforms.0.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.2.compose.transforms.1.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.2.compose.transforms.2.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.2.compose.transforms.3.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.2.compose.transforms.4.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_1d.xy_transforms.0.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_1d.xy_transforms.1.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_1d.xy_transforms.2.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_2d.x_transforms.0.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_2d.xy_transforms.0.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_2d.xy_transforms.1.p:
+    distribution: uniform
+    max: 1
+    min: 0
