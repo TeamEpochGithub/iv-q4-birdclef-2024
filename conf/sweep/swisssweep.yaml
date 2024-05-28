@@ -36,6 +36,7 @@ parameters:
       - efficientnet_b4
       - efficientnetv2_s
       - beit_base_patch16_224
+      - levit_conv_384
   model.train_sys.steps.0.model.drop_rate:
     distribution: uniform
     max: 0.5

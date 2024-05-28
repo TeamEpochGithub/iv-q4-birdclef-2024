@@ -38,13 +38,13 @@ class Timm(nn.Module):
             logger.info("CUDA is available")
             try:
                 self.model = timm.create_model(model_name, pretrained=True, in_chans=self.in_channels, num_classes=self.out_channels, **kwargs)
-            except ValueError:
+            except TypeError:
                 logger.warning(f"kwargs {kwargs} not supported for {model_name}. Trying without kwargs.")
                 self.model = timm.create_model(model_name, pretrained=True, in_chans=self.in_channels, num_classes=self.out_channels)
         else:
             try:
                 self.model = timm.create_model(model_name, pretrained=False, in_chans=self.in_channels, num_classes=self.out_channels, **kwargs)
-            except ValueError:
+            except TypeError:
                 logger.warning(f"kwargs {kwargs} not supported for {model_name}. Trying without kwargs.")
                 self.model = timm.create_model(model_name, pretrained=False, in_chans=self.in_channels, num_classes=self.out_channels)
 

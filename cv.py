@@ -95,7 +95,6 @@ def custom_predict(self, x: Any, **pred_args: Any) -> npt.NDArray[np.float32]:  
                 if i == 0:
                     raise FileNotFoundError(f"First model of {self.n_folds} folds not found...") from e
                 self.log_to_warning(f"Model for fold {self._fold} not found, skipping the rest of the folds...")
-                break
             self.log_to_terminal(f"Predicting with model fold {i + 1}/{self.n_folds}")
             predictions.append(self.predict_on_loader(pred_dataloader))
 
@@ -166,7 +165,10 @@ def run_cv_cfg(cfg: DictConfig) -> None:
         scores.append(score)
 
         X = copy_x
-        # Setup the inference pipeline
+        if score < 0.9:
+            break
+
+    # Set up the inference pipeline
     logger.info('Setting up the inference pipeline for unlabeled soundscapes')
     model_pipeline = setup_pipeline(cfg, is_train=False)
     model_pipeline.train_sys.steps[0].custom_predict = custom_predict.__get__(model_pipeline.train_sys.steps[0])
@@ -222,6 +224,11 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     wandb.log({"Score": avg_score["2024"]}) if isinstance(avg_score, dict) and "2024" in avg_score else None
     wandb.log({"Fold correlations": str(corrs)})
     wandb.log({"Mean corr": mean_corr})
+
+    # sweep score is score 2024 + weight* mean_corr
+    sweep_score = avg_score["2024"] + cfg.corr_weight * mean_corr
+    wandb.log({"Sweepscore": sweep_score})
+
     logger.info("Finishing wandb run")
     wandb.finish()
 

@@ -33,4 +33,4 @@ splitter:
   random_state: 42
   years: ["2024"]
 allow_multiple_instances: true
-corr_weight: 0.3
+corr_weight: 0.5
