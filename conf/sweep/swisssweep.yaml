@@ -19,9 +19,9 @@ parameters:
     max: 75
     min: 20
   model.train_sys.steps.0.optimizer.lr:
-    distribution: q_log_uniform
-    max: 0.002
-    min: 0.00005
+    distribution: log_uniform
+    max: -4
+    min: -10
   model.train_sys.steps.0.model.model_name:
     values:
       - efficientnet_b0
