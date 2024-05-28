@@ -1,7 +1,7 @@
 defaults:
   - base_cv
   - hydra/logging
-  - model: effb0 # Add models or ensembles
+  - model: swisssweep # Add models or ensembles
   - wandb: train
 
 ###############
@@ -33,3 +33,4 @@ splitter:
   random_state: 42
   years: ["2024"]
 allow_multiple_instances: true
+corr_weight: 0.3

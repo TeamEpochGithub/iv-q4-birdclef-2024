@@ -36,9 +36,17 @@ class Timm(nn.Module):
         # Check if cuda is available
         if torch.cuda.is_available():
             logger.info("CUDA is available")
-            self.model = timm.create_model(model_name, pretrained=True, in_chans=self.in_channels, num_classes=self.out_channels, **kwargs)
+            try:
+                self.model = timm.create_model(model_name, pretrained=True, in_chans=self.in_channels, num_classes=self.out_channels, **kwargs)
+            except ValueError:
+                logger.warning(f"kwargs {kwargs} not supported for {model_name}. Trying without kwargs.")
+                self.model = timm.create_model(model_name, pretrained=True, in_chans=self.in_channels, num_classes=self.out_channels)
         else:
-            self.model = timm.create_model(model_name, pretrained=False, in_chans=self.in_channels, num_classes=self.out_channels, **kwargs)
+            try:
+                self.model = timm.create_model(model_name, pretrained=False, in_chans=self.in_channels, num_classes=self.out_channels, **kwargs)
+            except ValueError:
+                logger.warning(f"kwargs {kwargs} not supported for {model_name}. Trying without kwargs.")
+                self.model = timm.create_model(model_name, pretrained=False, in_chans=self.in_channels, num_classes=self.out_channels)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass of the Timm model.
