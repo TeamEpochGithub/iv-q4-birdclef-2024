@@ -95,6 +95,7 @@ def custom_predict(self, x: Any, **pred_args: Any) -> npt.NDArray[np.float32]:  
                 if i == 0:
                     raise FileNotFoundError(f"First model of {self.n_folds} folds not found...") from e
                 self.log_to_warning(f"Model for fold {self._fold} not found, skipping the rest of the folds...")
+                break
             self.log_to_terminal(f"Predicting with model fold {i + 1}/{self.n_folds}")
             predictions.append(self.predict_on_loader(pred_dataloader))
 
@@ -165,7 +166,7 @@ def run_cv_cfg(cfg: DictConfig) -> None:
         scores.append(score)
 
         X = copy_x
-        if score < 0.9:
+        if score['2024'] < 0.9:
             break
 
     # Set up the inference pipeline
@@ -189,9 +190,9 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     for i in range(fold_no+1):
         pairs.extend(tuple(zip([i]*len(list(range(i+1, fold_no+1))),list(range(i+1, fold_no+1)))))
 
+    print(pairs)
     corrs = {}
     # Find the pairwise correlation between all the arrays
-    pairs.append((0,0))
     # make directory for output plots
     os.makedirs(output_dir/Path('fold_correlations'))
     for pair in pairs:
@@ -207,7 +208,10 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     mean_corr = 0
     for pair in corrs:
         mean_corr += corrs[pair]
-    mean_corr /= len(corrs)
+    if len(corrs) == 0:
+        mean_corr = 0
+    else:
+        mean_corr /= len(corrs)
 
     avg_score: dict[str, float]
     avg_score = {}
