@@ -98,7 +98,6 @@ def setup_train_y_data(raw_path: str | os.PathLike[str], years: Iterable[str], m
         metadata["samplename"] = metadata["filename"].str.replace("/", "-").str.replace(".ogg", "").str.replace(".mp3", "")
         all_metadata.append(metadata)
 
-
     all_metadata: pd.DataFrame = pd.concat(all_metadata).reset_index(drop=True)
 
     if max_recordings_per_species > -1:
@@ -113,9 +112,9 @@ def setup_train_y_data(raw_path: str | os.PathLike[str], years: Iterable[str], m
         else:
             ydata[f"label_{year}"] = one_hot_primary_secondary(metadata)
 
-        if year == 'kenya':
-            ydata[f"label_{year}"] = pd.get_dummies(ydata[f"label_{year}"].sum(axis=1)==0).astype(np.float32)
-            ydata[f"label_{year}"].columns = ['call', 'nocall']
+        if year == "kenya":
+            ydata[f"label_{year}"] = pd.get_dummies(ydata[f"label_{year}"].sum(axis=1) == 0).astype(np.float32)
+            ydata[f"label_{year}"].columns = ["call", "nocall"]
     return ydata
 
 

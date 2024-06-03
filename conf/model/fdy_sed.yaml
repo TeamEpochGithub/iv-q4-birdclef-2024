@@ -45,7 +45,7 @@ train_sys:
         - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomAmplitudeShift
           p: 0.5
         - _target_: src.modules.training.augmentations.audiomentations_compose.AudiomentationsCompose
-          compose: 
+          compose:
             _target_: audiomentations.Compose
             transforms:
             - _target_: audiomentations.PolarityInversion
@@ -56,7 +56,7 @@ train_sys:
               sounds_path: /home/tolga/Documents/q4-bird-clef/data/raw/esc50/audio/
               min_snr_db: -3.0
               max_snr_db: 3.0
-              noise_transform: 
+              noise_transform:
                 _target_: audiomentations.PolarityInversion
                 p: 0.5
 

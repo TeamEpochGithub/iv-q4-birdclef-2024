@@ -25,7 +25,6 @@ class VisualizePreds(VerboseTrainingBlock):
     :param threshold: The threshold for the top N lines.
     """
 
-
     n: int = 100
     threshold: float = 0.1
 

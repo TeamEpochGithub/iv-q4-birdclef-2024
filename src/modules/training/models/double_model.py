@@ -1,10 +1,10 @@
 """Wrapper class for a model that is meant to predict to things."""
-from torch import nn
+
 import torch
+from torch import nn
 
 
 class DoubleModel(nn.Module):
-
     def __init__(self, model):
         """Initialize the model"""
         super().__init__()
@@ -16,4 +16,4 @@ class DoubleModel(nn.Module):
         preds = self.model(x)
 
         # Separate the last pred in the head
-        return preds[:,:-2], preds[:,-2:]
+        return preds[:, :-2], preds[:, -2:]

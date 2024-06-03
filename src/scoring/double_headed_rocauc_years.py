@@ -45,7 +45,7 @@ class ROCAUC:
 
         # Loop over the years
         for year in years:
-            if year == 'kenya':
+            if year == "kenya":
                 continue
             logger.info(f"Calculating ROC AUC for year {year}")
 
@@ -66,7 +66,7 @@ class ROCAUC:
                 # Also slice metadata
                 metadata = metadata[indices]
 
-            if self.only_primary and year != 'kenya':
+            if self.only_primary and year != "kenya":
                 # Get the indices from the metadata where secondary label is an empty list as string
                 indices = metadata["secondary_labels"] == "[]"
 

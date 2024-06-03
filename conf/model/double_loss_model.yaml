@@ -84,9 +84,9 @@ train_sys:
       cycle_limit: 1
     criterion:
       _target_: src.modules.training.losses.double_loss.DoubleLoss
-      task_loss: 
+      task_loss:
         _target_: torch.nn.BCELoss
-      call_loss: 
+      call_loss:
         _target_: torch.nn.BCELoss
     optimizer:
       _target_: functools.partial

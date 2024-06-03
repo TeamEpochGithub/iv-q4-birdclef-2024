@@ -63,7 +63,7 @@ class ROCAUC(Scorer):
 
         # Loop over the years
         for year in years:
-            if year == 'kenya':
+            if year == "kenya":
                 continue
             logger.info(f"Calculating ROC AUC for year {year}")
 

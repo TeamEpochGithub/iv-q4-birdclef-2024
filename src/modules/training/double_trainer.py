@@ -1,17 +1,14 @@
 import gc
-from abc import abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-import numpy.typing as npt
 import numpy as np
-from numpy import float32
-from numpy._typing import NDArray
+import numpy.typing as npt
 import onnxruntime as onnxrt  # type: ignore[import-not-found]
 import torch
 from torch import Tensor
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
 from src.modules.training.datasets.dask_dataset import DaskDataset
@@ -73,9 +70,9 @@ class DoubleTrainer(MainTrainer):
         return DoubleDataset(task_dataset=task_dataset, discriminator_dataset=None)
 
     def _train_one_epoch(
-            self,
-            dataloader: DataLoader[tuple[Tensor, ...]],
-            epoch: int,
+        self,
+        dataloader: DataLoader[tuple[Tensor, ...]],
+        epoch: int,
     ) -> float:
         """Train the model for one epoch.
 
@@ -97,7 +94,7 @@ class DoubleTrainer(MainTrainer):
             # Print tqdm
             task_losses.append(task_loss.item())
             call_losses.append(call_loss.item())
-            pbar.set_postfix(task_loss=sum(task_losses) / len(task_losses),call_loss=sum(call_losses) / len(call_losses))
+            pbar.set_postfix(task_loss=sum(task_losses) / len(task_losses), call_loss=sum(call_losses) / len(call_losses))
 
         # Step the scheduler
         if self.initialized_scheduler is not None:
@@ -144,10 +141,9 @@ class DoubleTrainer(MainTrainer):
                 task_losses.append(task_loss.item())
                 call_losses.append(call_loss.item())
                 pbar.set_description(desc=desc)
-                pbar.set_postfix(task_loss=sum(task_losses) / len(task_losses),call_loss=sum((call_losses)) / len(call_losses))
+                pbar.set_postfix(task_loss=sum(task_losses) / len(task_losses), call_loss=sum(call_losses) / len(call_losses))
         losses = [task_losses[i] + self.lambda_ * call_losses[i] for i in range(len(task_losses))]
         return sum(losses) / len(losses)
-
 
     def one_train_batch(self, batch: tuple[Tensor, ...]) -> float:
         """Train the model for one batch.
@@ -176,7 +172,6 @@ class DoubleTrainer(MainTrainer):
         self.initialized_optimizer.step()
 
         return task_loss, call_loss
-
 
     def predict_on_loader(
         self,
@@ -233,10 +228,10 @@ class DoubleTrainer(MainTrainer):
                     # disc_predictions.extend(disc_pred)
 
             self.log_to_terminal("Done predicting")
-            return np.array(task_predictions) # np.array(disc_predictions)
+            return np.array(task_predictions)  # np.array(disc_predictions)
         # ONNX with CPU
         return self.onnx_predict(loader)
-    
+
     def onnx_predict(self, loader: DataLoader[tuple[Tensor, ...]]) -> npt.NDArray[np.float32]:
         """Predict on the loader using ONNX.
 

@@ -1,13 +1,10 @@
 """Computes loss for two outputs from a model"""
 
-
 import torch
-
 
 
 class DoubleLoss(torch.nn.Module):
     """Applies a task loss to task preds and call loss to the call preds separately and adds the losses up"""
-    
 
     def __init__(self, task_loss, call_loss) -> None:
         """Initialize the DoubleLoss class."""

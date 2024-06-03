@@ -38,19 +38,22 @@ class Scale(torch.nn.Module):
             x = x * scale
         return x, y
 
+
 @dataclass
 class EnergyCutmix(torch.nn.Module):
     """Instead of taking the rightmost side from the donor sample, take the highests energy sample.
-        Modified implementation of cutmix1d from epochalyst."""
+    Modified implementation of cutmix1d from epochalyst.
+    """
+
     p: float = 0.5
     low: float = 0.25
     high: float = 0.75
 
     def find_window(self, donor, receiver, window_size, stride):
         """Extract the strongest window from donor and the weakest from th receiver. Return the indices for both windows."""
-        donor_power = donor ** 2
-        receiver_power = receiver ** 2
-        
+        donor_power = donor**2
+        receiver_power = receiver**2
+
         # Extract the energies per window
         donor_energies = torch.nn.functional.avg_pool1d(donor_power, window_size, stride=stride, padding=0)
         receiver_energies = torch.nn.functional.avg_pool1d(receiver_power, window_size, stride=stride, padding=0)
@@ -82,20 +85,20 @@ class EnergyCutmix(torch.nn.Module):
 
         # Generate random floats between self.low and self.high for each sample in x
         cutoff_rates = torch.rand(x.shape[0], device=x.device) * (self.high - self.low) + self.low
-        # Cutoff rates is how much of a donor sample will end up in the receiver sample        
+        # Cutoff rates is how much of a donor sample will end up in the receiver sample
 
         augmented_x = x.clone()
         augmented_y = y.clone().float()
-
 
         for i in range(x.shape[0]):
             if torch.rand(1) < self.p:
                 donor = x[shuffled_indices[i]]
                 receiver = x[i]
                 donor_start, donor_end, receiver_start, receiver_end = self.find_window(donor, receiver, (cutoff_rates[i] * x.shape[-1]).int().item(), stride=300)
-                augmented_x[i,:,receiver_start:receiver_end] = donor[:,donor_start:donor_end]
+                augmented_x[i, :, receiver_start:receiver_end] = donor[:, donor_start:donor_end]
                 augmented_y[i] = torch.clip(y[i] + y[shuffled_indices[i]], 0, 1)
         return augmented_x, augmented_y
+
 
 """import matplotlib.pyplot as plt
 import sounddevice
@@ -118,9 +121,9 @@ plt.plot(augmented.numpy())
 plt.title('Augmented')
 plt.show()"""
 
+
 @dataclass
 class SumMixUp(torch.nn.Module):
-
     p: float = 0.5
     mode: str = "hard"
 
@@ -134,7 +137,7 @@ class SumMixUp(torch.nn.Module):
         indices = torch.arange(x.shape[0], device=x.device, dtype=torch.int)
         shuffled_indices = torch.randperm(indices.shape[0])
         lambda_ = torch.rand(x.shape[0], device=x.device)
-        if self.mode == 'hard':
+        if self.mode == "hard":
             lambda_ = lambda_ * 0.4 + 0.3
 
         augmented_x = x.clone()
@@ -142,6 +145,6 @@ class SumMixUp(torch.nn.Module):
         for i in range(x.shape[0]):
             if torch.rand(1) < self.p:
                 augmented_x[i] = lambda_ * x[i] + (1 - lambda_[i]) * x[shuffled_indices[i]]
-                if self.mode == 'hard':
+                if self.mode == "hard":
                     augmented_y[i] = torch.clamp(y[i] + y[shuffled_indices[i]], 0, 1)
         return augmented_x, augmented_y

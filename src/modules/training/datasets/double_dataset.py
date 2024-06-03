@@ -1,10 +1,7 @@
 from dataclasses import dataclass
-from typing import Any, Sized, Union
+from typing import Any
 
-import dask
 import numpy as np
-import numpy.typing as npt
-import torch
 from torch.utils.data import Dataset
 
 from src.modules.training.datasets.dask_dataset import DaskDataset
@@ -14,11 +11,11 @@ from src.modules.training.datasets.dask_dataset import DaskDataset
 class DoubleDataset(Dataset):
     """Unsupervised Data Augmentation dataset.
 
-    Wraps around a normal train dataset, but also randomly samples some unlabeled target data every batch."""
+    Wraps around a normal train dataset, but also randomly samples some unlabeled target data every batch.
+    """
 
     task_dataset: DaskDataset
     discriminator_dataset: DaskDataset
-
 
     def __len__(self):
         """Get the length of the dataset."""

@@ -1,4 +1,5 @@
 """Example transformation block for the transformation pipeline."""
+
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -16,6 +17,7 @@ class Rescale(VerboseTransformationBlock):
     """An example transformation block for the transformation pipeline."""
 
     years: list[str] = field(default_factory=lambda: ["2024"])
+
     def custom_transform(self, data: XData) -> XData:
         """Apply a custom transformation to the data.
 
@@ -41,7 +43,6 @@ class Rescale(VerboseTransformationBlock):
         """
         return 2 * ((data - data.min()) / (data.max() - data.min())) - 1
 
-
     def __call__(self, data: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
         """Replace NaN values with 0.
 
@@ -49,4 +50,3 @@ class Rescale(VerboseTransformationBlock):
         :return: The transformed data
         """
         return self.rescale(data)
-
