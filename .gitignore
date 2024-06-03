@@ -162,23 +162,19 @@ cython_debug/
 .idea
 
 submission/source-code
-
 submission/dependencies
+submission/submission.csv
 
 outputs
-
 tm
 data/raw
 data/processed
 data/final
 notebooks/dataset
 
-
-submission/submission.csv
-
 conf/best
 
 plots
-
 tmbackup
 wandb
+.lock

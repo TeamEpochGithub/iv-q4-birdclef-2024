@@ -1,4 +1,5 @@
 """Schema for the train configuration."""
+
 from dataclasses import dataclass
 from typing import Any
 
@@ -11,15 +12,18 @@ class TrainConfig:
 
     :param model: The model pipeline.
     :param ensemble: The ensemble pipeline.
-    :param raw_data_path: Path to the raw data.
-    :param raw_target_path: Path to the raw target.
+    :param raw_path: Path to the raw data.
+    :param cache_path: Path to the cache.
+    :param data_path: Path to the data.
     :param processed_path: Path to put processed data.
     :param metadata_path: Path to the metadata.
+    :param years: The years to use the data from.
     :param scorer: Scorer object to be instantiated.
     :param wandb: Whether to log to Weights & Biases and other settings.
     :param splitter: Cross validation splitter.
     :param test_size: Size of the test set.
     :param allow_multiple_instances: Whether to allow multiple instances of training at the same time.
+    :param max_recordings_per_species: Maximum number of recordings per species. -1 means no cap.
     """
 
     model: Any
@@ -35,3 +39,4 @@ class TrainConfig:
     splitter: Any
     test_size: float = 0.2
     allow_multiple_instances: bool = False
+    max_recordings_per_species: int = -1

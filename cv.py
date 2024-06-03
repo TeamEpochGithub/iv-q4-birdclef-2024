@@ -1,4 +1,5 @@
 """The main script for Cross Validation. Takes in the raw data, does CV and logs the results."""
+
 import copy
 import gc
 import os
@@ -7,26 +8,28 @@ from contextlib import nullcontext
 from pathlib import Path
 from typing import Any
 
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
-import torch
-from torch.utils.data import DataLoader
 import hydra
+import matplotlib.pyplot as plt
+import numpy as np
+import numpy.typing as npt
 import randomname
-import wandb
+import seaborn as sns
+import torch
 from epochalyst.logging.section_separator import print_section_separator
 from hydra.core.config_store import ConfigStore
 from hydra.utils import instantiate
 from omegaconf import DictConfig
-import numpy.typing as npt
+from torch.utils.data import DataLoader
 
+import wandb
 from src.config.cv_config import CVConfig
-from src.setup.setup_data import setup_inference_data, setup_train_x_data, setup_train_y_data
+from src.scoring.scorer import Scorer
+from src.setup.setup_data import setup_inference_data
+from src.setup.setup_data import setup_train_x_data, setup_train_y_data
 from src.setup.setup_pipeline import setup_pipeline
 from src.setup.setup_runtime_args import setup_pred_args, setup_train_args
 from src.setup.setup_wandb import setup_wandb
-from src.typing.typing import YData
+from src.typing.typing import XData, YData
 from src.utils.lock import Lock
 from src.utils.logger import logger
 from src.utils.set_torch_seed import set_torch_seed
@@ -41,7 +44,10 @@ cs.store(name="base_cv", node=CVConfig)
 
 @hydra.main(version_base=None, config_path="conf", config_name="cv")
 def run_cv(cfg: DictConfig) -> None:  # TODO(Jeffrey): Use CVConfig instead of DictConfig
-    """Do cv on a model pipeline with K fold split. Entry point for Hydra which loads the config file."""
+    """Do cv on a model pipeline with K fold split. Entry point for Hydra which loads the config file.
+
+    :param cfg: The config object. Created with Hydra.
+    """
     # Run the cv config with an optional lock
     optional_lock = Lock if not cfg.allow_multiple_instances else nullcontext
     with optional_lock():
@@ -105,7 +111,10 @@ def custom_predict(self, x: Any, **pred_args: Any) -> npt.NDArray[np.float32]:  
 
 
 def run_cv_cfg(cfg: DictConfig) -> None:
-    """Do cv on a model pipeline with K fold split."""
+    """Do cv on a model pipeline with K fold split.
+
+    :param cfg: The config object. Created with Hydra.
+    """
     print_section_separator("Q4 - BirdCLEF - CV")
 
     import coloredlogs
@@ -140,11 +149,11 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     x_cache_exists = model_pipeline.get_x_cache_exists(cache_args)
     # y_cache_exists = model_pipeline.get_y_cache_exists(cache_args)
 
-    X = None
+    X: XData | None = None
     if not x_cache_exists:
         X = setup_train_x_data(cfg.raw_path, cfg.years)
 
-    y = setup_train_y_data(cfg.raw_path, cfg.years)
+    y: YData = setup_train_y_data(cfg.raw_path, cfg.years)
 
     # Instantiate scorer
     scorer = instantiate(cfg.scorer)
@@ -154,11 +163,10 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     # splitter_data = setup_splitter_data()
     logger.info("Using splitter to split data into train and test sets.")
 
+
     if not isinstance(y, YData):
         raise TypeError("Y Should be YData")
-    
-    # Will keep the preds of each fold fro unlabelled soundscapes
-    fold_preds = []
+
     for fold_no, (train_indices, test_indices) in enumerate(instantiate(cfg.splitter).split(y)):
         copy_x = copy.deepcopy(X)
 
@@ -216,7 +224,7 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     avg_score: dict[str, float]
     avg_score = {}
     for score in scores:
-        for year in score:  # type: ignore[union-attr]
+        for year in score:
             if avg_score.get(year) is not None:
                 avg_score[year] += score[year] / len(scores)
             else:
@@ -239,18 +247,18 @@ def run_cv_cfg(cfg: DictConfig) -> None:
 
 def run_fold(
     fold_no: int,
-    X: Any,  # noqa: ANN401
-    y: Any,  # noqa: ANN401
+    X: XData | None,
+    y: YData,
     train_indices: list[int],
     test_indices: list[int],
     cfg: DictConfig,
-    scorer: Any,  # noqa: ANN401
+    scorer: Scorer,
     output_dir: Path,
     cache_args: dict[str, Any],
 ) -> tuple[dict[str, float], Any]:
     """Run a single fold of the cross validation.
 
-    :param i: The fold number.
+    :param fold_no: The fold number.
     :param X: The input data.
     :param y: The labels.
     :param train_indices: The indices of the training data.
@@ -258,7 +266,7 @@ def run_fold(
     :param cfg: The config file.
     :param scorer: The scorer to use.
     :param output_dir: The output directory for the prediction plots.
-    :param processed_y: The processed labels.
+    :param cache_args: The cache arguments.
     :return: The score of the fold and the predictions.
     """
     # Print section separator

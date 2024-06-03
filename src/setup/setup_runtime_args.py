@@ -1,15 +1,18 @@
 """File containing functions related to setting up runtime arguments for pipelines."""
+
+from collections.abc import Iterable, Mapping
 from typing import Any
 
+from epochalyst._core._caching._cacher import CacheArgs
 from epochalyst.pipeline.ensemble import EnsemblePipeline
 from epochalyst.pipeline.model.model import ModelPipeline
 
 
 def setup_train_args(
     pipeline: ModelPipeline | EnsemblePipeline,
-    cache_args: dict[str, Any],
-    train_indices: list[int] | dict[str, list[int]],
-    test_indices: list[int] | dict[str, list[int]],
+    cache_args: CacheArgs,
+    train_indices: Iterable[int] | Mapping[str, Iterable[int]],
+    test_indices: Iterable[int] | Mapping[str, Iterable[int] | Mapping[str, Iterable[int]]],
     fold: int = -1,
     *,
     save_model: bool = False,
@@ -27,25 +30,24 @@ def setup_train_args(
     :return: Dictionary containing arguments
     """
     # Main trainer arguments
-    main_trainer = {
+    main_trainer: dict[str, Any] = {
         "train_indices": train_indices,
         "test_indices": test_indices,
         "save_model": save_model,
     }
 
     if fold > -1:
-        main_trainer["fold"] = fold  # type: ignore[assignment]
+        main_trainer["fold"] = fold
 
     # Train system arguments
     train_sys = {
-        "DoubleTrainer": main_trainer,
         "MainTrainer": main_trainer,
     }
 
     if save_model_preds:
         train_sys["cache_args"] = cache_args
 
-    train_args = {
+    train_args: dict[str, dict[str, Any]] = {
         "x_sys": {},
         "y_sys": {},
         "train_sys": train_sys,

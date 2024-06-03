@@ -1,4 +1,5 @@
 """Train.py is the main script for training the model and will take in the raw data and output a trained model."""
+
 import os
 import warnings
 from contextlib import nullcontext
@@ -16,6 +17,7 @@ from src.setup.setup_data import setup_train_x_data, setup_train_y_data
 from src.setup.setup_pipeline import setup_pipeline
 from src.setup.setup_runtime_args import setup_train_args
 from src.setup.setup_wandb import setup_wandb
+from src.typing.typing import XData
 from src.utils.lock import Lock
 from src.utils.logger import logger
 from src.utils.set_torch_seed import set_torch_seed
@@ -30,7 +32,10 @@ cs.store(name="base_train", node=TrainConfig)
 
 @hydra.main(version_base=None, config_path="conf", config_name="train")
 def run_train(cfg: DictConfig) -> None:
-    """Train a model pipeline with a train-test split. Entry point for Hydra which loads the config file."""
+    """Train a model pipeline with a train-test split. Entry point for Hydra which loads the config file.
+
+    :param cfg: The config object. Created with Hydra.
+    """
     # Run the train config with an optional lock
     optional_lock = Lock if not cfg.allow_multiple_instances else nullcontext
     with optional_lock():
@@ -38,7 +43,11 @@ def run_train(cfg: DictConfig) -> None:
 
 
 def run_train_cfg(cfg: DictConfig) -> None:
-    """Train a model pipeline with a train-test split."""
+    """Train a model pipeline with a train-test split.
+
+    :param cfg: The config object. Created with Hydra.
+    :raise ValueError: If test size is 0 and n_splits is not 0.
+    """
     print_section_separator("Q4 - BirdCLEF - Training")
 
     import coloredlogs
@@ -66,29 +75,28 @@ def run_train_cfg(cfg: DictConfig) -> None:
         "storage_type": ".pkl",
         "storage_path": f"{processed_data_path}",
     }
-    # cache_args = {}  # type: ignore[var-annotated]
     # Read the data if required and split it in X, y
     x_cache_exists = model_pipeline.get_x_cache_exists(cache_args)
     # y_cache_exists = model_pipeline.get_y_cache_exists(cache_args)
 
-    X = None
+    X: XData | None = None
     if not x_cache_exists:
-        # X = setup_train_x_data(cfg.data_path, cfg.cache_path)
-        X = setup_train_x_data(cfg.raw_path, cfg.years)
+        X = setup_train_x_data(cfg.raw_path, cfg.years, cfg.max_recordings_per_species)
 
     # If not cache exists, we need to load the data
-    y = setup_train_y_data(cfg.raw_path, cfg.years)
+    y = setup_train_y_data(cfg.raw_path, cfg.years, cfg.max_recordings_per_species)
 
     # For this simple splitter, we only need y.
     if cfg.test_size == 0:
         if cfg.splitter.n_splits != 0:
             raise ValueError("Test size is 0, but n_splits is not 0. Also please set n_splits to 0 if you want to run train full.")
         logger.info("Training full.")
-        train_indices, test_indices = {year: list(range(len(X[f"bird_{year}"]))) for year in cfg.years}, {year: [] for year in cfg.years}  # type: ignore[arg-type, union-attr, index, var-annotated]
+        train_indices: dict[str, list[int]] = {year: list(range(len(X[f"bird_{year}"]))) for year in cfg.years}  # type: ignore[index]
+        test_indices: dict[str, list[int] | dict[str, list[int]]] = {year: [] for year in cfg.years}
         fold = -1
     else:
         logger.info("Using splitter to split data into train and test sets.")
-        train_indices, test_indices = next(instantiate(cfg.splitter).split(y))  # type: ignore[index]
+        train_indices, test_indices = next(instantiate(cfg.splitter).split(y))
         fold = 0
     # train_indices["kenya"] = []
     # test_indices["kenya"] = []
@@ -105,19 +113,19 @@ def run_train_cfg(cfg: DictConfig) -> None:
     )
     predictions, y_new = model_pipeline.train(X, y, **train_args)
 
-    if y is None:
+    if not y:
         y = y_new
 
     if sum(len(test_indices[year]) for year in test_indices) > 0:
         print_section_separator("Scoring")
         scorer = instantiate(cfg.scorer)
-        score = scorer(y, predictions, test_indices=test_indices, years=cfg.years, output_dir=output_dir)  # type: ignore[union-attr]
+        score = scorer(y, predictions, test_indices=test_indices, years=cfg.years, output_dir=output_dir)
         logger.info(f"Score: {score}")
 
         if wandb.run:
             [wandb.log({f"Score_{year}_0": score[year]}) for year in score] if isinstance(score, dict) else wandb.log({"Score": score})
-        wandb.log({"Score": score["2024"]}) if isinstance(score, dict) and "2024" in score else None
-    wandb.finish()
+            wandb.log({"Score": score["2024"]}) if isinstance(score, dict) and "2024" in score else None
+            wandb.finish()
 
 
 if __name__ == "__main__":

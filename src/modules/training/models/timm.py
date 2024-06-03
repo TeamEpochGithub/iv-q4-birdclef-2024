@@ -1,30 +1,38 @@
 """Timm model for 2D image classification."""
-from typing import Any
+
+from typing import Any, Literal
 
 import torch
-from torch import nn
 
 from src.utils.logger import logger
 
 
-class Timm(nn.Module):
+class Timm(torch.nn.Module):
     """Timm model for 2D image classification.
 
     :param in_channels: Number of input channels
     :param out_channels: Number of output channels
-    :param model_name: Model to use
+    :param model: The model to use
+    :param activation: The activation function to use
     """
 
-    def __init__(self, in_channels: int, out_channels: int, model_name: str, activation: str | None = None, **kwargs: dict[str, Any]) -> None:
+    in_channels: int
+    out_channels: int
+    activation: Literal["sigmoid"] | None
+    model: torch.nn.Module
+
+    def __init__(self, in_channels: int, out_channels: int, model_name: str, activation: Literal["sigmoid"] | None = None, **kwargs: Any) -> None:
         """Initialize the Timm model.
 
         :param in_channels: The number of input channels.
         :param out_channels: The number of output channels.
         :param model_name: The model to use.
         :param activation: The activation function to use.
+        :param kwargs: Additional arguments for the model.
+        :raise ImportError: If timm is not installed.
         """
         try:
-            import timm  # type: ignore[import-not-found]
+            import timm
         except ImportError as err:
             raise ImportError("Need to install timm if you want to use timm models") from err
 

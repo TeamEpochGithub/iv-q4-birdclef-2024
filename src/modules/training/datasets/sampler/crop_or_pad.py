@@ -1,4 +1,5 @@
 """Crop or pad the input to the given length."""
+
 from dataclasses import dataclass
 
 import numpy as np
@@ -9,7 +10,10 @@ from src.modules.training.datasets.sampler.sampler import Sampler
 
 @dataclass
 class CropOrPad(Sampler):
-    """Crop or pad the input sequence."""
+    """Crop or pad the input sequence.
+
+    :param length: The desired length.
+    """
 
     length: int
 

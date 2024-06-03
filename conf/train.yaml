@@ -13,12 +13,15 @@ processed_path: data/processed/
 raw_path: data/raw/
 years: ["2024"]
 cache_path: data/cache
-#data_path: data/raw/train_data/dummy.npy
+
 data_path: data/raw/2024/train_audio/
 metadata_path: data/raw/2024/train_metadata.csv
 
 # Do this if you want train full.
 test_size: 0.2
+
+# Species cap
+max_recordings_per_species: 500
 
 scorer:
   _target_: src.scoring.rocauc_years.ROCAUC # Add scorer

@@ -25,8 +25,8 @@ train_sys:
           - _target_: hydra.utils.get_class
             path: torchaudio.transforms.MelSpectrogram
         output_shape:
-        - 224
-        - 224
+        - 256
+        - 256
         scale:
           _target_: src.modules.training.datasets.to_2d.spec_normalize.SpecNormalize
       labeler:
@@ -56,9 +56,9 @@ train_sys:
       num_workers: 8
       prefetch_factor: 2
       persistent_workers: false
-    n_folds: 5
+    n_folds: 0
     epochs: 50
-    patience: 15
+    patience: 14
     batch_size: 64
     model:
       _target_: src.modules.training.models.timm.Timm
@@ -83,6 +83,7 @@ train_sys:
       - _target_: hydra.utils.get_class
         path: torch.optim.AdamW
       lr: 0.0005
+  - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
   - _target_: src.modules.training.postprocessing.smooth_file.SmoothFile
     smooth_factor: 0.75
 pred_sys:

@@ -3,9 +3,12 @@
 - Since these methods are very competition specific none have been implemented here yet.
 - Usually you'll have one data setup for training and another for making submissions.
 """
+
 import ast
 import glob
-from typing import Any
+import os
+from collections.abc import Iterable
+from pathlib import Path
 
 import librosa
 import numpy as np
@@ -17,29 +20,36 @@ from src.typing.typing import XData, YData
 from src.utils.logger import logger
 
 
-def setup_train_x_data(raw_path: str, years: list[int]) -> XData:
+def setup_train_x_data(raw_path: str | os.PathLike[str], years: Iterable[str], max_recordings_per_species: int | None = None) -> XData:
     """Create train x data for pipeline.
 
     :param raw_path: Raw path
     :param years: The years you want to use the data from
-
+    :param max_recordings_per_species: Maximum number of recordings per species.
     :return: XData object
     """
-    # Instantiate an empty XData object to later fill with data
     xdata = XData()
+    all_metadata: list[pd.DataFrame] = []
 
     for year in years:
-        metadata_path = raw_path + str(year) + "/" + "train_metadata.csv"
-        data_path = raw_path + str(year) + "/" + "train_audio/"
+        raw_year_path = Path(raw_path) / str(year)
+        metadata_path = raw_year_path / "train_metadata.csv"
         metadata = pd.read_csv(metadata_path)
-        metadata["samplename"] = metadata.filename.map(lambda x: x.split("/")[0] + "-" + x.split("/")[-1].split(".")[0])
-        #metadata = metadata[metadata['secondary_labels'] == '[]'].reset_index(drop=True)
+        metadata["year"] = year
+        metadata["samplename"] = metadata["filename"].str.replace("/", "-").str.replace(".ogg", "").str.replace(".mp3", "")
+        all_metadata.append(metadata)
 
-        # Load the bird_2024 data
-        filenames = metadata.filename
-        filenames = [data_path + filename for filename in filenames]
+    all_metadata: pd.DataFrame = pd.concat(all_metadata).reset_index(drop=True)
 
-        bird = np.array([load_audio_train(filename) for filename in filenames])
+    if max_recordings_per_species is not None and max_recordings_per_species > -1:
+        all_metadata: pd.DataFrame = all_metadata.groupby("primary_label").head(max_recordings_per_species).reset_index(drop=True)  # type: ignore[no-redef]
+
+    for year in years:
+        raw_year_path = Path(raw_path) / str(year)
+        data_path = raw_year_path / "train_audio"
+        metadata = all_metadata[all_metadata["year"] == year]
+
+        bird = np.array([load_audio_train(data_path / filename) for filename in metadata["filename"]])
         xdata[f"bird_{year}"] = bird
         xdata[f"meta_{year}"] = metadata
 
@@ -47,7 +57,21 @@ def setup_train_x_data(raw_path: str, years: list[int]) -> XData:
 
 
 @delayed
-def load_audio_train(path: str) -> npt.NDArray[np.float32]:
+def load_audio_train(path: str | os.PathLike[str]) -> npt.NDArray[np.float32]:
+    """Load audio data lazily using librosa.
+
+    :param path: Path to the audio file
+    :return: Audio data
+    """
+    try:
+        return librosa.load(path, sr=32000, dtype=np.float32)[0]
+    except FileNotFoundError:
+        logger.error(f"File not found: {path}")
+        return np.zeros(32000, dtype=np.float32)
+
+
+@delayed
+def load_audio_submit(path: str | os.PathLike[str]) -> npt.NDArray[np.float32]:
     """Load audio data lazily using librosa.
 
     :param path: Path to the audio file
@@ -56,32 +80,32 @@ def load_audio_train(path: str) -> npt.NDArray[np.float32]:
     return librosa.load(path, sr=32000, dtype=np.float32)[0]
 
 
-@delayed
-def load_audio_submit(path: str) -> npt.NDArray[np.float32]:
-    """Load audio data lazily using librosa.
-
-    :param path: Path to the audio file
-    :return: Audio data
-    """
-    return librosa.load(path, sr=32000, dtype=np.float32)[0] / 100
-
-
-def setup_train_y_data(raw_path: str, years: list[str]) -> YData:
+def setup_train_y_data(raw_path: str | os.PathLike[str], years: Iterable[str], max_recordings_per_species: int = -1) -> YData:
     """Create train y data for pipeline.
 
     :param raw_path: path to the raw data
     :param years: The years you want to use the data from
-
+    :param max_recordings_per_species: Maximum number of recordings per species. -1 means no cap.
     :return: YData object
     """
     ydata = YData()
+    all_metadata: list[pd.DataFrame] = []
 
     for year in years:
-        metadata_path = raw_path + str(year) + "/" + "train_metadata.csv"
+        metadata_path = Path(raw_path) / str(year) / "train_metadata.csv"
         metadata = pd.read_csv(metadata_path)
-        metadata["samplename"] = metadata.filename.map(lambda x: x.split("/")[0] + "-" + x.split("/")[-1].split(".")[0])
-        #metadata = metadata[metadata['secondary_labels'] == '[]'].reset_index(drop=True)
+        metadata["year"] = year
+        metadata["samplename"] = metadata["filename"].str.replace("/", "-").str.replace(".ogg", "").str.replace(".mp3", "")
+        all_metadata.append(metadata)
 
+
+    all_metadata: pd.DataFrame = pd.concat(all_metadata).reset_index(drop=True)
+
+    if max_recordings_per_species > -1:
+        all_metadata: pd.DataFrame = all_metadata.groupby("primary_label").head(max_recordings_per_species).reset_index(drop=True)  # type: ignore[no-redef]
+
+    for year in years:
+        metadata = all_metadata[all_metadata["year"] == year]
         ydata[f"meta_{year}"] = metadata
 
         if "labels" in metadata.columns:
@@ -143,10 +167,9 @@ def one_hot_label(metadata: pd.DataFrame) -> pd.DataFrame:
     return one_hot
 
 
-def setup_inference_data(path: str) -> Any:  # noqa: ANN401
+def setup_inference_data(path: str | os.PathLike[str]) -> XData:
     """Create data for inference with pipeline.
 
-    :param raw_path: Raw path
     :param path: Usually raw path is a parameter
     :return: Inference data
     """
@@ -161,9 +184,9 @@ def setup_inference_data(path: str) -> Any:  # noqa: ANN401
     return XData(bird_2024=bird_2024)
 
 
-def setup_splitter_data() -> Any:  # noqa: ANN401
+def setup_splitter_data() -> None:
     """Create data for splitter.
 
-    :return: Splitter data
+    :return: None
     """
-    return None
+    return

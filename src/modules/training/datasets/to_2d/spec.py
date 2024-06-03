@@ -10,7 +10,15 @@ from torchaudio.transforms import MelSpectrogram
 
 @dataclass
 class Spec:
-    """Wrapper class for spectrogram functions from torchaudio."""
+    """Wrapper class for spectrogram functions from torchaudio.
+
+    :param spec: The spectrogram function to use.
+    :param output_shape: The desired output shape.
+    :param sequence_length: The desired sequence length.
+    :param scale: The scaling function to use.
+    :param sample_rate: The sample rate of the input data.
+    :param f_min: The minimum frequency.
+    """
 
     spec: functools.partial[torch.nn.Module]
     output_shape: tuple[int, int] = (224, 224)  # H, W
@@ -30,8 +38,11 @@ class Spec:
             self.instantiated_spec = self.spec(n_fft=self.n_fft, hop_length=self.hop_length)
 
     def __call__(self, input_data: torch.Tensor) -> torch.Tensor:
-        """Create spectrograms from the input."""
-        # Create spectrograms from the input
+        """Create spectrograms from the input.
+
+        :param input_data: The input data.
+        :return: The spectrogram.
+        """
         spec_out = self.instantiated_spec(input_data)
         if len(spec_out.shape) == 3:
             spec_out = spec_out.unsqueeze(1)
