@@ -7,12 +7,13 @@ x_sys:
   - _target_: src.modules.transformation.x.nan_to_zero.NanToZero
     years:
     - '2024'
+    - 'esc50'
 y_sys: null
 train_sys:
   _target_: src.modules.training.verbose_training_pipeline.VerboseTrainingPipeline
   steps:
   - _target_: src.modules.training.main_trainer.MainTrainer
-    year: '2024'
+    year: 'union_2024_esc50'
     dataset_args:
       sampler:
         _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad

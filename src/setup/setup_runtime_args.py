@@ -40,7 +40,7 @@ def setup_train_args(
         main_trainer["fold"] = fold
 
     # Train system arguments
-    train_sys: dict[str, Any] = {
+    train_sys = {
         "MainTrainer": main_trainer,
     }
 

@@ -53,25 +53,25 @@ train_sys:
         - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.CutMix
           p: 0.5
     dataloader_args:
-      num_workers: 16
+      num_workers: 8
       prefetch_factor: 2
-      persistent_workers: true
+      persistent_workers: false
     n_folds: 5
-    epochs: 20
+    epochs: 50
     patience: 15
     batch_size: 64
     model:
       _target_: src.modules.training.models.timm.Timm
       in_channels: 1
       out_channels: 182
-      model_name: efficientnet_b0
+      model_name: convnext_tiny
       activation: sigmoid
     scheduler:
       _target_: functools.partial
       _args_:
       - _target_: hydra.utils.get_class
         path: timm.scheduler.cosine_lr.CosineLRScheduler
-      warmup_t: 2
+      warmup_t: 3
       warmup_lr_init: 1.0e-05
       t_initial: 50
       cycle_limit: 1
@@ -82,12 +82,9 @@ train_sys:
       _args_:
       - _target_: hydra.utils.get_class
         path: torch.optim.AdamW
-      lr: 0.001
-#   - _target_: src.modules.training.postprocessing.set_to_0.SetTo0
-#   - _target_: src.modules.training.postprocessing.smooth_file.SmoothFile
-#     smooth_factor: 0.75
-# pred_sys:
-#   _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline
-#   title: Postprocessing pipeline
-# label_sys:
-#   _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline
+      lr: 0.0005
+pred_sys:
+  _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline
+  title: Postprocessing pipeline
+label_sys:
+  _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline

@@ -9,18 +9,24 @@ from pathlib import Path
 from typing import Any
 
 import hydra
+import matplotlib.pyplot as plt
+import numpy as np
+import numpy.typing as npt
 import randomname
+import seaborn as sns
+import torch
 import wandb
 from epochalyst.logging.section_separator import print_section_separator
 from hydra.core.config_store import ConfigStore
 from hydra.utils import instantiate
 from omegaconf import DictConfig
+from torch.utils.data import DataLoader
 
 from src.config.cv_config import CVConfig
 from src.scoring.scorer import Scorer
-from src.setup.setup_data import setup_train_x_data, setup_train_y_data
+from src.setup.setup_data import setup_inference_data, setup_train_x_data, setup_train_y_data
 from src.setup.setup_pipeline import setup_pipeline
-from src.setup.setup_runtime_args import setup_train_args
+from src.setup.setup_runtime_args import setup_pred_args, setup_train_args
 from src.setup.setup_wandb import setup_wandb
 from src.typing.typing import XData, YData
 from src.utils.lock import Lock
@@ -45,6 +51,64 @@ def run_cv(cfg: DictConfig) -> None:  # TODO(Jeffrey): Use CVConfig instead of D
     optional_lock = Lock if not cfg.allow_multiple_instances else nullcontext
     with optional_lock():
         run_cv_cfg(cfg)
+
+
+def collate_fn(batch: tuple[torch.Tensor, ...]) -> tuple[torch.Tensor, ...]:
+    """Collate function for the dataloader.
+
+    :param batch: The batch to collate.
+    :return: Collated batch.
+    """
+    X, y = batch
+    return X, y
+
+
+def custom_predict(self, x: Any, **pred_args: Any) -> npt.NDArray[np.float32]:  # noqa: ANN401
+    """Predict on the test data.
+
+    :param x: The input to the system.
+    :return: The output of the system.
+    """
+    print_section_separator(f"Predicting model: {self.model.__class__.__name__}")
+    self.log_to_debug(f"Predicting model: {self.model.__class__.__name__}")
+
+    # Parse pred_args
+    curr_batch_size = pred_args.get("batch_size", self.batch_size)
+
+    # Create dataset
+    pred_dataset = self.create_prediction_dataset(x)
+    pred_dataloader = DataLoader(
+        pred_dataset,
+        batch_size=curr_batch_size,
+        shuffle=False,
+        collate_fn=(collate_fn if hasattr(pred_dataset, "__getitems__") else None),  # type: ignore[arg-type],
+        # num_workers=16,
+        # prefetch_factor=1
+    )
+
+    # Predict with a single model
+    if self.n_folds < 1 or pred_args.get("use_single_model", False):
+        self._load_model()
+        return self.predict_on_loader(pred_dataloader)
+
+    predictions = []
+    # Predict with multiple models
+    for i in range(int(self.n_folds)):
+        self._fold = i  # set the fold, which updates the hash
+        # Try to load the next fold if it exists
+        try:
+            self._load_model()
+        except FileNotFoundError as e:
+            if i == 0:
+                raise FileNotFoundError(f"First model of {self.n_folds} folds not found...") from e
+            self.log_to_warning(f"Model for fold {self._fold} not found, skipping the rest of the folds...")
+            break
+        self.log_to_terminal(f"Predicting with model fold {i + 1}/{self.n_folds}")
+        predictions.append(self.predict_on_loader(pred_dataloader))
+
+    # Average the predictions using numpy
+    test_predictions = np.array(predictions)
+    return test_predictions
 
 
 def run_cv_cfg(cfg: DictConfig) -> None:
@@ -100,6 +164,9 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     # splitter_data = setup_splitter_data()
     logger.info("Using splitter to split data into train and test sets.")
 
+    if not isinstance(y, YData):
+        raise TypeError("Y Should be YData")
+
     for fold_no, (train_indices, test_indices) in enumerate(instantiate(cfg.splitter).split(y)):
         copy_x = copy.deepcopy(X)
 
@@ -107,6 +174,52 @@ def run_cv_cfg(cfg: DictConfig) -> None:
         scores.append(score)
 
         X = copy_x
+        if score["2024"] < 0.9:
+            break
+
+    # Set up the inference pipeline
+    logger.info("Setting up the inference pipeline for unlabeled soundscapes")
+    model_pipeline = setup_pipeline(cfg, is_train=False)
+    model_pipeline.train_sys.steps[0].custom_predict = custom_predict.__get__(model_pipeline.train_sys.steps[0])
+    data_path = "data/raw/2024/unlabeled_soundscapes/"
+    X_unlabeled = setup_inference_data(data_path)
+    X_unlabeled["bird_2024"] = X_unlabeled["bird_2024"][:1000]
+    # Get output directory
+    output_dir = Path(hydra.core.hydra_config.HydraConfig.get().runtime.output_dir)
+    pred_args = setup_pred_args(pipeline=model_pipeline, output_dir=output_dir.as_posix(), data_dir=data_path, species_dir="data/raw/2024/train_audio/")
+
+    logger.info("Making predictions on unlabeled soundscapes")
+    predictions = model_pipeline.predict(X_unlabeled, **pred_args)
+    fold_preds = predictions
+    print(fold_preds.shape)
+
+    # Find the pairs
+    pairs = []
+    for i in range(fold_no + 1):
+        pairs.extend(tuple(zip([i] * len(list(range(i + 1, fold_no + 1))), list(range(i + 1, fold_no + 1)))))
+
+    print(pairs)
+    corrs = {}
+    # Find the pairwise correlation between all the arrays
+    # make directory for output plots
+    os.makedirs(output_dir / Path("fold_correlations"))
+    for pair in pairs:
+        corr = np.corrcoef(x=fold_preds[pair[0]], y=fold_preds[pair[1]], rowvar=False)
+        corrs[pair] = corr[:182, 182:364]
+        plt.figure(figsize=(12, 12))
+        sns.heatmap(corrs[pair])
+        diag_corr = sum([corrs[pair][i, i] for i in range(corrs[pair].shape[0])]) / 182
+        corrs[pair] = diag_corr
+        plt.title(f"pair {pair} diag_corr:{diag_corr}")
+        plt.savefig(output_dir / Path("fold_correlations") / Path(f"{pair}.png"))
+
+    mean_corr = 0
+    for pair in corrs:
+        mean_corr += corrs[pair]
+    if len(corrs) == 0:
+        mean_corr = 0
+    else:
+        mean_corr /= len(corrs)
 
     avg_score: dict[str, float]
     avg_score = {}
@@ -121,6 +234,12 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     logger.info(f"Avg Score: {avg_score}")
     [wandb.log({f"Avg Score_{year}": avg_score[year]}) for year in avg_score] if isinstance(avg_score, dict) else wandb.log({"Avg Score": avg_score})
     wandb.log({"Score": avg_score["2024"]}) if isinstance(avg_score, dict) and "2024" in avg_score else None
+    wandb.log({"Fold correlations": str(corrs)})
+    wandb.log({"Mean corr": mean_corr})
+
+    # sweep score is score 2024 + weight* mean_corr
+    sweep_score = avg_score["2024"] + cfg.corr_weight * mean_corr
+    wandb.log({"Sweepscore": sweep_score})
 
     logger.info("Finishing wandb run")
     wandb.finish()
@@ -171,7 +290,7 @@ def run_fold(
 
     gc.collect()
 
-    score = scorer(y_true=y, y_pred=predictions, test_indices=test_indices, years=cfg.years)
+    score = scorer(y_true=y, y_pred=predictions, test_indices=test_indices, years=cfg.years, output_dir=output_dir)
     logger.info(f"Score, fold {fold_no}: {score}")
 
     fold_dir = output_dir / str(fold_no)  # Files specific to a run can be saved here

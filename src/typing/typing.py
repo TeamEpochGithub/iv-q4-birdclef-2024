@@ -40,14 +40,18 @@ class XData:
     meta_2022: pd.DataFrame | None = None
     meta_2021: pd.DataFrame | None = None
     meta_kenya: pd.DataFrame | None = None
+    meta_esc50: pd.DataFrame | None = None
+    meta_green: pd.DataFrame | None = None
+    bird_2024add: npt.NDArray[Any] | None = None
+    bird_2024: npt.NDArray[Any] | None = None
+    bird_2023: npt.NDArray[Any] | None = None
+    bird_2022: npt.NDArray[Any] | None = None
+    bird_2021: npt.NDArray[Any] | None = None
+    bird_kenya: npt.NDArray[Any] | None = None
+    bird_esc50: npt.NDArray[Any] | None = None
+    bird_green: npt.NDArray[Any] | None = None
     bird_2024gsil: npt.NDArray[np.float32] | None = None
     bird_2024gbird: npt.NDArray[np.float32] | None = None
-    bird_2024add: npt.NDArray[np.float32] | None = None
-    bird_2024: npt.NDArray[np.float32] | None = None
-    bird_2023: npt.NDArray[np.float32] | None = None
-    bird_2022: npt.NDArray[np.float32] | None = None
-    bird_2021: npt.NDArray[np.float32] | None = None
-    bird_kenya: npt.NDArray[np.float32] | None = None
 
     @overload
     def __getitem__(self, indexer: PandasIlocIndexer) -> XData: ...
@@ -200,6 +204,8 @@ class YData:
     meta_2022: pd.DataFrame | None = None
     meta_2021: pd.DataFrame | None = None
     meta_kenya: pd.DataFrame | None = None
+    meta_esc50: pd.DataFrame | None = None
+    meta_green: pd.DataFrame | None = None
     label_2024gsil: pd.DataFrame | None = None
     label_2024gbird: pd.DataFrame | None = None
     label_2024add: pd.DataFrame | None = None
@@ -208,6 +214,8 @@ class YData:
     label_2022: pd.DataFrame | None = None
     label_2021: pd.DataFrame | None = None
     label_kenya: pd.DataFrame | None = None
+    label_esc50: pd.DataFrame | None = None
+    label_green: pd.DataFrame | None = None
 
     @overload
     def __getitem__(self, indexer: PandasIlocIndexer) -> YData: ...

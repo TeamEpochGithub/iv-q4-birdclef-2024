@@ -19,7 +19,7 @@ def to_submission_format(predictions: npt.NDArray[np.float32], test_path: str | 
     :raise ValueError: If the number of species in predictions does not match the number of species in the dataset.
     :return: The predictions in the submission format.
     """
-    file_list = [file.stem for file in Path(test_path).glob("*.ogg")]
+    file_list = [file.stem for file in Path(test_path).glob("*.ogg")] + [file.stem for file in Path(test_path).glob("*.wav")]
 
     logger.info(f"Number of test soundscapes: {len(file_list)} ")
     logger.info(f"Filenames: {file_list[:10]}...")
