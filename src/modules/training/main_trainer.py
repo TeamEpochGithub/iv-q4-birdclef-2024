@@ -4,6 +4,7 @@ import signal
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
+from types import FrameType
 from typing import Any, NoReturn
 
 import numpy as np
@@ -39,6 +40,7 @@ class MainTrainer(TorchTrainer, Logger):
     dataloader_args: dict[str, Any] = field(default_factory=dict, repr=False)
     # Weights for the sampler
     weights_path: str | None = None
+    prediction_time_limit: int | None = field(default=None, repr=False)
 
     def save_model_to_external(self) -> None:
         """Save the model to external storage."""
@@ -271,8 +273,11 @@ class MainTrainer(TorchTrainer, Logger):
         onnx_model = onnxrt.InferenceSession(f"{self.get_hash()}.onnx")
         predictions = []
 
-        signal.signal(signal.SIGALRM, handle_timeout)
-        signal.alarm(5000)  # TODO(Jeffrey): Set this in the config
+        # Set a timeout for the predictions
+        if self.prediction_time_limit is not None:
+            signal.signal(signal.SIGALRM, handle_timeout)
+            self.log_to_terminal(f"Starting predictions with timeout of {self.prediction_time_limit} seconds.")
+            signal.alarm(self.prediction_time_limit)
 
         try:
             with torch.no_grad(), tqdm(loader, unit="batch", disable=False) as tepoch:
@@ -282,10 +287,12 @@ class MainTrainer(TorchTrainer, Logger):
                     predictions.extend(y_pred)
         except TimeoutError:
             self.log_to_terminal("Time limit reached. Stopping predictions.")
+        else:
+            self.log_to_terminal("Done predicting!")
         finally:
-            signal.alarm(0)
+            if self.prediction_time_limit is not None:
+                signal.alarm(0)
 
-        self.log_to_terminal("Done predicting")
         # Remove the saved onnx model
         Path(f"{self.get_hash()}.onnx").unlink()
         return np.array(predictions)
@@ -301,7 +308,7 @@ def collate_fn(batch: tuple[torch.Tensor, ...]) -> tuple[torch.Tensor, ...]:
     return X, y
 
 
-def handle_timeout(signum: int, frame: Any) -> NoReturn:
+def handle_timeout(signum: int, frame: FrameType | None) -> NoReturn:  # noqa: ARG001
     """Handle the timeout signal.
 
     :raise TimeoutError: If the timeout is reached.
