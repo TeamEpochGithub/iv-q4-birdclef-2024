@@ -1,0 +1,40 @@
+wandb_version: 1
+
+model.train_sys.steps.0.batch_size:
+  value: 101
+model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.0.p:
+  value: 0.7613507231394993
+model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.1.p:
+  value: 0.3675320188999114
+model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.2.compose.transforms.0.p:
+  value: 0.5068116157868334
+model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.2.compose.transforms.1.p:
+  value: 0.34575003451082653
+model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.2.compose.transforms.2.p:
+  value: 0.5647487197616106
+model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.2.compose.transforms.3.p:
+  value: 0.6380965337674354
+model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.2.compose.transforms.4.p:
+  value: 0.924454185080288
+model.train_sys.steps.0.dataset_args.aug_1d.xy_transforms.0.p:
+  value: 0.07575601293074807
+model.train_sys.steps.0.dataset_args.aug_1d.xy_transforms.1.p:
+  value: 0.04803927747530912
+model.train_sys.steps.0.dataset_args.aug_1d.xy_transforms.2.p:
+  value: 0.741654203739935
+model.train_sys.steps.0.dataset_args.aug_2d.x_transforms.0.p:
+  value: 0.41827906206449006
+model.train_sys.steps.0.dataset_args.aug_2d.xy_transforms.0.p:
+  value: 0.7230703352085204
+model.train_sys.steps.0.dataset_args.aug_2d.xy_transforms.1.p:
+  value: 0.3897070185252443
+model.train_sys.steps.0.epochs:
+  value: 31
+model.train_sys.steps.0.model.drop_path_rate:
+  value: 0.45622373183514503
+model.train_sys.steps.0.model.drop_rate:
+  value: 0.19485601139498265
+model.train_sys.steps.0.model.model_name:
+  value: beit_base_patch16_224
+model.train_sys.steps.0.optimizer.lr:
+  value: 0.0001626170877095039
