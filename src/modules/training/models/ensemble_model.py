@@ -40,7 +40,28 @@ class EnsembleModel(torch.nn.Module, ABC):
         raise NotImplementedError("EnsembleModel is an abstract class.")
 
 
-class AlternatingEnsembleModel(EnsembleModel):
+class FusionEnsembleModel(EnsembleModel):
+    """Ensemble that averages the output of the models."""
+
+    @override
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass of the ensemble.
+
+        :param x: The data of a 4-minute soundscape of shape (48, C, H, W)
+        :return: The predictions of shape (48, 182)
+        """
+        predictions: list[torch.Tensor] = [torch.empty((x.shape[0], N_CLASSES), device=x.device, dtype=x.dtype)] * len(self.models)
+
+        try:
+            for i, model in enumerate(self.models):
+                predictions[i] = model(x)
+        except TimeoutError as e:
+            raise TimeoutError("Ensemble time limit reached.", torch.stack(predictions).nanmean(dim=0)) from e
+
+        return torch.stack(predictions).mean(dim=0)
+
+
+class AlternatingEnsembleModel(FusionEnsembleModel):
     """Ensemble that alternates between models for inference."""
 
     @override
@@ -54,12 +75,15 @@ class AlternatingEnsembleModel(EnsembleModel):
         :return: The predictions of shape (48, 182)
         """
         if self.training:
-            return torch.stack([model(x) for model in self.models]).mean(dim=0)
+            return super().forward(x)
 
         predictions: torch.Tensor = torch.empty((x.shape[0], N_CLASSES), device=x.device, dtype=x.dtype)
 
-        for i in range(len(self.models)):
-            indices = range(i, x.shape[0], len(self.models))
-            predictions[indices] = self.models[i](x[indices])
+        try:
+            for i, model in enumerate(self.models):
+                indices = range(i, x.shape[0], len(self.models))
+                predictions[indices] = model(x[indices])
+        except TimeoutError as e:
+            raise TimeoutError("Ensemble time limit reached.", predictions) from e
 
         return predictions

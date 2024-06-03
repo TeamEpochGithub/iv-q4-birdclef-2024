@@ -18,3 +18,6 @@ def set_torch_seed(seed: int = 42) -> None:
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
     logger.info(f"Random seed set as {seed}")
+
+    torch.utils.deterministic.fill_uninitialized_memory = True
+    torch.use_deterministic_algorithms(mode=True)

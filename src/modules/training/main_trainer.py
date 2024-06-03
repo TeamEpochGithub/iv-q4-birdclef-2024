@@ -40,7 +40,7 @@ class MainTrainer(TorchTrainer, Logger):
     dataloader_args: dict[str, Any] = field(default_factory=dict, repr=False)
     # Weights for the sampler
     weights_path: str | None = None
-    prediction_time_limit: int | None = field(default=None, repr=False)
+    prediction_time: int | None = field(default=None, repr=False)
 
     def save_model_to_external(self) -> None:
         """Save the model to external storage."""
@@ -271,13 +271,13 @@ class MainTrainer(TorchTrainer, Logger):
         output_names = ["output"]
         torch.onnx.export(self.model, input_tensor, f"{self.get_hash()}.onnx", verbose=False, input_names=input_names, output_names=output_names)
         onnx_model = onnxrt.InferenceSession(f"{self.get_hash()}.onnx")
-        predictions = []
+        predictions: list[npt.NDArray[np.float32]] = []
 
         # Set a timeout for the predictions
-        if self.prediction_time_limit is not None:
+        if self.prediction_time is not None and self.prediction_time > 0:
             signal.signal(signal.SIGALRM, handle_timeout)
-            self.log_to_terminal(f"Starting predictions with timeout of {self.prediction_time_limit} seconds.")
-            signal.alarm(self.prediction_time_limit)
+            self.log_to_terminal(f"Starting predictions with timeout of {self.prediction_time} seconds.")
+            signal.alarm(self.prediction_time)
 
         try:
             with torch.no_grad(), tqdm(loader, unit="batch", disable=False) as tepoch:
@@ -285,13 +285,18 @@ class MainTrainer(TorchTrainer, Logger):
                     X_batch = data[0].to(self.device).float()
                     y_pred = onnx_model.run(output_names, {input_names[0]: X_batch.numpy()})[0]
                     predictions.extend(y_pred)
-        except TimeoutError:
+        except TimeoutError as e:
+            if len(e.args) > 1:
+                predictions.extend(e.args[1])
             self.log_to_terminal("Time limit reached. Stopping predictions.")
+
+            # Path(f"{self.get_hash()}.onnx").unlink()
+            # raise TimeoutError("Time limit reached. Stopping predictions.", np.array(predictions))
         else:
             self.log_to_terminal("Done predicting!")
-        finally:
-            if self.prediction_time_limit is not None:
-                signal.alarm(0)
+
+        if self.prediction_time is not None:
+            signal.alarm(0)
 
         # Remove the saved onnx model
         Path(f"{self.get_hash()}.onnx").unlink()

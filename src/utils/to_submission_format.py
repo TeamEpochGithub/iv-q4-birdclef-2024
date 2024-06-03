@@ -30,7 +30,11 @@ def to_submission_format(predictions: npt.NDArray[np.float32], test_path: str | 
         raise ValueError("Number of species in predictions does not match the number of species in the dataset.")
 
     if predictions.shape[0] != len(file_list) * 48:
-        raise ValueError("Number of predictions does not match the number of test soundscapes.")
+        logger.warning(
+            f"Number of predictions ({predictions.shape[0]}) does not match the number of test soundscapes ({len(file_list) * 48}). ",
+            "This is likely the result of a timeout. Padding submission with zeros.",
+        )
+        predictions = np.concatenate([predictions, np.zeros((len(file_list) * 48 - predictions.shape[0], predictions.shape[1]))])
 
     # Convert predictions to dataframe with species as columns and row_id as index.
     submission = pd.DataFrame(predictions, columns=species_list)
