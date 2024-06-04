@@ -1,5 +1,8 @@
+"""Dummy models for testing purposes."""
+
+from typing import Final
+
 import torch
-from typing_extensions import Final
 
 N_CLASSES: Final[int] = 182  # TODO(Jeffrey): Don't hardcode the number of bird species.
 
