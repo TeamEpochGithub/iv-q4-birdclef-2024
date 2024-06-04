@@ -116,7 +116,7 @@ def setup_train_y_data(raw_path: str | os.PathLike[str], years: Iterable[str], m
             case "freefield":
                 ydata[f"label_{year}"] = metadata["hasbird"]
             case _:
-                if "labels" in metadata.columns and year != "2024gxeno":
+                if "labels" in metadata.columns:
                     ydata[f"label_{year}"] = one_hot_label(metadata)
                 else:
                     ydata[f"label_{year}"] = one_hot_primary_secondary(metadata)

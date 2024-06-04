@@ -23,11 +23,15 @@ test_size: 0.2
 # Species cap
 #max_recordings_per_species: 500
 
+#scorer:
+#  _target_: src.scoring.rocauc_years.ROCAUC # Add scorer
+#  name: rocauc
+#  grade_threshold: 0
+#  only_primary: true
+
 scorer:
-  _target_: src.scoring.rocauc_years.ROCAUC # Add scorer
-  name: rocauc
-  grade_threshold: 0
-  only_primary: true
+  _target_: src.scoring.accuracy.Accuracy # Add scorer
+  name: acc
 splitter:
   _target_: src.setup.splitter.Splitter
   splitter:

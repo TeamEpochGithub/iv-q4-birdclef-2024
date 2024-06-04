@@ -61,11 +61,14 @@ train_sys:
     patience: 15
     batch_size: 64
     model:
-      _target_: src.modules.training.models.timm.Timm
-      in_channels: 1
-      out_channels: 1
-      model_name: convnext_tiny
-      activation: sigmoid
+      _target_: src.modules.training.models.two_stage_model.TwoStageModel
+      threshold: 0.4125
+      model1:
+        _target_: src.modules.training.models.pretrained_model.PretrainedModel
+        model_path: "tm/1d3da39e7fabe8b5c620a1b4dcacd640_5_f0.pt"  # Call / nocall model
+      model2:
+        _target_: src.modules.training.models.pretrained_model.PretrainedModel
+        model_path: "tm/1ae19a94670376d14cd2c4f0e8467ebf_5_f0.pt"  # Bird species model
     scheduler:
       _target_: functools.partial
       _args_:

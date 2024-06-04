@@ -37,6 +37,7 @@ class XData:
     meta_2024add: pd.DataFrame | None = None
     meta_2024gsil: pd.DataFrame | None = None
     meta_2024gbird: pd.DataFrame | None = None
+    meta_2024gxeno: pd.DataFrame | None = None
     meta_2023: pd.DataFrame | None = None
     meta_2022: pd.DataFrame | None = None
     meta_2021: pd.DataFrame | None = None
@@ -54,6 +55,7 @@ class XData:
     bird_green: npt.NDArray[Any] | None = None
     bird_2024gsil: npt.NDArray[np.float32] | None = None
     bird_2024gbird: npt.NDArray[np.float32] | None = None
+    bird_2024gxeno: npt.NDArray[np.float32] | None = None
 
     @overload
     def __getitem__(self, indexer: PandasIlocIndexer) -> XData: ...
@@ -201,7 +203,9 @@ class YData:
     meta_freefield: pd.DataFrame | None = None
     meta_2024gsil: pd.DataFrame | None = None
     meta_2024gbird: pd.DataFrame | None = None
+    meta_2024gxeno: pd.DataFrame | None = None
     meta_2024add: pd.DataFrame | None = None
+
     meta_2024: pd.DataFrame | None = None
     meta_2023: pd.DataFrame | None = None
     meta_2022: pd.DataFrame | None = None
@@ -212,6 +216,7 @@ class YData:
     label_freefield: pd.DataFrame | None = None
     label_2024gsil: pd.DataFrame | None = None
     label_2024gbird: pd.DataFrame | None = None
+    label_2024gxeno: pd.DataFrame | None = None
     label_2024add: pd.DataFrame | None = None
     label_2024: pd.DataFrame | None = None
     label_2023: pd.DataFrame | None = None

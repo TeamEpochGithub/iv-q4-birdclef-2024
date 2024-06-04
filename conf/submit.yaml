@@ -1,7 +1,7 @@
 defaults:
   - base_submit
   - hydra/logging
-  - model: sour-notch # Add models or ensembles
+  - model: 2stage-submit #$ Add models or ensembles
 
 # Use this when uploading to Kaggle
 
