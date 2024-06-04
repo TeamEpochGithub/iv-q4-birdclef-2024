@@ -42,7 +42,7 @@ class Accuracy(Scorer):
         output_dir: str = kwargs.get("output_dir", "")
         y_true = y_true[f"label_{years[0]}"].iloc[test_indices[str(years[0])]]
 
-        y_pred = (y_pred > 0.4125).astype(int)
+        y_pred = (y_pred > 0.40).astype(int)
 
         # Save the confusion matrix and save to output dir as a png using seaborn
         from sklearn.metrics import confusion_matrix
