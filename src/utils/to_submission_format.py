@@ -31,7 +31,7 @@ def to_submission_format(predictions: npt.NDArray[np.float32], test_path: str | 
 
     if predictions.shape[0] != len(file_list) * 48:
         logger.warning(
-            f"Number of predictions ({predictions.shape[0]}) does not match the number of test soundscapes ({len(file_list) * 48}). ",
+            f"Number of predictions ({predictions.shape[0]}) does not match the number of test soundscapes ({len(file_list) * 48}). "
             "This is likely the result of a timeout. Padding submission with zeros.",
         )
         predictions = np.concatenate([predictions, np.zeros((len(file_list) * 48 - predictions.shape[0], predictions.shape[1]))])

@@ -14,6 +14,7 @@ from src.setup.setup_data import setup_inference_data
 from src.setup.setup_pipeline import setup_pipeline
 from src.setup.setup_runtime_args import setup_pred_args
 from src.utils.logger import logger
+from src.utils.timer import ModelTimeoutError
 from src.utils.to_submission_format import to_submission_format
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -54,7 +55,11 @@ def run_submit(cfg: DictConfig) -> None:
     # Predict on the test data
     logger.info("Making predictions...")
     pred_args = setup_pred_args(pipeline=model_pipeline, output_dir=output_dir.as_posix(), data_dir=cfg.data_path, species_dir=cfg.species_path)
-    predictions = model_pipeline.predict(X, **pred_args)
+    try:
+        predictions = model_pipeline.predict(X, **pred_args)
+    except ModelTimeoutError as e:
+        logger.warning("Model timed out. Truncating predictions.")
+        predictions = e.predictions
 
     # Make submission
     if predictions is not None:

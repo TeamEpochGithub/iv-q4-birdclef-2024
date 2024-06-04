@@ -1,11 +1,9 @@
 """Module for example training block."""
 
-import signal
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from types import FrameType
-from typing import Any, NoReturn
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt
@@ -22,6 +20,7 @@ from src.modules.training.datasets.sampler.submission import SubmissionSampler
 from src.modules.training.models.ensemble_model import EnsembleModel
 from src.modules.training.models.pretrained_model import PretrainedModel
 from src.typing.typing import XData, YData
+from src.utils.timer import ModelTimeoutError
 
 
 @dataclass
@@ -274,10 +273,9 @@ class MainTrainer(TorchTrainer, Logger):
         predictions: list[npt.NDArray[np.float32]] = []
 
         # Set a timeout for the predictions
-        if self.prediction_time is not None and self.prediction_time > 0:
-            signal.signal(signal.SIGALRM, handle_timeout)
-            self.log_to_terminal(f"Starting predictions with timeout of {self.prediction_time} seconds.")
-            signal.alarm(self.prediction_time)
+        # if self.prediction_time is not None and self.prediction_time > 0:
+        #     self.log_to_terminal(f"Starting predictions with timeout of {self.prediction_time} seconds.")
+        #     set_alarm(self.prediction_time)
 
         try:
             with torch.no_grad(), tqdm(loader, unit="batch", disable=False) as tepoch:
@@ -286,20 +284,16 @@ class MainTrainer(TorchTrainer, Logger):
                     y_pred = onnx_model.run(output_names, {input_names[0]: X_batch.numpy()})[0]
                     predictions.extend(y_pred)
         except TimeoutError as e:
-            if len(e.args) > 1:
-                predictions.extend(e.args[1])
-            self.log_to_terminal("Time limit reached. Stopping predictions.")
+            if isinstance(e, ModelTimeoutError):
+                predictions.extend(e.predictions)
 
-            # Path(f"{self.get_hash()}.onnx").unlink()
-            # raise TimeoutError("Time limit reached. Stopping predictions.", np.array(predictions))
+            raise ModelTimeoutError("Time limit reached. Stopping predictions.", predictions=np.array(predictions)) from e
         else:
             self.log_to_terminal("Done predicting!")
+        finally:
+            # Remove the saved onnx model
+            Path(f"{self.get_hash()}.onnx").unlink()
 
-        if self.prediction_time is not None:
-            signal.alarm(0)
-
-        # Remove the saved onnx model
-        Path(f"{self.get_hash()}.onnx").unlink()
         return np.array(predictions)
 
 
@@ -311,11 +305,3 @@ def collate_fn(batch: tuple[torch.Tensor, ...]) -> tuple[torch.Tensor, ...]:
     """
     X, y = batch
     return X, y
-
-
-def handle_timeout(signum: int, frame: FrameType | None) -> NoReturn:  # noqa: ARG001
-    """Handle the timeout signal.
-
-    :raise TimeoutError: If the timeout is reached.
-    """
-    raise TimeoutError("Timed limit reached")

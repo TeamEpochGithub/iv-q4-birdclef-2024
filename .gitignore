@@ -311,3 +311,5 @@ plots
 tmbackup
 .lock
 wandb/
+kaggle/
+*.onnx
