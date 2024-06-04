@@ -1,7 +1,7 @@
 defaults:
   - base_submit
   - hydra/logging
-  - model: thin-trainer #$ Add models or ensembles
+  - model: convnext-post-google #$ Add models or ensembles
 
 # Use this when uploading to Kaggle
 
