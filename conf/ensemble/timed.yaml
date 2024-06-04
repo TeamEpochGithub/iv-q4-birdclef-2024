@@ -6,7 +6,7 @@ weights:  # Unused for TimedVotingEnsemble, all models are weighted equally
   - 0.5
   - 0.5
 
-prediction_time: 50  # Seconds
+prediction_time: 10  # Seconds
 
 _target_: src.modules.ensemble.timed_voting_ensemble.TimedVotingEnsemble
 _convert_: partial

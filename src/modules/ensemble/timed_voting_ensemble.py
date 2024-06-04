@@ -10,6 +10,7 @@ import numpy as np
 import numpy.typing as npt
 from agogos.training import TrainType
 from epochalyst.pipeline.ensemble import EnsemblePipeline
+from epochalyst.pipeline.model.model import ModelPipeline
 
 from src.modules.logging.logger import Logger
 
@@ -25,7 +26,8 @@ class TimedVotingEnsemble(EnsemblePipeline, Logger):
 
     prediction_time: int | None = None
 
-    _ensemble_has_timed_out: bool = field(default=False, init=False, repr=False)
+    ensemble_has_timed_out: bool = field(default=False, init=False, repr=False)
+    cur_step: int = field(default=0, init=False, repr=False)
 
     def predict(self, data: npt.NDArray[np.float32], **transform_args: Mapping[Any, Any]) -> npt.NDArray[np.float32]:
         """Transform the input data.
@@ -44,14 +46,16 @@ class TimedVotingEnsemble(EnsemblePipeline, Logger):
 
         # Loop through each step and call the transform method
         for i, step in enumerate(self.get_steps()):
-            if self._ensemble_has_timed_out:
+            self.cur_step = i
+            if self.ensemble_has_timed_out:
                 self.log_to_warning(f"Stopping predictions at model {i - 1}")
+                timer.cancel()
                 break
             step_args = transform_args.get(step.__class__.__name__, {})
             out_data[i] = cast(TrainType, step).predict(copy.deepcopy(data), **step_args)
-        else:
-            if timer:
-                timer.cancel()
+
+        if timer:
+            timer.cancel()
 
         return np.nanmean(np.array(out_data), axis=0)
 
@@ -63,7 +67,13 @@ class TimedVotingEnsemble(EnsemblePipeline, Logger):
 
         def timeout() -> None:
             """Set the ensemble timed out flag."""
-            self._ensemble_has_timed_out = True
+            self.ensemble_has_timed_out = True
+
+            # Attempt to set the model_has_timed_out flag for the current model.
+            cur_model_pipeline = cast(ModelPipeline, self.get_steps()[self.cur_step])
+            cur_trainer = cur_model_pipeline.train_sys.steps[0]  # TODO(Jeffrey): Find a cleaner way to access the Trainer
+            setattr(cur_trainer, "model_has_timed_out", True)
+
             self.log_to_warning("Ensemble has timed out. Finishing current model.")
 
         timer = Timer(seconds, timeout)

@@ -43,7 +43,7 @@ class MainTrainer(TorchTrainer, Logger):
     weights_path: str | None = None
     prediction_time: int | None = field(default=None, repr=False)
 
-    _model_has_timed_out: bool = field(default=False, init=False, repr=False)
+    model_has_timed_out: bool = field(default=False, init=False, repr=False)
 
     def save_model_to_external(self) -> None:
         """Save the model to external storage."""
@@ -101,6 +101,66 @@ class MainTrainer(TorchTrainer, Logger):
         pred_dataset_args["sampler"] = SubmissionSampler()
 
         return DaskDataset(X=x, year="2024", **pred_dataset_args)
+
+    def custom_predict(self, x: Any, **pred_args: Any) -> npt.NDArray[np.float32]:  # noqa: ANN401
+        """Predict on the test data.
+
+        Copied form Epochalyst just to change the last line...
+
+        :param x: The input to the system.
+        :return: The output of the system.
+        """
+        self.log_to_debug(f"Predicting model: {self.model.__class__.__name__}")
+
+        # Parse pred_args
+        curr_batch_size = pred_args.get("batch_size", self.batch_size)
+
+        # Create dataset
+        pred_dataset = self.create_prediction_dataset(x)
+        pred_dataloader = DataLoader(
+            pred_dataset,
+            batch_size=curr_batch_size,
+            shuffle=False,
+            collate_fn=(collate_fn if hasattr(pred_dataset, "__getitems__") else None),  # type: ignore[arg-type]
+        )
+
+        timer: Timer | None = None
+
+        # Set a timeout for the predictions
+        if self.prediction_time is not None and self.prediction_time > 0:
+            timer = self._set_model_timer(self.prediction_time)
+
+        # Predict with a single model
+        if self.n_folds < 1 or pred_args.get("use_single_model", False):
+            self._load_model()
+            return self.predict_on_loader(pred_dataloader)
+
+        predictions = []
+        # Predict with multiple models
+        for i in range(int(self.n_folds)):
+            if self.model_has_timed_out:
+                self.log_to_warning(f"Stopping predictions at fold {i - 1}")
+                break
+
+            self._fold = i  # set the fold, which updates the hash
+            # Try to load the next fold if it exists
+            try:
+                self._load_model()
+            except FileNotFoundError as e:
+                if i == 0:
+                    raise FileNotFoundError(f"First model of {self.n_folds} folds not found...") from e
+                self.log_to_warning(f"Model for fold {self._fold} not found, skipping the rest of the folds...")
+                break
+            self.log_to_terminal(f"Predicting with model fold {i + 1}/{self.n_folds}")
+            predictions.append(self.predict_on_loader(pred_dataloader))
+
+        if timer is not None:
+            timer.cancel()
+
+        # Average the predictions
+        test_predictions = np.array(predictions)
+
+        return np.nanmean(test_predictions, axis=0)
 
     def create_dataloaders(
         self,
@@ -275,23 +335,16 @@ class MainTrainer(TorchTrainer, Logger):
         torch.onnx.export(self.model, input_tensor, f"{self.get_hash()}.onnx", verbose=False, input_names=input_names, output_names=output_names)
         onnx_model = onnxrt.InferenceSession(f"{self.get_hash()}.onnx")
         predictions: list[npt.NDArray[np.float32]] = [np.full((48, N_CLASSES), np.nan)] * len(loader)
-        timer: Timer | None = None
-
-        # Set a timeout for the predictions
-        if self.prediction_time is not None and self.prediction_time > 0:
-            timer = self._set_model_timer(self.prediction_time)
 
         with torch.no_grad(), tqdm(loader, desc="Predicting", unit="batch", disable=False) as tepoch:
             for data in tepoch:
-                if self._model_has_timed_out:
+                if self.model_has_timed_out:
                     self.log_to_warning(f"Stopping predictions at batch {tepoch.n - 1}.")
                     break
                 X_batch = data[0].to(self.device).float()
                 y_pred = onnx_model.run(output_names, {input_names[0]: X_batch.numpy()})[0]
                 predictions[tepoch.n] = y_pred
             else:
-                if timer is not None:
-                    timer.cancel()
                 self.log_to_terminal("Done predicting!")
 
         Path(f"{self.get_hash()}.onnx").unlink()
@@ -305,7 +358,7 @@ class MainTrainer(TorchTrainer, Logger):
 
         def timeout() -> None:
             """Set the model timed out flag."""
-            self._model_has_timed_out = True
+            self.model_has_timed_out = True
             self.log_to_warning("Model has timed out. Finishing current batch.")
 
         timer = Timer(seconds, timeout)
