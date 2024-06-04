@@ -26,13 +26,17 @@ def to_submission_format(predictions: npt.NDArray[np.float32], test_path: str | 
 
     species_list = sorted(os.listdir(species_path))
 
+    if np.isnan(predictions).any():
+        logger.warning("Predictions contain NaN values. This is likely the result of a timeout. Replacing with zeros.")
+        predictions = np.nan_to_num(predictions)
+
     if predictions.shape[1] != len(species_list):
         raise ValueError("Number of species in predictions does not match the number of species in the dataset.")
 
     if predictions.shape[0] != len(file_list) * 48:
         logger.warning(
             f"Number of predictions ({predictions.shape[0]}) does not match the number of test soundscapes ({len(file_list) * 48}). "
-            "This is likely the result of a timeout. Padding submission with zeros.",
+            "This is may be the result of a timeout. Padding submission with zeros.",
         )
         predictions = np.concatenate([predictions, np.zeros((len(file_list) * 48 - predictions.shape[0], predictions.shape[1]))])
 

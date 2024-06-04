@@ -2,11 +2,11 @@ defaults:
   - /model/convnext-post-add@steps.0
   - /model/convnext-post-add@steps.1
 
-weights:
+weights:  # Unused for TimedVotingEnsemble, all models are weighted equally
   - 0.5
   - 0.5
 
-prediction_time: 25
+prediction_time: 5  # Seconds
 
 _target_: src.modules.ensemble.timed_voting_ensemble.TimedVotingEnsemble
 _convert_: partial

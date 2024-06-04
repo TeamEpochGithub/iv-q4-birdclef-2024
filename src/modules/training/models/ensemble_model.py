@@ -11,8 +11,6 @@ import torch
 from annotated_types import MinLen
 from typing_extensions import override
 
-from src.utils.timer import ModelTimeoutError
-
 N_CLASSES: Final[int] = 182  # TODO(Jeffrey): Don't hardcode the number of bird species.
 
 
@@ -54,13 +52,10 @@ class FusionEnsembleModel(EnsembleModel):
         """
         predictions: list[torch.Tensor] = [torch.empty((x.shape[0], N_CLASSES), device=x.device, dtype=x.dtype)] * len(self.models)
 
-        try:
-            for i, model in enumerate(self.models):
-                predictions[i] = model(x)
-        except TimeoutError as e:
-            raise ModelTimeoutError("Ensemble time limit reached.", predictions=torch.stack(predictions).nanmean(dim=0)) from e
+        for i, model in enumerate(self.models):
+            predictions[i] = model(x)
 
-        return torch.stack(predictions).mean(dim=0)
+        return torch.stack(predictions).nanmean(dim=0)
 
 
 class AlternatingEnsembleModel(FusionEnsembleModel):
@@ -81,11 +76,8 @@ class AlternatingEnsembleModel(FusionEnsembleModel):
 
         predictions: torch.Tensor = torch.empty((x.shape[0], N_CLASSES), device=x.device, dtype=x.dtype)
 
-        try:
-            for i, model in enumerate(self.models):
-                indices = range(i, x.shape[0], len(self.models))
-                predictions[indices] = model(x[indices])
-        except TimeoutError as e:
-            raise ModelTimeoutError("Ensemble time limit reached.", predictions=predictions) from e
+        for i, model in enumerate(self.models):
+            indices = range(i, x.shape[0], len(self.models))
+            predictions[indices] = model(x[indices])
 
         return predictions

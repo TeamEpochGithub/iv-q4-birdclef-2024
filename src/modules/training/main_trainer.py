@@ -3,7 +3,8 @@
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from threading import Timer
+from typing import Any, Final
 
 import numpy as np
 import numpy.typing as npt
@@ -20,7 +21,8 @@ from src.modules.training.datasets.sampler.submission import SubmissionSampler
 from src.modules.training.models.ensemble_model import EnsembleModel
 from src.modules.training.models.pretrained_model import PretrainedModel
 from src.typing.typing import XData, YData
-from src.utils.timer import ModelTimeoutError
+
+N_CLASSES: Final[int] = 182  # TODO(Jeffrey): Don't hardcode the number of bird species.
 
 
 @dataclass
@@ -40,6 +42,8 @@ class MainTrainer(TorchTrainer, Logger):
     # Weights for the sampler
     weights_path: str | None = None
     prediction_time: int | None = field(default=None, repr=False)
+
+    _model_has_timed_out: bool = field(default=False, init=False, repr=False)
 
     def save_model_to_external(self) -> None:
         """Save the model to external storage."""
@@ -270,31 +274,45 @@ class MainTrainer(TorchTrainer, Logger):
         output_names = ["output"]
         torch.onnx.export(self.model, input_tensor, f"{self.get_hash()}.onnx", verbose=False, input_names=input_names, output_names=output_names)
         onnx_model = onnxrt.InferenceSession(f"{self.get_hash()}.onnx")
-        predictions: list[npt.NDArray[np.float32]] = []
+        predictions: list[npt.NDArray[np.float32]] = [np.full((48, N_CLASSES), np.nan)] * len(loader)
+        timer: Timer | None = None
 
         # Set a timeout for the predictions
-        # if self.prediction_time is not None and self.prediction_time > 0:
-        #     self.log_to_terminal(f"Starting predictions with timeout of {self.prediction_time} seconds.")
-        #     set_alarm(self.prediction_time)
+        if self.prediction_time is not None and self.prediction_time > 0:
+            timer = self._set_model_timer(self.prediction_time)
 
-        try:
-            with torch.no_grad(), tqdm(loader, unit="batch", disable=False) as tepoch:
-                for data in tepoch:
-                    X_batch = data[0].to(self.device).float()
-                    y_pred = onnx_model.run(output_names, {input_names[0]: X_batch.numpy()})[0]
-                    predictions.extend(y_pred)
-        except TimeoutError as e:
-            if isinstance(e, ModelTimeoutError):
-                predictions.extend(e.predictions)
+        with torch.no_grad(), tqdm(loader, desc="Predicting", unit="batch", disable=False) as tepoch:
+            for data in tepoch:
+                if self._model_has_timed_out:
+                    self.log_to_warning(f"Stopping predictions at batch {tepoch.n - 1}.")
+                    break
+                X_batch = data[0].to(self.device).float()
+                y_pred = onnx_model.run(output_names, {input_names[0]: X_batch.numpy()})[0]
+                predictions[tepoch.n] = y_pred
+            else:
+                if timer is not None:
+                    timer.cancel()
+                self.log_to_terminal("Done predicting!")
 
-            raise ModelTimeoutError("Time limit reached. Stopping predictions.", predictions=np.array(predictions)) from e
-        else:
-            self.log_to_terminal("Done predicting!")
-        finally:
-            # Remove the saved onnx model
-            Path(f"{self.get_hash()}.onnx").unlink()
+        Path(f"{self.get_hash()}.onnx").unlink()
+        return np.concatenate(predictions)
 
-        return np.array(predictions)
+    def _set_model_timer(self, seconds: int) -> Timer:
+        """Set the timer for the model to run for the given number of seconds.
+
+        :param seconds: The number of seconds to set the timer for.
+        """
+
+        def timeout() -> None:
+            """Set the model timed out flag."""
+            self._model_has_timed_out = True
+            self.log_to_warning("Model has timed out. Finishing current batch.")
+
+        timer = Timer(seconds, timeout)
+        timer.start()
+
+        self.log_to_terminal(f"Model timer set for {seconds} seconds.")
+        return timer
 
 
 def collate_fn(batch: tuple[torch.Tensor, ...]) -> tuple[torch.Tensor, ...]:

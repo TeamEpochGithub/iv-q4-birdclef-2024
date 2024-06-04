@@ -1,9 +1,9 @@
 """Ensemble with a time limit for predictions."""
 
 import copy
-import signal
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from threading import Timer
 from typing import Any, Final, cast
 
 import numpy as np
@@ -12,7 +12,6 @@ from agogos.training import TrainType
 from epochalyst.pipeline.ensemble import EnsemblePipeline
 
 from src.modules.logging.logger import Logger
-from src.utils.timer import ModelTimeoutError, set_alarm
 
 N_CLASSES: Final[int] = 182  # TODO(Jeffrey): Don't hardcode the number of bird species.
 
@@ -26,6 +25,8 @@ class TimedVotingEnsemble(EnsemblePipeline, Logger):
 
     prediction_time: int | None = None
 
+    _ensemble_has_timed_out: bool = field(default=False, init=False, repr=False)
+
     def predict(self, data: npt.NDArray[np.float32], **transform_args: Mapping[Any, Any]) -> npt.NDArray[np.float32]:
         """Transform the input data.
 
@@ -36,21 +37,37 @@ class TimedVotingEnsemble(EnsemblePipeline, Logger):
         if len(self.get_steps()) == 0:
             return data
 
+        timer: Timer | None = None
+
         if self.prediction_time is not None and self.prediction_time > 0:
-            self.log_to_terminal(f"Starting predictions with timeout of {self.prediction_time} seconds.")
-            set_alarm(self.prediction_time)
+            timer = self._set_ensemble_timer(self.prediction_time)
 
         # Loop through each step and call the transform method
-        try:
-            for i, step in enumerate(self.get_steps()):
-                step_args = transform_args.get(step.__class__.__name__, {})
-                out_data[i] = cast(TrainType, step).predict(copy.deepcopy(data), **step_args)
-        except TimeoutError as e:
-            self.log_to_warning("Ensemble time limit reached. Truncating predictions")
-            if isinstance(e, ModelTimeoutError):
-                padding = np.subtract((48 * len(data), N_CLASSES), e.predictions.shape)
-                out_data[i] = np.pad(e.predictions, ((0, padding[0]), (0, padding[1])), "constant", constant_values=np.nan)
+        for i, step in enumerate(self.get_steps()):
+            if self._ensemble_has_timed_out:
+                self.log_to_warning(f"Stopping predictions at model {i - 1}")
+                break
+            step_args = transform_args.get(step.__class__.__name__, {})
+            out_data[i] = cast(TrainType, step).predict(copy.deepcopy(data), **step_args)
         else:
-            signal.alarm(0)
+            if timer:
+                timer.cancel()
 
         return np.nanmean(np.array(out_data), axis=0)
+
+    def _set_ensemble_timer(self, seconds: int) -> Timer:
+        """Set the timer for the ensemble to run for the given number of seconds.
+
+        :param seconds: The number of seconds to set the timer for.
+        """
+
+        def timeout() -> None:
+            """Set the ensemble timed out flag."""
+            self._ensemble_has_timed_out = True
+            self.log_to_warning("Ensemble has timed out. Finishing current model.")
+
+        timer = Timer(seconds, timeout)
+        timer.start()
+
+        self.log_to_terminal(f"Ensemble timer set for {seconds} seconds.")
+        return timer
