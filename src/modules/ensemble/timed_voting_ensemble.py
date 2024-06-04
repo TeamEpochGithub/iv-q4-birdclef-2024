@@ -72,7 +72,7 @@ class TimedVotingEnsemble(EnsemblePipeline, Logger):
             # Attempt to set the model_has_timed_out flag for the current model.
             cur_model_pipeline = cast(ModelPipeline, self.get_steps()[self.cur_step])
             cur_trainer = cur_model_pipeline.train_sys.steps[0]  # TODO(Jeffrey): Find a cleaner way to access the Trainer
-            setattr(cur_trainer, "model_has_timed_out", True)
+            cur_trainer.model_has_timed_out = True
 
             self.log_to_warning("Ensemble has timed out. Finishing current model.")
 

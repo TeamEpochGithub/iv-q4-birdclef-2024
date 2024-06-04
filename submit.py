@@ -39,6 +39,7 @@ def run_submit(cfg: DictConfig) -> None:
     # Set up logging
     try:
         import coloredlogs
+
         coloredlogs.install()
     except ImportError:
         """Coloredlogs is not installed."""
