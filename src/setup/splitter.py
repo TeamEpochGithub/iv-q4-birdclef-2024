@@ -42,7 +42,10 @@ class Splitter:
         splits: list[list[dict[int, Any]]]
         splits = [[{}, {}] for _ in range(self.n_splits)]
         for year in self.years:
-            year_splits = self.instantiated_splitter.split(data[f"meta_{year}"], data[f"meta_{year}"]["primary_label"])
+            if year == "freefield":
+                year_splits = self.instantiated_splitter.split(data[f"meta_{year}"], data[f"meta_{year}"]["hasbird"])
+            else: #Normal years
+                year_splits = self.instantiated_splitter.split(data[f"meta_{year}"], data[f"meta_{year}"]["primary_label"])
             for i, split in enumerate(year_splits):
                 splits[i][0][year] = split[0]
                 splits[i][1][year] = split[1]

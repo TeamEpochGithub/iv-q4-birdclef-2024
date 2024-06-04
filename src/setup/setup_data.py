@@ -36,7 +36,7 @@ def setup_train_x_data(raw_path: str | os.PathLike[str], years: Iterable[str], m
         metadata_path = raw_year_path / "train_metadata.csv"
         metadata = pd.read_csv(metadata_path)
         metadata["year"] = year
-        metadata["samplename"] = metadata["filename"].str.replace("/", "-").str.replace(".ogg", "").str.replace(".mp3", "")
+        metadata["samplename"] = metadata["filename"].str.replace("/", "-").str.replace(".ogg", "").str.replace(".mp3", "").str.replace(".wav", "")
         all_metadata.append(metadata)
 
     all_metadata: pd.DataFrame = pd.concat(all_metadata).reset_index(drop=True)
@@ -95,7 +95,7 @@ def setup_train_y_data(raw_path: str | os.PathLike[str], years: Iterable[str], m
         metadata_path = Path(raw_path) / str(year) / "train_metadata.csv"
         metadata = pd.read_csv(metadata_path)
         metadata["year"] = year
-        metadata["samplename"] = metadata["filename"].str.replace("/", "-").str.replace(".ogg", "").str.replace(".mp3", "")
+        metadata["samplename"] = metadata["filename"].str.replace("/", "-").str.replace(".ogg", "").str.replace(".mp3", "").str.replace(".wav", "")
         all_metadata.append(metadata)
 
     all_metadata: pd.DataFrame = pd.concat(all_metadata).reset_index(drop=True)
@@ -107,14 +107,19 @@ def setup_train_y_data(raw_path: str | os.PathLike[str], years: Iterable[str], m
         metadata = all_metadata[all_metadata["year"] == year]
         ydata[f"meta_{year}"] = metadata
 
-        if "labels" in metadata.columns:
-            ydata[f"label_{year}"] = one_hot_label(metadata)
-        else:
-            ydata[f"label_{year}"] = one_hot_primary_secondary(metadata)
-
-        if year == "kenya":
-            ydata[f"label_{year}"] = pd.get_dummies(ydata[f"label_{year}"].sum(axis=1) == 0).astype(np.float32)
-            ydata[f"label_{year}"].columns = ["call", "nocall"]
+        match year:
+            case "kenya":
+                ydata[f"label_{year}"] = pd.get_dummies(ydata[f"label_{year}"].sum(axis=1) == 0).astype(np.float32)
+                ydata[f"label_{year}"].columns = ["call", "nocall"]
+            case "2024gxeno":
+                ydata[f"label_{year}"] = metadata.iloc[:, :182]
+            case "freefield":
+                ydata[f"label_{year}"] = metadata["hasbird"]
+            case _:
+                if "labels" in metadata.columns and year != "2024gxeno":
+                    ydata[f"label_{year}"] = one_hot_label(metadata)
+                else:
+                    ydata[f"label_{year}"] = one_hot_primary_secondary(metadata)
     return ydata
 
 
