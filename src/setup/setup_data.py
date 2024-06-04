@@ -5,6 +5,7 @@
 """
 
 import ast
+import glob
 import os
 from collections.abc import Iterable
 from pathlib import Path
@@ -106,10 +107,17 @@ def setup_train_y_data(raw_path: str | os.PathLike[str], years: Iterable[str], m
         metadata = all_metadata[all_metadata["year"] == year]
         ydata[f"meta_{year}"] = metadata
 
-        if "labels" in metadata.columns:
-            ydata[f"label_{year}"] = one_hot_label(metadata)
-        else:
-            ydata[f"label_{year}"] = one_hot_primary_secondary(metadata)
+        match year:
+            case "kenya":
+                ydata[f"label_{year}"] = pd.get_dummies(ydata[f"label_{year}"].sum(axis=1) == 0).astype(np.float32)
+                ydata[f"label_{year}"].columns = ["call", "nocall"]
+            case "2024gxeno":
+                ydata[f"label_{year}"] = metadata.iloc[:, :182]
+            case _:
+                if "labels" in metadata.columns and year != "2024gxeno":
+                    ydata[f"label_{year}"] = one_hot_label(metadata)
+                else:
+                    ydata[f"label_{year}"] = one_hot_primary_secondary(metadata)
     return ydata
 
 
@@ -131,10 +139,11 @@ def one_hot_primary_secondary(metadata: pd.DataFrame) -> pd.DataFrame:
             continue
         for secondary_label in ast.literal_eval(secondary_labels):
             try:
-                one_hot.iloc[i, primary_labels_dict[secondary_label]] = 0.5
+                one_hot.iloc[i, primary_labels_dict[secondary_label]] = 0.0
             except KeyError:  # noqa: PERF203
                 errors.append((i, secondary_label))
     logger.debug(f"Errors: {errors}")
+
     return one_hot
 
 
@@ -167,7 +176,7 @@ def setup_inference_data(path: str | os.PathLike[str]) -> XData:
     :return: Inference data
     """
     # Load all files in the path that end with .ogg with glob
-    filenames = list(Path(path).glob("*.ogg"))
+    filenames = glob.glob(path + "/*.ogg") + glob.glob(path + "/*.wav")
 
     logger.info(f"Filenames: {filenames[:10]}...")
 

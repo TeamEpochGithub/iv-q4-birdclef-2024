@@ -25,8 +25,8 @@ class VisualizePreds(VerboseTrainingBlock):
     :param threshold: The threshold for the top N lines.
     """
 
-    n: int = 10
-    threshold: float = 0.01
+    n: int = 100
+    threshold: float = 0.1
 
     def custom_train(
         self,
@@ -57,7 +57,7 @@ class VisualizePreds(VerboseTrainingBlock):
         data_dir: str = pred_args["data_dir"]
         species_dir: str = pred_args["species_dir"]
 
-        file_list = [file.stem for file in Path(data_dir).glob("*.ogg")]
+        file_list = [file.stem for file in Path(data_dir).glob("*.ogg")] + [file.stem for file in Path(data_dir).glob("*.wav")]
         bird_classes = sorted(os.listdir(species_dir))
 
         # Create folders
@@ -69,8 +69,8 @@ class VisualizePreds(VerboseTrainingBlock):
 
         for i, sliced in tqdm(enumerate(range(0, min(x.shape[0], self.n * 48), 48)), desc="Creating Plots"):
             prediction = x[sliced : sliced + 48]
-            self.heatmap(prediction, classes=bird_classes, file_name=f"{file_list[i]}.png", output_dir=output_dir_heatmaps.as_posix())
-            self.top_n_lines(prediction, classes=bird_classes, file_name=f"{file_list[i]}.png", output_dir=output_dir_top_n_lines.as_posix())
+            self.heatmap(prediction, classes=bird_classes + ["silent"], file_name=f"{file_list[i]}.png", output_dir=output_dir_heatmaps.as_posix())
+            self.top_n_lines(prediction, classes=bird_classes + ["silent"], file_name=f"{file_list[i]}.png", output_dir=output_dir_top_n_lines.as_posix())
 
         return x
 

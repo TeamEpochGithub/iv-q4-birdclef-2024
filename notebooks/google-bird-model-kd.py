@@ -12,10 +12,10 @@ from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 from typing import Any, Final
 
-METADATA_PATH: Final[Path] = Path("data/raw/train_metadata.csv")
+METADATA_PATH: Final[Path] = Path("data/raw/2024/train_metadata.csv")
 AUDIO_PATH: Final[Path] = Path("data/raw/2024/train_audio")
 MODEL_PATH: str = "https://kaggle.com/models/google/bird-vocalization-classifier/frameworks/TensorFlow2/variations/bird-vocalization-classifier/versions/4"
-PREDICTIONS_OUTPUT_PATH: Final[Path] = Path("data/raw/2024/kd/google/bird-vocalization-classifier-submission.csv")
+PREDICTIONS_OUTPUT_PATH: Final[Path] = Path("data/raw/2024gxeno/train_metadata.csv")
 
 SAMPLE_RATE: Final[int] = 32000
 WINDOW: Final[int] = 5 * SAMPLE_RATE
@@ -85,7 +85,9 @@ with tf.device("/GPU:0"):
             if len(clip) < WINDOW:
                 clip = np.concatenate([clip, np.zeros(WINDOW - len(clip))])
             result = model.infer_tf(clip[None, :])
-            prediction = np.concatenate([result[0].numpy(), -100], axis=None)  # add -100 logit for unpredicted birds
+            print(result[0].shape)
+            prediction = np.concatenate([result[0].numpy(), -100], axis=None)
+            # add -100 logit for unpredicted birds
             file_predictions.append(prediction[model_bc_indexes])
         all_predictions[filename] = np.stack(file_predictions)
 

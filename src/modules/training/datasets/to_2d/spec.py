@@ -23,7 +23,7 @@ class Spec:
     spec: functools.partial[torch.nn.Module]
     output_shape: tuple[int, int] = (224, 224)  # H, W
     sequence_length: int = 160000  # 5 seconds x 32kHz
-    scale: Callable[[torch.Tensor], torch.Tensor] = torch.log10
+    scale: Callable[[torch.Tensor], torch.Tensor] | None = None
     sample_rate: int = 32000
     f_min: int = 0
 
@@ -46,5 +46,7 @@ class Spec:
         spec_out = self.instantiated_spec(input_data)
         if len(spec_out.shape) == 3:
             spec_out = spec_out.unsqueeze(1)
+        if self.scale is None:
+            self.scale = torch.log10
         # log10 returns some -inf's replace them with zeros
         return torch.nan_to_num(self.scale(spec_out + 10**-10), neginf=-10, posinf=1, nan=0)

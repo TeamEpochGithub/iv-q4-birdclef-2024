@@ -309,6 +309,7 @@ conf/best
 
 plots
 tmbackup
+wandb
 .lock
 wandb/
 kaggle/

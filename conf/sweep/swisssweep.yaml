@@ -1,0 +1,99 @@
+command:
+  - python3
+  - ${program}
+  - ${args_no_hyphens}
+method: bayes
+metric:
+  goal: maximize
+  name: Sweepscore
+program: cv.py
+project: detect-bird
+name: Swisssweep
+parameters:
+  model.train_sys.steps.0.batch_size:
+    distribution: int_uniform
+    max: 128
+    min: 16
+  model.train_sys.steps.0.epochs:
+    distribution: int_uniform
+    max: 75
+    min: 20
+  model.train_sys.steps.0.optimizer.lr:
+    distribution: log_uniform
+    max: -4
+    min: -10
+  model.train_sys.steps.0.model.model_name:
+    values:
+      - efficientnet_b0
+      - convnext_tiny
+      - eca_nfnet_l0
+      - resnet34
+      - resnet50
+      - vgg11
+      - vgg19
+      - levit_conv_192
+      - levit_128
+      - efficientnet_b4
+      - efficientnetv2_s
+      - beit_base_patch16_224
+      - levit_conv_384
+  model.train_sys.steps.0.model.drop_rate:
+    distribution: uniform
+    max: 0.5
+    min: 0.0
+  model.train_sys.steps.0.model.drop_path_rate:
+    distribution: uniform
+    max: 0.5
+    min: 0.0
+  model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.0.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.1.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.2.compose.transforms.0.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.2.compose.transforms.1.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.2.compose.transforms.2.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.2.compose.transforms.3.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.2.compose.transforms.4.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_1d.xy_transforms.0.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_1d.xy_transforms.1.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_1d.xy_transforms.2.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_2d.x_transforms.0.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_2d.xy_transforms.0.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_2d.xy_transforms.1.p:
+    distribution: uniform
+    max: 1
+    min: 0
