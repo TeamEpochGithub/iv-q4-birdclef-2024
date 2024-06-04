@@ -21,11 +21,11 @@ defaults:
 #result_path: submission
 
 # KAGGLE TESTING
-data_path: /kaggle/input/birdclef-2024/unlabeled_soundscapes/
-species_path: /kaggle/input/birdclef-2024/train_audio/
-result_path: /kaggle/working/
-
-# KAGGLE SUBMIT
-#data_path: /kaggle/input/birdclef-2024/test_soundscapes/
+#data_path: /kaggle/input/birdclef-2024/unlabeled_soundscapes/
 #species_path: /kaggle/input/birdclef-2024/train_audio/
 #result_path: /kaggle/working/
+
+# KAGGLE SUBMIT
+data_path: /kaggle/input/birdclef-2024/test_soundscapes/
+species_path: /kaggle/input/birdclef-2024/train_audio/
+result_path: /kaggle/working/
