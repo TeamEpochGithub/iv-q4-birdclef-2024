@@ -6,13 +6,13 @@ x_sys:
   steps:
   - _target_: src.modules.transformation.x.nan_to_zero.NanToZero
     years:
-    - '2024'
+    - '2024gxeno'
 y_sys: null
 train_sys:
   _target_: src.modules.training.verbose_training_pipeline.VerboseTrainingPipeline
   steps:
   - _target_: src.modules.training.main_trainer.MainTrainer
-    year: '2024'
+    year: '2024gxeno'
     dataset_args:
       sampler:
         _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
@@ -34,79 +34,46 @@ train_sys:
       filter_:
         _target_: src.modules.training.datasets.filter.grade_threshold.GradeThreshold
         threshold: 0
-      process_delayed:
-      - _target_: src.modules.transformation.x.rescale.Rescale
       aug_1d:
         _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
         x_transforms:
         - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomPhaseShift
-          p: 0.33790896411510696
+          p: 0.5
           shift_limit: 0.5
         - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomAmplitudeShift
-          p: 0.17175373014870876
-        - _target_: src.modules.training.augmentations.audiomentations_compose.AudiomentationsCompose
-          compose:
-            _target_: audiomentations.Compose
-            transforms:
-            - _target_: audiomentations.PolarityInversion
-              p: 0.5832064964674231
-            - _target_: src.modules.training.augmentations.add_background_noise_wrapper.AddBackgroundNoiseWrapper
-              p: 0.9057886322902412
-              sounds_path: data/raw/esc50/audio/
-              min_snr_db: -3.0
-              max_snr_db: 3.0
-              noise_transform:
-                _target_: audiomentations.PolarityInversion
-                p: 0.5
-            - _target_: audiomentations.AddColorNoise
-              p: 0.48334572145543553
-              min_snr_db: -3.0
-              max_snr_db: 3.0
-            - _target_: audiomentations.PitchShift
-              p: 0.9134808013309752
-            - _target_: audiomentations.Shift
-              p: 0.8720288447744026
+          p: 0.5
         xy_transforms:
-        - _target_: src.modules.training.augmentations.time_series_augmentations.EnergyCutmix
-          p: 0.7113738682599692
-        - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.MixUp1D
-          p: 0.2645972577160469
         - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.CutMix1D
-          p: 0.6178780035884529
+          p: 0.5
+        - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.MixUp1D
+          p: 0.5
       aug_2d:
         _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
-        x_transforms:
-        - _target_: kornia.augmentation.RandomErasing
-          p: 0.02695442943644122
         xy_transforms:
-        - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.MixUp
-          p: 0.5535378635933469
         - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.CutMix
-          p: 0.14690552839735926
+          p: 0.5
     dataloader_args:
-      num_workers: 16
-      prefetch_factor: 1
+      num_workers: 8
+      prefetch_factor: 2
       persistent_workers: false
     n_folds: 5
-    epochs: 61
+    epochs: 50
     patience: 15
-    batch_size: 88
+    batch_size: 64
     model:
       _target_: src.modules.training.models.timm.Timm
       in_channels: 1
       out_channels: 182
-      model_name: resnet34
+      model_name: convnext_tiny
       activation: sigmoid
-      drop_rate: 0.4605612970518879
-      drop_path_rate: 0.019055490646760764
     scheduler:
       _target_: functools.partial
       _args_:
       - _target_: hydra.utils.get_class
         path: timm.scheduler.cosine_lr.CosineLRScheduler
-      warmup_t: 5
+      warmup_t: 3
       warmup_lr_init: 1.0e-05
-      t_initial: ${..epochs}
+      t_initial: 50
       cycle_limit: 1
     criterion:
       _target_: torch.nn.BCELoss
@@ -115,5 +82,11 @@ train_sys:
       _args_:
       - _target_: hydra.utils.get_class
         path: torch.optim.AdamW
-      lr: 0.008219245848597912
+      lr: 0.0005
   - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
+  - _target_: src.modules.training.postprocessing.multiply_mean.MultiplyMean
+pred_sys:
+  _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline
+  title: Postprocessing pipeline
+label_sys:
+  _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline

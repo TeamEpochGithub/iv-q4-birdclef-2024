@@ -1,7 +1,7 @@
 defaults:
   - base_train
   - hydra/logging
-  - model: swisssweep # Add models or ensembles
+  - model: convnext-post-google # Add models or ensembles
   - wandb: train
 
 ###############
@@ -11,7 +11,7 @@ defaults:
 ###############
 processed_path: data/processed/
 raw_path: data/raw/
-years: ["2024"]
+years: ["2024gxeno"]
 cache_path: data/cache
 
 data_path: data/raw/2024/train_audio/
@@ -21,7 +21,7 @@ metadata_path: data/raw/2024/train_metadata.csv
 test_size: 0.2
 
 # Species cap
-max_recordings_per_species: 500
+#max_recordings_per_species: 500
 
 scorer:
   _target_: src.scoring.rocauc_years.ROCAUC # Add scorer
@@ -38,5 +38,5 @@ splitter:
   n_splits: 5 # Set to 0 if you want train full.
   shuffle: true
   random_state: 42
-  years: ["2024"]
+  years: ["2024gxeno"]
 allow_multiple_instances: true

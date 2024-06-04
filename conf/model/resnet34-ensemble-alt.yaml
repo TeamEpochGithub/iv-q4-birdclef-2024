@@ -87,18 +87,23 @@ train_sys:
       num_workers: 16
       prefetch_factor: 1
       persistent_workers: false
-    n_folds: 5
+    n_folds: 0
     epochs: 61
     patience: 15
     batch_size: 88
     model:
-      _target_: src.modules.training.models.timm.Timm
-      in_channels: 1
-      out_channels: 182
-      model_name: resnet34
-      activation: sigmoid
-      drop_rate: 0.4605612970518879
-      drop_path_rate: 0.019055490646760764
+      _target_: src.modules.training.models.ensemble_model.AlternatingEnsembleModel
+      models:
+        - _target_: src.modules.training.models.pretrained_model.PretrainedModel
+          model_path: "tm/880fbd3e010c4e1d20dca78c670d3ee7_5_f0.pt"  # wandb.ai/team-epoch-iv/detect-bird/runs/k4o2zfhf
+        - _target_: src.modules.training.models.pretrained_model.PretrainedModel
+          model_path: "tm/880fbd3e010c4e1d20dca78c670d3ee7_5_f1.pt"  # wandb.ai/team-epoch-iv/detect-bird/runs/tgjga2tg
+        - _target_: src.modules.training.models.pretrained_model.PretrainedModel
+          model_path: "tm/880fbd3e010c4e1d20dca78c670d3ee7_5_f2.pt"  # wandb.ai/team-epoch-iv/detect-bird/runs/tgjga2tg
+        - _target_: src.modules.training.models.pretrained_model.PretrainedModel
+          model_path: "tm/880fbd3e010c4e1d20dca78c670d3ee7_5_f3.pt"  # wandb.ai/team-epoch-iv/detect-bird/runs/tgjga2tg
+        - _target_: src.modules.training.models.pretrained_model.PretrainedModel
+          model_path: "tm/880fbd3e010c4e1d20dca78c670d3ee7_5_f4.pt"  # wandb.ai/team-epoch-iv/detect-bird/runs/tgjga2tg
     scheduler:
       _target_: functools.partial
       _args_:
@@ -116,4 +121,6 @@ train_sys:
       - _target_: hydra.utils.get_class
         path: torch.optim.AdamW
       lr: 0.008219245848597912
+  - _target_: src.modules.training.postprocessing.post_ensemble.AlternatingEnsembleModelPredictionsReweight
+    n_models: 5
   - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds

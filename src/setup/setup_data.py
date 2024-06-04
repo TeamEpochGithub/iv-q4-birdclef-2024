@@ -107,14 +107,17 @@ def setup_train_y_data(raw_path: str | os.PathLike[str], years: Iterable[str], m
         metadata = all_metadata[all_metadata["year"] == year]
         ydata[f"meta_{year}"] = metadata
 
-        if "labels" in metadata.columns:
-            ydata[f"label_{year}"] = one_hot_label(metadata)
-        else:
-            ydata[f"label_{year}"] = one_hot_primary_secondary(metadata)
-
-        if year == "kenya":
-            ydata[f"label_{year}"] = pd.get_dummies(ydata[f"label_{year}"].sum(axis=1) == 0).astype(np.float32)
-            ydata[f"label_{year}"].columns = ["call", "nocall"]
+        match year:
+            case "kenya":
+                ydata[f"label_{year}"] = pd.get_dummies(ydata[f"label_{year}"].sum(axis=1) == 0).astype(np.float32)
+                ydata[f"label_{year}"].columns = ["call", "nocall"]
+            case "2024gxeno":
+                ydata[f"label_{year}"] = metadata.iloc[:, :182]
+            case _:
+                if "labels" in metadata.columns and year != "2024gxeno":
+                    ydata[f"label_{year}"] = one_hot_label(metadata)
+                else:
+                    ydata[f"label_{year}"] = one_hot_primary_secondary(metadata)
     return ydata
 
 
