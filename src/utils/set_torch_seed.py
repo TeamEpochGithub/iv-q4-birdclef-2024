@@ -1,5 +1,7 @@
 """Set seed for reproducibility."""
 
+import random
+
 import torch
 
 from src.utils.logger import logger
@@ -10,6 +12,8 @@ def set_torch_seed(seed: int = 42) -> None:
 
     :param seed: seed to set
     """
+    random.seed(seed)
+
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
@@ -18,3 +22,5 @@ def set_torch_seed(seed: int = 42) -> None:
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
     logger.info(f"Random seed set as {seed}")
+
+    torch.use_deterministic_algorithms(mode=True)

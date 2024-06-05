@@ -37,9 +37,12 @@ def run_submit(cfg: DictConfig) -> None:
     print_section_separator("Q4 - BirdCLEF - Submit")
 
     # Set up logging
-    import coloredlogs
+    try:
+        import coloredlogs
 
-    coloredlogs.install()
+        coloredlogs.install()
+    except ImportError:
+        """Coloredlogs is not installed."""
 
     # Get output directory
     output_dir = Path(hydra.core.hydra_config.HydraConfig.get().runtime.output_dir)

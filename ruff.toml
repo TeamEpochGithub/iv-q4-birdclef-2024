@@ -34,6 +34,8 @@ ignore = [
     "EM102",  # Exception must not use an f-string literal, assign to variable first
     # flake8-future-annotations (FA)
     "FA",  # Missing from __future__ import annotations
+    # flake8-implicit-str-concat (ISC)
+    "ISC001",  # Implicitly concatenated string literals on one line
     # flake8-fixme (FIX)
     "FIX001",  # Line contains FIXME
     "FIX002",  # Line contains TODO

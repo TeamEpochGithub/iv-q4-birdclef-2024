@@ -14,13 +14,13 @@ from src.modules.logging.logger import Logger
 class PostEnsemble(EnsemblePipeline, TrainingPipeline, Logger):
     """Ensembling with post processing blocks.
 
-    :param steps: The models to alternate between.
+    :param steps: The models to ensemble.
     """
 
     steps: Sequence[ModelPipeline]
 
     def train(self, x: Never, y: Never, **train_args: Never) -> NoReturn:
-        """Train the system. This is not implemented for an AlternatingEnsemble.
+        """Train the system. This is not implemented for an Ensemble.
 
         :param x: The input to the system.
         :param y: The expected output of the system.

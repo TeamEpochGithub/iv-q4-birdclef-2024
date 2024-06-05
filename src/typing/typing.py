@@ -11,7 +11,7 @@ import numpy.typing as npt
 import pandas as pd
 from typing_extensions import Self
 
-PandasIlocIndexer: TypeAlias = int | slice | Sequence[int] | Sequence[bool]
+IlocIndexer: TypeAlias = int | slice | Sequence[int] | Sequence[bool]
 
 
 @dataclass
@@ -56,7 +56,7 @@ class XData:
     bird_2024gxeno: npt.NDArray[np.float32] | None = None
 
     @overload
-    def __getitem__(self, indexer: PandasIlocIndexer) -> XData: ...
+    def __getitem__(self, indexer: IlocIndexer) -> XData: ...
 
     @overload
     def __getitem__(self, indexer: Mapping[str, Any]) -> XData: ...
@@ -64,7 +64,7 @@ class XData:
     @overload
     def __getitem__(self, indexer: str) -> pd.DataFrame | npt.NDArray[np.float32]: ...
 
-    def __getitem__(self, indexer: PandasIlocIndexer | Mapping[str, Any] | str) -> XData | pd.DataFrame | npt.NDArray[np.float32]:
+    def __getitem__(self, indexer: IlocIndexer | Mapping[str, Any] | str) -> XData | pd.DataFrame | npt.NDArray[np.float32]:
         """Index the data according to the indexer type.
 
         :param indexer: The indexer to use
@@ -223,7 +223,7 @@ class YData:
     label_green: pd.DataFrame | None = None
 
     @overload
-    def __getitem__(self, indexer: PandasIlocIndexer) -> YData: ...
+    def __getitem__(self, indexer: IlocIndexer) -> YData: ...
 
     @overload
     def __getitem__(self, indexer: Mapping[str, Any]) -> YData: ...
@@ -231,7 +231,7 @@ class YData:
     @overload
     def __getitem__(self, indexer: str) -> pd.DataFrame: ...
 
-    def __getitem__(self, indexer: PandasIlocIndexer | Mapping[str, Any] | str) -> YData | pd.DataFrame:
+    def __getitem__(self, indexer: IlocIndexer | Mapping[str, Any] | str) -> YData | pd.DataFrame:
         """Index the data according to the indexer type.
 
         :param indexer: The indexer to use
