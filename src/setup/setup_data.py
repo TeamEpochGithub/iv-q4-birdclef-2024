@@ -77,7 +77,7 @@ def load_audio_submit(path: str | os.PathLike[str]) -> npt.NDArray[np.float32]:
     :param path: Path to the audio file
     :return: Audio data
     """
-    return librosa.load(path, sr=32000, dtype=np.float32)[0]
+    return librosa.load(path, sr=32000, dtype=np.float32)[0] / 100
 
 
 def setup_train_y_data(raw_path: str | os.PathLike[str], years: Iterable[str], max_recordings_per_species: int = -1) -> YData:

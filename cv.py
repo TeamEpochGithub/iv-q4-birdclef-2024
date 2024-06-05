@@ -174,8 +174,8 @@ def run_cv_cfg(cfg: DictConfig) -> None:
         scores.append(score)
 
         X = copy_x
-        # if score["2024"] < 0.9:
-        #     break
+        if fold_no == 0 and score < 0.7:
+            break
 
     # Set up the inference pipeline
     logger.info("Setting up the inference pipeline for unlabeled soundscapes")

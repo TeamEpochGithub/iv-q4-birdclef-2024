@@ -1,7 +1,7 @@
 defaults:
   - base_train
   - hydra/logging
-  - model: visformer-post # Add models or ensembles
+  - model: sweep-visformer  # Add models or ensembles
   - wandb: train
 
 ###############
@@ -23,15 +23,15 @@ test_size: 0.2
 # Species cap
 #max_recordings_per_species: 500
 
-#scorer:
-#  _target_: src.scoring.rocauc_years.ROCAUC # Add scorer
-#  name: rocauc
-#  grade_threshold: 0
-#  only_primary: true
-
 scorer:
-  _target_: src.scoring.accuracy.Accuracy # Add scorer
-  name: acc
+  _target_: src.scoring.rocauc_years.ROCAUC # Add scorer
+  name: rocauc
+  grade_threshold: 0
+  only_primary: true
+
+#scorer:
+#  _target_: src.scoring.accuracy.Accuracy # Add scorer
+#  name: acc
 splitter:
   _target_: src.setup.splitter.Splitter
   splitter:

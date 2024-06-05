@@ -62,11 +62,11 @@ train_sys:
     batch_size: 64
     model:
       _target_: src.modules.training.models.two_stage_model.TwoStageModel
-      threshold: 0.4125
+      threshold: 0.05
       model1:
         _target_: src.modules.training.models.pretrained_model.PretrainedModel
         #model_path: "tm/1d3da39e7fabe8b5c620a1b4dcacd640_5_f0.pt"  # Call / nocall model (convnext) 909815b1e76632df33b38c3591a1bced_5_f0.pt
-        model_path: "tm/909815b1e76632df33b38c3591a1bced_5_f0.pt" # Call / nocall model (visformer tiny)
+        model_path: "tm/b9a551df2850be59e8ae24f8b7c6fd3b_0.pt" # Call / nocall model (visformer train full)
       model2:
         _target_: src.modules.training.models.pretrained_model.PretrainedModel
         model_path: "tm/1ae19a94670376d14cd2c4f0e8467ebf_5_f0.pt"  # Bird species model

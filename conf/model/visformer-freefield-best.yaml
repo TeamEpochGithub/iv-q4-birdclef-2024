@@ -16,9 +16,10 @@ train_sys:
     dataset_args:
       sampler:
         _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
-        length: 160000
+        length: 320000
       to_2d:
         _target_: src.modules.training.datasets.to_2d.spec.Spec
+        sequence_length: 320000
         spec:
           _target_: functools.partial
           _args_:
@@ -38,22 +39,22 @@ train_sys:
         _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
         x_transforms:
         - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomPhaseShift
-          p: 0.5
+          p: 0.36722247171138633
           shift_limit: 0.5
         - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomAmplitudeShift
-          p: 0.5
+          p: 0.18986044490913212
         xy_transforms:
         - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.CutMix1D
-          p: 0.5
+          p: 0.23151718274969468
         - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.MixUp1D
-          p: 0.5
+          p: 0.522099648673672
       aug_2d:
         _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
         xy_transforms:
         - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.CutMix
-          p: 0.5
+          p: 0.7575252033680597
         - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.MixUp
-          p: 0.5
+          p: 0.07089214722365322
     dataloader_args:
       num_workers: 8
       prefetch_factor: 2
@@ -61,7 +62,7 @@ train_sys:
     n_folds: 5
     epochs: 40
     patience: 10
-    batch_size: 64
+    batch_size: 26
     model:
       _target_: src.modules.training.models.timm.Timm
       in_channels: 1
@@ -84,7 +85,7 @@ train_sys:
       _args_:
       - _target_: hydra.utils.get_class
         path: torch.optim.AdamW
-      lr: 1e-4
+      lr: 5.433782454692736e-05
   - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
   - _target_: src.modules.training.postprocessing.multiply_mean.MultiplyMean
 pred_sys:

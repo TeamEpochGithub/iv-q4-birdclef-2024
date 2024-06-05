@@ -6,9 +6,9 @@ method: bayes
 metric:
   goal: maximize
   name: Score
-program: cv.py
+program: train.py
 project: detect-bird
-name: twostage
+name: visformer
 parameters:
   model.train_sys.steps.0.batch_size:
     distribution: int_uniform

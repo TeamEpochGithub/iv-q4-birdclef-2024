@@ -39,6 +39,10 @@ class TwoStageModel(torch.nn.Module):
         """
         # Start by feeding forward the first model
         preds = self.model1(x)
+        preds2 = self.model2(x)
+
+        return preds * preds2
+
 
         # Output of preds is now (48, 1)
         # We need to convert this to a binary classification to check if it is a call or not. Use the self.thresholdto determine if it is a call or not for every item in the batch
@@ -47,7 +51,7 @@ class TwoStageModel(torch.nn.Module):
         #Get the indices of the calls
         call_indices = calls.nonzero(as_tuple=True)[0]
 
-        print(len(call_indices) / 24)
+        #print(len(call_indices) / 24)
 
         # Get the predictions of the second model
         preds = self.model2(x[call_indices])

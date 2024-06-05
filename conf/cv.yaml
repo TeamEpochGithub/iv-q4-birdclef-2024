@@ -1,7 +1,7 @@
 defaults:
   - base_cv
   - hydra/logging
-  - model: visformer-freefield # Add models or ensembles
+  - model: sweep-visformer  # Add models or ensembles
   - wandb: train
 
 ###############
@@ -12,18 +12,18 @@ defaults:
 processed_path: data/processed/
 raw_path: data/raw/
 cache_path: data/cache
-years: ["freefield"]
+years: ["2024"]
 #data_path: data/raw/train_data/dummy.npy
 data_path: data/raw/2024/train_audio/
 metadata_path: data/raw/2024/train_metadata.csv
-#scorer:
-#  _target_: src.scoring.rocauc_years.ROCAUC # Add scorer
-#  name: rocauc
-#  grade_threshold: 0
-#  only_primary: true
 scorer:
-  _target_: src.scoring.accuracy.Accuracy # Add scorer
-  name: acc
+  _target_: src.scoring.rocauc_years.ROCAUC # Add scorer
+  name: rocauc
+  grade_threshold: 0
+  only_primary: true
+#scorer:
+#  _target_: src.scoring.accuracy.Accuracy # Add scorer
+#  name: acc
 splitter:
   _target_: src.setup.splitter.Splitter
   splitter:
@@ -31,9 +31,9 @@ splitter:
     _args_:
       - _target_: hydra.utils.get_class
         path: sklearn.model_selection.StratifiedKFold
-  n_splits: 2 # Set to 0 if you want train full.
+  n_splits: 5 # Set to 0 if you want train full.
   shuffle: true
   random_state: 42
-  years: ["freefield"]
+  years: ["2024"]
 allow_multiple_instances: true
 #corr_weight: 0.5
