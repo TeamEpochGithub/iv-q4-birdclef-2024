@@ -1,7 +1,7 @@
 defaults:
   - base_submit
   - hydra/logging
-  - model: 2stage-submit #$ Add models or ensembles
+  - model: visformer-best #$ Add models or ensembles
 
 # Use this when uploading to Kaggle
 
