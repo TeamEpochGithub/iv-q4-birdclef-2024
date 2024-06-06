@@ -38,6 +38,7 @@ class TwoStageModel(torch.nn.Module):
         :return: The predictions of shape (48, 182)
         """
         # Start by feeding forward the first model
+        #Convert 48,C,H,W into 24,
         preds = self.model1(x)
         preds2 = self.model2(x)
 

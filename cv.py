@@ -174,8 +174,8 @@ def run_cv_cfg(cfg: DictConfig) -> None:
         scores.append(score)
 
         X = copy_x
-        if fold_no == 0 and score < 0.7:
-            break
+        # if fold_no == 0 and score < 0.7:
+        #     break
 
     # Set up the inference pipeline
     logger.info("Setting up the inference pipeline for unlabeled soundscapes")
@@ -221,22 +221,28 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     # else:
     #     mean_corr /= len(corrs)
 
-    # avg_score: dict[str, float]
-    # avg_score = {}
-    # for score in scores:
-    #     for year in score:
-    #         if avg_score.get(year) is not None:
-    #             avg_score[year] += score[year] / len(scores)
-    #         else:
-    #             avg_score[year] = score[year] / len(scores)
-
     print_section_separator("CV - Results")
-    logger.info(f"Avg Score: {np.array(scores).mean()}")
-    wandb.log({"Score": np.array(scores).mean()})
+
+    if "freefield" in years:
+        logger.info(f"Avg Score: {np.array(scores).mean()}")
+        wandb.log({"Score": np.array(scores).mean()})
+
+    else:
+        avg_score: dict[str, float]
+        avg_score = {}
+        for score in scores:
+            for year in score:
+                if avg_score.get(year) is not None:
+                    avg_score[year] += score[year] / len(scores)
+                else:
+                    avg_score[year] = score[year] / len(scores)
+        [wandb.log({f"Avg Score_{year}": avg_score[year]}) for year in avg_score] if isinstance(avg_score, dict) else wandb.log({"Avg Score": avg_score})
+        wandb.log({"Score": avg_score["2024"]}) if isinstance(avg_score, dict) and "2024" in avg_score else None
+
+
 
     # logger.info(f"Avg Score: {avg_score}")
-    # [wandb.log({f"Avg Score_{year}": avg_score[year]}) for year in avg_score] if isinstance(avg_score, dict) else wandb.log({"Avg Score": avg_score})
-    # wandb.log({"Score": avg_score["2024"]}) if isinstance(avg_score, dict) and "2024" in avg_score else None
+
     # wandb.log({"Fold correlations": str(corrs)})
     # wandb.log({"Mean corr": mean_corr})
     #
