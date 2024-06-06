@@ -36,7 +36,7 @@ def setup_train_x_data(raw_path: str | os.PathLike[str], years: Iterable[str], m
         metadata_path = raw_year_path / "train_metadata.csv"
         metadata = pd.read_csv(metadata_path)
         metadata["year"] = year
-        metadata["samplename"] = metadata["filename"].str.replace("/", "-").str.replace(".ogg", "").str.replace(".mp3", "")
+        metadata["samplename"] = metadata["filename"].str.replace("/", "-").str.replace(".ogg", "").str.replace(".mp3", "").str.replace(".wav", "")
         all_metadata.append(metadata)
 
     all_metadata: pd.DataFrame = pd.concat(all_metadata).reset_index(drop=True)
@@ -77,7 +77,7 @@ def load_audio_submit(path: str | os.PathLike[str]) -> npt.NDArray[np.float32]:
     :param path: Path to the audio file
     :return: Audio data
     """
-    return librosa.load(path, sr=32000, dtype=np.float32)[0]
+    return librosa.load(path, sr=32000, dtype=np.float32)[0] / 100
 
 
 def setup_train_y_data(raw_path: str | os.PathLike[str], years: Iterable[str], max_recordings_per_species: int = -1) -> YData:
@@ -95,7 +95,7 @@ def setup_train_y_data(raw_path: str | os.PathLike[str], years: Iterable[str], m
         metadata_path = Path(raw_path) / str(year) / "train_metadata.csv"
         metadata = pd.read_csv(metadata_path)
         metadata["year"] = year
-        metadata["samplename"] = metadata["filename"].str.replace("/", "-").str.replace(".ogg", "").str.replace(".mp3", "")
+        metadata["samplename"] = metadata["filename"].str.replace("/", "-").str.replace(".ogg", "").str.replace(".mp3", "").str.replace(".wav", "")
         all_metadata.append(metadata)
 
     all_metadata: pd.DataFrame = pd.concat(all_metadata).reset_index(drop=True)
@@ -113,8 +113,10 @@ def setup_train_y_data(raw_path: str | os.PathLike[str], years: Iterable[str], m
                 ydata[f"label_{year}"].columns = ["call", "nocall"]
             case "2024gxeno":
                 ydata[f"label_{year}"] = metadata.iloc[:, :182]
+            case "freefield":
+                ydata[f"label_{year}"] = metadata["hasbird"]
             case _:
-                if "labels" in metadata.columns and year != "2024gxeno":
+                if "labels" in metadata.columns:
                     ydata[f"label_{year}"] = one_hot_label(metadata)
                 else:
                     ydata[f"label_{year}"] = one_hot_primary_secondary(metadata)

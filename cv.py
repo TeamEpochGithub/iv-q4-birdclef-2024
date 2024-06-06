@@ -174,8 +174,8 @@ def run_cv_cfg(cfg: DictConfig) -> None:
         scores.append(score)
 
         X = copy_x
-        if score["2024"] < 0.9:
-            break
+        # if fold_no == 0 and score < 0.7:
+        #     break
 
     # Set up the inference pipeline
     logger.info("Setting up the inference pipeline for unlabeled soundscapes")
@@ -186,60 +186,69 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     X_unlabeled["bird_2024"] = X_unlabeled["bird_2024"][:1000]
     # Get output directory
     output_dir = Path(hydra.core.hydra_config.HydraConfig.get().runtime.output_dir)
-    pred_args = setup_pred_args(pipeline=model_pipeline, output_dir=output_dir.as_posix(), data_dir=data_path, species_dir="data/raw/2024/train_audio/")
+    # pred_args = setup_pred_args(pipeline=model_pipeline, output_dir=output_dir.as_posix(), data_dir=data_path, species_dir="data/raw/2024/train_audio/")
+    #
+    # logger.info("Making predictions on unlabeled soundscapes")
+    # predictions = model_pipeline.predict(X_unlabeled, **pred_args)
+    # fold_preds = predictions
+    # print(fold_preds.shape)
 
-    logger.info("Making predictions on unlabeled soundscapes")
-    predictions = model_pipeline.predict(X_unlabeled, **pred_args)
-    fold_preds = predictions
-    print(fold_preds.shape)
-
-    # Find the pairs
-    pairs = []
-    for i in range(fold_no + 1):
-        pairs.extend(tuple(zip([i] * len(list(range(i + 1, fold_no + 1))), list(range(i + 1, fold_no + 1)))))
-
-    print(pairs)
-    corrs = {}
-    # Find the pairwise correlation between all the arrays
-    # make directory for output plots
-    os.makedirs(output_dir / Path("fold_correlations"))
-    for pair in pairs:
-        corr = np.corrcoef(x=fold_preds[pair[0]], y=fold_preds[pair[1]], rowvar=False)
-        corrs[pair] = corr[:182, 182:364]
-        plt.figure(figsize=(12, 12))
-        sns.heatmap(corrs[pair])
-        diag_corr = sum([corrs[pair][i, i] for i in range(corrs[pair].shape[0])]) / 182
-        corrs[pair] = diag_corr
-        plt.title(f"pair {pair} diag_corr:{diag_corr}")
-        plt.savefig(output_dir / Path("fold_correlations") / Path(f"{pair}.png"))
-
-    mean_corr = 0
-    for pair in corrs:
-        mean_corr += corrs[pair]
-    if len(corrs) == 0:
-        mean_corr = 0
-    else:
-        mean_corr /= len(corrs)
-
-    avg_score: dict[str, float]
-    avg_score = {}
-    for score in scores:
-        for year in score:
-            if avg_score.get(year) is not None:
-                avg_score[year] += score[year] / len(scores)
-            else:
-                avg_score[year] = score[year] / len(scores)
+    # # Find the pairs
+    # pairs = []
+    # for i in range(fold_no + 1):
+    #     pairs.extend(tuple(zip([i] * len(list(range(i + 1, fold_no + 1))), list(range(i + 1, fold_no + 1)))))
+    #
+    # print(pairs)
+    # corrs = {}
+    # # Find the pairwise correlation between all the arrays
+    # # make directory for output plots
+    # os.makedirs(output_dir / Path("fold_correlations"))
+    # for pair in pairs:
+    #     corr = np.corrcoef(x=fold_preds[pair[0]], y=fold_preds[pair[1]], rowvar=False)
+    #     corrs[pair] = corr[:182, 182:364]
+    #     plt.figure(figsize=(12, 12))
+    #     sns.heatmap(corrs[pair])
+    #     diag_corr = sum([corrs[pair][i, i] for i in range(corrs[pair].shape[0])]) / 182
+    #     corrs[pair] = diag_corr
+    #     plt.title(f"pair {pair} diag_corr:{diag_corr}")
+    #     plt.savefig(output_dir / Path("fold_correlations") / Path(f"{pair}.png"))
+    #
+    # mean_corr = 0
+    # for pair in corrs:
+    #     mean_corr += corrs[pair]
+    # if len(corrs) == 0:
+    #     mean_corr = 0
+    # else:
+    #     mean_corr /= len(corrs)
 
     print_section_separator("CV - Results")
-    logger.info(f"Avg Score: {avg_score}")
-    [wandb.log({f"Avg Score_{year}": avg_score[year]}) for year in avg_score] if isinstance(avg_score, dict) else wandb.log({"Avg Score": avg_score})
-    wandb.log({"Score": avg_score["2024"]}) if isinstance(avg_score, dict) and "2024" in avg_score else None
-    wandb.log({"Fold correlations": str(corrs)})
-    wandb.log({"Mean corr": mean_corr})
 
-    # sweep score is score 2024 + weight* mean_corr
-    sweep_score = avg_score["2024"] + cfg.corr_weight * mean_corr
-    wandb.log({"Sweepscore": sweep_score})
+    if "freefield" in years:
+        logger.info(f"Avg Score: {np.array(scores).mean()}")
+        wandb.log({"Score": np.array(scores).mean()})
+
+    else:
+        avg_score: dict[str, float]
+        avg_score = {}
+        for score in scores:
+            for year in score:
+                if avg_score.get(year) is not None:
+                    avg_score[year] += score[year] / len(scores)
+                else:
+                    avg_score[year] = score[year] / len(scores)
+        [wandb.log({f"Avg Score_{year}": avg_score[year]}) for year in avg_score] if isinstance(avg_score, dict) else wandb.log({"Avg Score": avg_score})
+        wandb.log({"Score": avg_score["2024"]}) if isinstance(avg_score, dict) and "2024" in avg_score else None
+
+
+
+    # logger.info(f"Avg Score: {avg_score}")
+
+    # wandb.log({"Fold correlations": str(corrs)})
+    # wandb.log({"Mean corr": mean_corr})
+    #
+    # # sweep score is score 2024 + weight* mean_corr
+    # sweep_score = avg_score["2024"] + cfg.corr_weight * mean_corr
+    # wandb.log({"Sweepscore": sweep_score})
 
     logger.info("Finishing wandb run")
     wandb.finish()

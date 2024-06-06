@@ -32,6 +32,7 @@ class XData:
     :param bird_kenya: Audiodata of Kenya
     """
 
+    meta_freefield: pd.DataFrame | None = None
     meta_2024: pd.DataFrame | None = None
     meta_2024add: pd.DataFrame | None = None
     meta_2024gsil: pd.DataFrame | None = None
@@ -43,6 +44,7 @@ class XData:
     meta_kenya: pd.DataFrame | None = None
     meta_esc50: pd.DataFrame | None = None
     meta_green: pd.DataFrame | None = None
+    bird_freefield: npt.NDArray[np.float32] | None = None
     bird_2024add: npt.NDArray[Any] | None = None
     bird_2024: npt.NDArray[Any] | None = None
     bird_2023: npt.NDArray[Any] | None = None
@@ -198,6 +200,7 @@ class YData:
     :param label_kenya: Labels of Kenya
     """
 
+    meta_freefield: pd.DataFrame | None = None
     meta_2024gsil: pd.DataFrame | None = None
     meta_2024gbird: pd.DataFrame | None = None
     meta_2024gxeno: pd.DataFrame | None = None
@@ -210,6 +213,7 @@ class YData:
     meta_kenya: pd.DataFrame | None = None
     meta_esc50: pd.DataFrame | None = None
     meta_green: pd.DataFrame | None = None
+    label_freefield: pd.DataFrame | None = None
     label_2024gsil: pd.DataFrame | None = None
     label_2024gbird: pd.DataFrame | None = None
     label_2024gxeno: pd.DataFrame | None = None

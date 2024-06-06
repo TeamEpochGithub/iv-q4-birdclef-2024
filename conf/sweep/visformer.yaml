@@ -1,0 +1,44 @@
+command:
+  - python3
+  - ${program}
+  - ${args_no_hyphens}
+method: bayes
+metric:
+  goal: maximize
+  name: Score
+program: train.py
+project: detect-bird
+name: visformer
+parameters:
+  model.train_sys.steps.0.batch_size:
+    distribution: int_uniform
+    max: 256
+    min: 8
+  model.train_sys.steps.0.optimizer.lr:
+    distribution: log_uniform
+    max: -4
+    min: -10
+  model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.0.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_1d.x_transforms.1.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_1d.xy_transforms.0.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_1d.xy_transforms.1.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_2d.xy_transforms.0.p:
+    distribution: uniform
+    max: 1
+    min: 0
+  model.train_sys.steps.0.dataset_args.aug_2d.xy_transforms.1.p:
+    distribution: uniform
+    max: 1
+    min: 0

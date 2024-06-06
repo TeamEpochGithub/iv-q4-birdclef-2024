@@ -101,9 +101,12 @@ class ROCAUC(Scorer):
             # Convert
             solution = y_true_year
             # Select the correct columns from the pred using the label_lookup
-            label_indices = np.array([label_lookup.columns.get_loc(col) for col in y_true_year.columns])
+            if not isinstance(y_true_year, pd.DataFrame):
+                submission = pd.DataFrame(y_pred_year)
+            else:
+                label_indices = np.array([label_lookup.columns.get_loc(col) for col in y_true_year.columns])
 
-            submission = pd.DataFrame(np.clip(y_pred_year[:, label_indices], 0, 1), columns=solution.columns)
+                submission = pd.DataFrame(np.clip(y_pred_year[:, label_indices], 0, 1), columns=solution.columns)
 
             if not pd.api.types.is_numeric_dtype(submission.values):
                 bad_dtypes = {x: submission[x].dtype for x in submission.columns if not pd.api.types.is_numeric_dtype(submission[x])}

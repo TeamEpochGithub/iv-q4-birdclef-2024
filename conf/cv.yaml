@@ -1,7 +1,7 @@
 defaults:
   - base_cv
   - hydra/logging
-  - model: swisssweep # Add models or ensembles
+  - model: sweep-visformer  # Add models or ensembles
   - wandb: train
 
 ###############
@@ -21,6 +21,9 @@ scorer:
   name: rocauc
   grade_threshold: 0
   only_primary: true
+#scorer:
+#  _target_: src.scoring.accuracy.Accuracy # Add scorer
+#  name: acc
 splitter:
   _target_: src.setup.splitter.Splitter
   splitter:
@@ -33,4 +36,4 @@ splitter:
   random_state: 42
   years: ["2024"]
 allow_multiple_instances: true
-corr_weight: 0.5
+#corr_weight: 0.5
