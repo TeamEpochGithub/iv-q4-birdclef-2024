@@ -50,8 +50,10 @@ train_sys:
       aug_2d:
         _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
         xy_transforms:
-        - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.CutMix
+        - _target_: src.modules.training.augmentations.ormix.OrMix
           p: 0.5
+#        - _target_: src.modules.training.augmentations.ormix.OrMix
+#          p: 0.25
     dataloader_args:
       num_workers: 8
       prefetch_factor: 2
