@@ -2,7 +2,7 @@
 
 import functools
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import torch
 from torchaudio.transforms import MelSpectrogram
@@ -26,6 +26,7 @@ class Spec:
     scale: Callable[[torch.Tensor], torch.Tensor] | None = None
     sample_rate: int = 32000
     f_min: int = 0
+    f_max: int | None = field(default=None, repr=False)
 
     def __post_init__(self) -> None:
         """Calculate the params for the desired input shape and instantiate the spec class."""
@@ -33,7 +34,7 @@ class Spec:
         self.hop_length = self.sequence_length // self.output_shape[1] + 1
         # Re-instantiate spec class with params for deisred output shape
         if self.spec.func is MelSpectrogram:
-            self.instantiated_spec = self.spec(n_fft=self.n_fft * 4, hop_length=self.hop_length, n_mels=self.output_shape[0], sample_rate=self.sample_rate, f_min=self.f_min)
+            self.instantiated_spec = self.spec(n_fft=self.n_fft * 4, hop_length=self.hop_length, n_mels=self.output_shape[0], sample_rate=self.sample_rate, f_min=self.f_min, f_max=self.f_max)
         else:
             self.instantiated_spec = self.spec(n_fft=self.n_fft, hop_length=self.hop_length)
 
