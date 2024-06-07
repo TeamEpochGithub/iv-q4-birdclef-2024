@@ -141,7 +141,7 @@ def one_hot_primary_secondary(metadata: pd.DataFrame) -> pd.DataFrame:
             continue
         for secondary_label in ast.literal_eval(secondary_labels):
             try:
-                one_hot.iloc[i, primary_labels_dict[secondary_label]] = 0.0
+                one_hot.iloc[i, primary_labels_dict[secondary_label]] = 0.5
             except KeyError:  # noqa: PERF203
                 errors.append((i, secondary_label))
     logger.debug(f"Errors: {errors}")
