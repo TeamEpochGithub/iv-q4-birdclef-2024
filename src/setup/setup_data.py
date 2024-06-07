@@ -64,7 +64,7 @@ def load_audio_train(path: str | os.PathLike[str]) -> npt.NDArray[np.float32]:
     :return: Audio data
     """
     try:
-        return librosa.load(path, sr=32000, dtype=np.float32)[0]
+        return librosa.load(path, sr=32000, dtype=np.float32, duration=5.0)[0]
     except FileNotFoundError:
         logger.error(f"File not found: {path}")
         return np.zeros(32000, dtype=np.float32)

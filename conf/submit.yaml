@@ -1,7 +1,7 @@
 defaults:
   - base_submit
   - hydra/logging
-  - model: visformer-best #$ Add models or ensembles
+  - model: convnext-post-ormix #$ Add models or ensembles
 
 # Use this when uploading to Kaggle
 

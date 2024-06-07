@@ -38,22 +38,22 @@ train_sys:
         _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
         x_transforms:
         - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomPhaseShift
-          p: 0.15686638522857854
+          p: 0.5
           shift_limit: 0.5
         - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomAmplitudeShift
-          p: 0.18158239761963835
+          p: 0.5
         xy_transforms:
         - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.CutMix1D
-          p: 0.4623010955014415
+          p: 0.5
         - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.MixUp1D
-          p: 0.9271994767777376
+          p: 0.5
       aug_2d:
         _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
         xy_transforms:
-        - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.CutMix
-          p: 0.9558867145777652
-        - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.MixUp
-          p: 0.1531886944076034
+        - _target_: src.modules.training.augmentations.ormix.OrMix
+          p: 0.5
+#        - _target_: src.modules.training.augmentations.ormix.OrMix
+#          p: 0.25
     dataloader_args:
       num_workers: 8
       prefetch_factor: 2
@@ -61,19 +61,19 @@ train_sys:
     n_folds: 5
     epochs: 50
     patience: 15
-    batch_size: 110
+    batch_size: 64
     model:
       _target_: src.modules.training.models.timm.Timm
       in_channels: 1
       out_channels: 182
-      model_name: visformer_tiny
+      model_name: convnext_tiny
       activation: sigmoid
     scheduler:
       _target_: functools.partial
       _args_:
       - _target_: hydra.utils.get_class
         path: timm.scheduler.cosine_lr.CosineLRScheduler
-      warmup_t: 0
+      warmup_t: 3
       warmup_lr_init: 1.0e-05
       t_initial: 50
       cycle_limit: 1
@@ -84,9 +84,9 @@ train_sys:
       _args_:
       - _target_: hydra.utils.get_class
         path: torch.optim.AdamW
-      lr: 0.0008033167218405902
+      lr: 0.0005
   - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
-#  - _target_: src.modules.training.postprocessing.multiply_mean.MultiplyMean
+  - _target_: src.modules.training.postprocessing.multiply_mean.MultiplyMean
 pred_sys:
   _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline
   title: Postprocessing pipeline
