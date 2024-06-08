@@ -15,6 +15,7 @@ class PretrainedModel(torch.nn.Module):
     """
 
     model: torch.nn.Module
+    crop_head: int | None = None
 
     def __init__(self, model_path: str | PathLike[str]) -> None:
         """Initialize the model.
@@ -36,4 +37,6 @@ class PretrainedModel(torch.nn.Module):
         if self.training:
             raise NotImplementedError("Fine-tuning a pretrained model is not supported.")
 
+        if self.crop_head is not None:
+            x = x[:, :, :, self.crop_head:]
         return self.model(x)
