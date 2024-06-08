@@ -100,6 +100,12 @@ class DaskDataset(Dataset[tuple[torch.Tensor, torch.Tensor]]):
         # Convert to 2D if method is specified
         if self.to_2d is not None:
             x_tensor = self.to_2d(x_tensor)
+
+            norm = torch.quantile(x_tensor, 0.25, dim=2, keepdim=True)[0]
+            x_tensor = x_tensor - norm
+            norm = torch.quantile(x_tensor, 0.25, dim=3, keepdim=True)[0]
+            x_tensor = x_tensor - norm
+
             # Only apply 2D augmentations if converted to 2D
             if self.aug_2d is not None:
                 x_tensor, y_tensor = self.aug_2d(x_tensor, y_tensor)

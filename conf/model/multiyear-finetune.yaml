@@ -62,7 +62,8 @@ train_sys:
       batch_size: 64
       model:
         _target_: src.modules.training.models.pretrained_model.PretrainedModel
-        model_path: "tm/ec2153138d52bee3e0812bc5d0047ac0_5_f0.pt"
+#        model_path: "tm/ec2153138d52bee3e0812bc5d0047ac0_5_f0.pt" # original foundation model
+        model_path: "tm/122595f284e2c7f831addbcd5d853825_0.pt" # finetuned model
         crop_head: 182
       scheduler:
         _target_: functools.partial

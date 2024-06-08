@@ -17,7 +17,7 @@ class PretrainedModel(torch.nn.Module):
     model: torch.nn.Module
     crop_head: int | None = None
 
-    def __init__(self, model_path: str | PathLike[str], crop_head: int | None) -> None:
+    def __init__(self, model_path: str | PathLike[str], crop_head: int | None = None) -> None:
         """Initialize the model.
 
         :param model_path: The path to the pretrained model to load.
