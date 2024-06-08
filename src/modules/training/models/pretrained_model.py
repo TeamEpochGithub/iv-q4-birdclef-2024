@@ -38,5 +38,5 @@ class PretrainedModel(torch.nn.Module):
         """
         pred = self.model(x)
         if self.crop_head is not None:
-            pred = pred[:, :self.crop_head]
+            pred = pred[:, : self.crop_head]
         return pred

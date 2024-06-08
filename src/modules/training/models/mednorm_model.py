@@ -3,7 +3,6 @@ from torch import nn
 
 
 class MedNormModel(nn.Module):
-
     def __init__(self, model: nn.Module, use_vertical: bool = True, quantile: float = 0.25):
         super().__init__()
         self.model = model
@@ -14,7 +13,8 @@ class MedNormModel(nn.Module):
         """Subtract the median over the time axis, and if specified also the frequency axis.
 
         :param x: The input tensor of shape (B, C, H, W)
-        :return: The output tensor of shape (B, C, H, W)"""
+        :return: The output tensor of shape (B, C, H, W)
+        """
         norm = torch.quantile(x, self.quantile, dim=2, keepdim=True)[0]
         x = x - norm
         if self.use_vertical:
