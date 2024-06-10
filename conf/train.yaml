@@ -1,7 +1,7 @@
 defaults:
   - base_train
   - hydra/logging
-  - model: old/convnextv2-atto-median-spec-2ch  # Add models or ensembles
+  - model: eca-foundation  # Add models or ensembles
   - wandb: train
 
 ###############
@@ -11,7 +11,7 @@ defaults:
 ###############
 processed_path: data/processed/
 raw_path: data/raw/
-years: ["2024","2024add","2023","2022","2021","2020","kenya","pam20","pam21","pam22","kenya"]
+years: ["2024","2024add","2023","2022","2021","2020","pam20","pam21","pam22","kenya"]
 cache_path: data/cache
 
 data_path: data/raw/2024/train_audio/
@@ -26,7 +26,6 @@ max_recordings_per_species: 200
 scorer:
   _target_: src.scoring.rocauc_years.ROCAUC # Add scorer
   name: rocauc
-  grade_threshold: 0
   only_primary: true
 
 #scorer:
@@ -42,5 +41,5 @@ splitter:
   n_splits: 5 # Set to 0 if you want train full.
   shuffle: true
   random_state: 42
-  years: ["2024","2024add","2023","2022","2021","2020", "kenya","pam20","pam21","pam22","kenya"]
+  years: ["2024","2024add","2023","2022","2021","2020","pam20","pam21","pam22","kenya"]
 allow_multiple_instances: true

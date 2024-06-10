@@ -1,7 +1,7 @@
 defaults:
   - base_submit
   - hydra/logging
-  - model: old/convnextv2-atto-median-spec-2ch # Add models or ensembles
+  - model: eca-foundation # Add models or ensembles
 
 # Use this when uploading to Kaggle
 

@@ -5,13 +5,13 @@ x_sys:
   title: Preprocessing pipeline
   steps:
   - _target_: src.modules.transformation.x.nan_to_zero.NanToZero
-    years: ["2024","2024add","2023","2022","2021","2020","pam20","pam21","pam22","kenya"]
+    years: ["2024","2024add"]
 y_sys: null
 train_sys:
   _target_: src.modules.training.verbose_training_pipeline.VerboseTrainingPipeline
   steps:
   - _target_: src.modules.training.main_trainer.MainTrainer
-    year: "union_2024_2024add_2023_2022_2021_2020_pam20_pam21_pam22_kenya"
+    year: "union_2024_2024add"
     dataset_args:
       sampler:
         _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
@@ -36,40 +36,62 @@ train_sys:
       aug_1d:
         _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
         x_transforms:
-        - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomPhaseShift
-          p: 0.5
-          shift_limit: 0.5
-        - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomAmplitudeShift
-          p: 0.5
+          - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomPhaseShift
+            p: 0.10647910039874942
+            shift_limit: 0.5
+          - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomAmplitudeShift
+            p: 0.468415665510393
+          - _target_: src.modules.training.augmentations.audiomentations_compose.AudiomentationsCompose
+            compose:
+              _target_: audiomentations.Compose
+              transforms:
+                - _target_: audiomentations.PolarityInversion
+                  p: 0.24421958210613093
+                - _target_: src.modules.training.augmentations.add_background_noise_wrapper.AddBackgroundNoiseWrapper
+                  p: 0.8982070570715455
+                  sounds_path: data/raw/esc50/audio/
+                  min_snr_db: -3.0
+                  max_snr_db: 3.0
+                  noise_transform:
+                    _target_: audiomentations.PolarityInversion
+                    p: 0.5
+                - _target_: audiomentations.AddColorNoise
+                  p: 0.11299090466351223
+                  min_snr_db: -3.0
+                  max_snr_db: 3.0
+                - _target_: audiomentations.PitchShift
+                  p: 0.1711070661245233
+                - _target_: audiomentations.Shift
+                  p: 0.6130068470589359
         xy_transforms:
-        - _target_: src.modules.training.augmentations.time_series_augmentations.EnergyCutmix
-          p: 0.8181849503196303
+          - _target_: src.modules.training.augmentations.time_series_augmentations.EnergyCutmix
+            p: 0.5181849503196303
+          - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.MixUp1D
+            p: 0.7663673680865126
+          - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.CutMix1D
+            p: 0.6679029319201417
       aug_2d:
         _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
         x_transforms:
-        - _target_: kornia.augmentation.RandomErasing
-          p: 0.9224610095221584
+          - _target_: kornia.augmentation.RandomErasing
+            p: 0.9224610095221584
         xy_transforms:
-        - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.MixUp
-          p: 0.9025840454489424
-        - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.CutMix
-          p: 0.3798213307255385
+          - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.MixUp
+            p: 0.9025840454489424
+          - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.CutMix
+            p: 0.3798213307255385
     dataloader_args:
       num_workers: 16
       prefetch_factor: 2
       persistent_workers: false
     n_folds: 5
-    epochs: 75
+    epochs: 20
     patience: 15
     batch_size: 256
     model:
-      _target_: src.modules.training.models.timm.Timm
-      in_channels: 1
-      out_channels: 1109
-      model_name: eca_nfnet_l0
-      activation: sigmoid
-      drop_path_rate: 0.2
-      drop_rate: 0.2
+      _target_: src.modules.training.models.pretrained_model.PretrainedModel
+      model_path: "tm/?65d98dcf365ead579266f698a1f5a135_5_f0.pt"
+      crop_head: 182
     scheduler:
       _target_: functools.partial
       _args_:
@@ -77,19 +99,18 @@ train_sys:
         path: timm.scheduler.cosine_lr.CosineLRScheduler
       warmup_t: 3
       warmup_lr_init: 1.0e-05
-      t_initial: 75
+      t_initial: 20
       cycle_limit: 1
     criterion:
       _target_: src.modules.training.losses.focal_loss.FocalLossBCE
-      alpha: 2
+      alpha: 0.25
+      ignore_half_labels: true
     optimizer:
       _target_: functools.partial
       _args_:
       - _target_: hydra.utils.get_class
         path: torch.optim.AdamW
       lr: 5e-4
-  - _target_: src.modules.training.postprocessing.keep_2024_species.Keep2024Species
-  - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
   - _target_: src.modules.training.postprocessing.multiply_mean.MultiplyMean
 pred_sys:
   _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline

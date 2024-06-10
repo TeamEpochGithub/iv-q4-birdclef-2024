@@ -63,8 +63,6 @@ class ROCAUC(Scorer):
 
         # Loop over the years
         for year in years:
-            if year == "kenya":
-                continue
             logger.info(f"Calculating ROC AUC for year {year}")
 
             metadata = y_true[f"meta_{year}"].iloc[test_indices[str(year)]]  # type: ignore[call-overload]
@@ -87,7 +85,7 @@ class ROCAUC(Scorer):
                 # Also slice metadata
                 metadata = metadata[indices]
 
-            if self.only_primary and "secondary_labels" in metadata.columns:
+            if self.only_primary and "secondary_labels" in metadata.columns and not year in ['kenya', 'pam20', 'pam21', 'pam22']:
                 # Get the indices from the metadata where secondary label is an empty list as string
                 indices = metadata["secondary_labels"] == "[]"
 
@@ -118,7 +116,7 @@ class ROCAUC(Scorer):
             if len(scored_columns) <= 0:
                 raise ValueError("No positive labels in y_true, ROC AUC score is not defined in that case.")
             scores[year] = roc_auc_score(solution[scored_columns].values, submission[scored_columns].values, average="macro")
-            self.plot_class_scores(metadata=metadata, solution=solution, submission=submission, scored_columns=scored_columns, output_dir=output_dir, year=year)
+            # self.plot_class_scores(metadata=metadata, solution=solution, submission=submission, scored_columns=scored_columns, output_dir=output_dir, year=year)
         # Calculate the ROC AUC score
         return scores
 
