@@ -28,6 +28,7 @@ class TimedVotingEnsemble(EnsemblePipeline, Logger):
 
     ensemble_has_timed_out: bool = field(default=False, init=False, repr=False)
     cur_step: int = field(default=0, init=False, repr=False)
+    post_process: list[Any] = None
 
     def predict(self, data: npt.NDArray[np.float32], **transform_args: Mapping[Any, Any]) -> npt.NDArray[np.float32]:
         """Transform the input data.
@@ -57,7 +58,13 @@ class TimedVotingEnsemble(EnsemblePipeline, Logger):
         if timer:
             timer.cancel()
 
-        return np.nanmean(np.array(out_data), axis=0)
+        curr_mean = np.nanmean(np.array(out_data), axis=0)
+        if self.post_process:
+            for el in self.post_process:
+                pred_args = transform_args.get("ModelPipeline", {}).get("train_sys", {}).get(el.__class__.__name__, {})
+                curr_mean = el.custom_predict(curr_mean, **pred_args)
+
+        return curr_mean
 
     def _set_ensemble_timer(self, seconds: int) -> Timer:
         """Set the timer for the ensemble to run for the given number of seconds.

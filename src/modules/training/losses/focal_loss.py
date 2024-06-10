@@ -18,7 +18,7 @@ class FocalLoss(torch.nn.Module):
     gamma: float
     reduction: Literal["none", "mean", "sum"]
 
-    def __init__(self, alpha: float = 0.25, gamma: float = 2, reduction: Literal["none", "mean", "sum"] = "mean") -> None:
+    def __init__(self, alpha: float = 0.25, gamma: float = 2, reduction: Literal["none", "mean", "sum"] = "none") -> None:
         """Initialize the focal loss.
 
         :param alpha: The alpha parameter.
@@ -55,10 +55,8 @@ class FocalLossBCE(FocalLoss):
     """
 
     bce: torch.nn.BCEWithLogitsLoss
-    bce_weight: float
-    focal_weight: float
 
-    def __init__(self, bce_weight: float = 1.0, focal_weight: float = 1.0) -> None:
+    def __init__(self, alpha: float) -> None:
         """Initialize the focal loss.
 
         :param bce_weight: The weight of the BCE loss.
@@ -66,8 +64,7 @@ class FocalLossBCE(FocalLoss):
         """
         super().__init__()
         self.bce = torch.nn.BCEWithLogitsLoss(reduction=self.reduction)
-        self.bce_weight = bce_weight
-        self.focal_weight = focal_weight
+        self.alpha = alpha
 
     def forward(self, inputs: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
         """Compute the focal loss.
@@ -76,8 +73,12 @@ class FocalLossBCE(FocalLoss):
         :param targets: The true labels.
         :return: The focal loss.
         """
-        # Flatten label and prediction tensors
-        # Call forward of the parent
-        focall_loss = super().forward(inputs, targets)
         bce_loss = self.bce(inputs, targets)
-        return self.bce_weight * bce_loss + self.focal_weight * focall_loss
+        probas = torch.sigmoid(inputs)
+
+        tmp = targets * self.alpha * (1. - probas) ** self.gamma * bce_loss
+        smp = (1. - targets) * probas ** self.gamma * bce_loss
+
+        loss = tmp + smp
+        loss = loss.mean()
+        return loss
