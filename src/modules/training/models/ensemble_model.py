@@ -81,3 +81,28 @@ class AlternatingEnsembleModel(FusionEnsembleModel):
             predictions[indices] = model(x[indices])
 
         return predictions
+
+class DoubleSpecEnsemble(EnsembleModel):
+    """Ensemble that averages the output of the models."""
+
+    @override
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass of the ensemble.
+
+        :param x: The data of a 4-minute soundscape of shape (48, C, H, W)
+        :return: The predictions of shape (48, 182)
+        """
+        predictions: list[torch.Tensor] = [torch.empty((x.shape[0], N_CLASSES), device=x.device, dtype=x.dtype)] * len(self.models)
+        # Split the channels of x into two parts
+        x_no_median = x[:, 0, :, :]
+        x_median = x[:, 1, :, :]
+
+        for i, model in enumerate(self.models):
+            if i == 0:
+                predictions[i] = model(x_no_median)
+            if i == 1:
+                predictions[i] = model(x_median)
+            if i == 2:
+                predictions[i] = model(x)
+
+        return torch.stack(predictions).nanmean(dim=0)

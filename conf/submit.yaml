@@ -1,7 +1,7 @@
 defaults:
   - base_submit
   - hydra/logging
-  - model: convnext-norm # Add models or ensembles
+  - model: old/convnextv2-atto-median-spec-2ch # Add models or ensembles
 
 # Use this when uploading to Kaggle
 
@@ -13,19 +13,19 @@ defaults:
 
 
 # Local paths
-#processed_path: data/processed
-#raw_path: data/raw
-#cache_path: data/cache
-#data_path: data/raw/2024/test_soundscapes/
-#species_path: data/raw/2024/train_audio/
-#result_path: submission
+processed_path: data/processed
+raw_path: data/raw
+cache_path: data/cache
+data_path: data/raw/2024/test_soundscapes/
+species_path: data/raw/2024/train_audio/
+result_path: submission
 
 # KAGGLE TESTING
-#data_path: /kaggle/input/birdclef-2024/unlabeled_soundscapes/
-#species_path: /kaggle/input/birdclef-2024/train_audio/
-#result_path: /kaggle/working/
+# data_path: /kaggle/input/birdclef-2024/unlabeled_soundscapes/
+# species_path: /kaggle/input/birdclef-2024/train_audio/
+# result_path: /kaggle/working/
 
-# KAGGLE SUBMIT
-data_path: /kaggle/input/birdclef-2024/test_soundscapes/
-species_path: /kaggle/input/birdclef-2024/train_audio/
-result_path: /kaggle/working/
+# # KAGGLE SUBMIT
+# data_path: /kaggle/input/birdclef-2024/test_soundscapes/
+# species_path: /kaggle/input/birdclef-2024/train_audio/
+# result_path: /kaggle/working/

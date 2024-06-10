@@ -1,7 +1,7 @@
 defaults:
   - base_train
   - hydra/logging
-  - model: eca-foundation  # Add models or ensembles
+  - model: old/convnextv2-atto-median-spec-2ch  # Add models or ensembles
   - wandb: train
 
 ###############
