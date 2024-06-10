@@ -11,7 +11,7 @@ defaults:
 ###############
 processed_path: data/processed/
 raw_path: data/raw/
-years: ["2024","2024add","2023","2022","2021","2020"]#"kenya","pam20","pam21","pam22"]
+years: ["2024","2024add","2023","2022","2021","2020","kenya","pam20","pam21","pam22","kenya"]
 cache_path: data/cache
 
 data_path: data/raw/2024/train_audio/
@@ -42,5 +42,5 @@ splitter:
   n_splits: 5 # Set to 0 if you want train full.
   shuffle: true
   random_state: 42
-  years: ["2024","2024add","2023","2022","2021","2020"]
+  years: ["2024","2024add","2023","2022","2021","2020", "kenya","pam20","pam21","pam22","kenya"]
 allow_multiple_instances: true

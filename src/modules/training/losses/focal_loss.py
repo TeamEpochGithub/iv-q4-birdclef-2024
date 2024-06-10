@@ -18,7 +18,8 @@ class FocalLoss(torch.nn.Module):
     gamma: float
     reduction: Literal["none", "mean", "sum"]
 
-    def __init__(self, alpha: float = 0.25, gamma: float = 2, reduction: Literal["none", "mean", "sum"] = "none") -> None:
+    def __init__(self, alpha: float = 0.25, gamma: float = 2,
+                 reduction: Literal["none", "mean", "sum"] = "none") -> None:
         """Initialize the focal loss.
 
         :param alpha: The alpha parameter.
@@ -47,7 +48,7 @@ class FocalLoss(torch.nn.Module):
         )
 
 
-class FocalLossBCE(FocalLoss):
+class FocalLossBCEWithLogits(FocalLoss):
     """Focal loss implementation, for combating class imbalance in classification tasks.
 
     :param bce_weight: The weight of the BCE loss.
@@ -75,6 +76,43 @@ class FocalLossBCE(FocalLoss):
         """
         bce_loss = self.bce(inputs, targets)
         probas = torch.sigmoid(inputs)
+
+        tmp = targets * self.alpha * (1. - probas) ** self.gamma * bce_loss
+        smp = (1. - targets) * probas ** self.gamma * bce_loss
+
+        loss = tmp + smp
+        loss = loss.mean()
+        return loss
+
+
+class FocalLossBCE(FocalLoss):
+    """Focal loss implementation, for combating class imbalance in classification tasks.
+
+    :param bce_weight: The weight of the BCE loss.
+    :param focal_weight: The weight of the focal loss.
+    """
+
+    bce: torch.nn.BCELoss
+
+    def __init__(self, alpha: float) -> None:
+        """Initialize the focal loss.
+
+        :param bce_weight: The weight of the BCE loss.
+        :param focal_weight: The weight of the focal loss.
+        """
+        super().__init__()
+        self.bce = torch.nn.BCELoss(reduction=self.reduction)
+        self.alpha = alpha
+
+    def forward(self, inputs: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+        """Compute the focal loss.
+
+        :param inputs: The model predictions.
+        :param targets: The true labels.
+        :return: The focal loss.
+        """
+        bce_loss = self.bce(inputs, targets)
+        probas = inputs
 
         tmp = targets * self.alpha * (1. - probas) ** self.gamma * bce_loss
         smp = (1. - targets) * probas ** self.gamma * bce_loss
