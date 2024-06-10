@@ -57,7 +57,7 @@ class FocalLossBCEWithLogits(FocalLoss):
 
     bce: torch.nn.BCEWithLogitsLoss
 
-    def __init__(self, alpha: float) -> None:
+    def __init__(self, alpha: float, ignore_half_labels: bool = False) -> None:
         """Initialize the focal loss.
 
         :param bce_weight: The weight of the BCE loss.
@@ -66,6 +66,7 @@ class FocalLossBCEWithLogits(FocalLoss):
         super().__init__()
         self.bce = torch.nn.BCEWithLogitsLoss(reduction=self.reduction)
         self.alpha = alpha
+        self.ignore_half_labels = ignore_half_labels
 
     def forward(self, inputs: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
         """Compute the focal loss.
@@ -81,6 +82,10 @@ class FocalLossBCEWithLogits(FocalLoss):
         smp = (1. - targets) * probas ** self.gamma * bce_loss
 
         loss = tmp + smp
+
+        if self.ignore_half_labels:
+            loss *= (targets != 0.5)
+
         loss = loss.mean()
         return loss
 
@@ -94,7 +99,7 @@ class FocalLossBCE(FocalLoss):
 
     bce: torch.nn.BCELoss
 
-    def __init__(self, alpha: float) -> None:
+    def __init__(self, alpha: float, ignore_half_labels: bool = False) -> None:
         """Initialize the focal loss.
 
         :param bce_weight: The weight of the BCE loss.
@@ -103,6 +108,7 @@ class FocalLossBCE(FocalLoss):
         super().__init__()
         self.bce = torch.nn.BCELoss(reduction=self.reduction)
         self.alpha = alpha
+        self.ignore_half_labels = ignore_half_labels
 
     def forward(self, inputs: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
         """Compute the focal loss.
@@ -116,7 +122,10 @@ class FocalLossBCE(FocalLoss):
 
         tmp = targets * self.alpha * (1. - probas) ** self.gamma * bce_loss
         smp = (1. - targets) * probas ** self.gamma * bce_loss
-
         loss = tmp + smp
+
+        if self.ignore_half_labels:
+            loss *= (targets != 0.5)
+
         loss = loss.mean()
         return loss
