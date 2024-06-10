@@ -18,7 +18,7 @@ class AddUnlabeledBackground:
 
     p: float = 0.5
     background_path: str = "./data/raw/2024/background"
-    subtract_old_background: bool = True
+    subtract_old_background: bool = False
 
     enabled: bool = field(default=True, init=False, repr=False)
 
@@ -44,6 +44,8 @@ class AddUnlabeledBackground:
         if not self.enabled:
             raise ValueError("Background path does not exist.")
 
+        x_test = x.clone()
+
         # to linear scale
         x = torch.exp(x)
 
@@ -63,5 +65,14 @@ class AddUnlabeledBackground:
             else:
                 noise.append(torch.zeros_like(x[i]))
         x = x + torch.stack(noise) * random_apply
+        x = torch.log(x)
 
-        return torch.log(x)
+       # min max scale the output
+        min_ = x.min(dim=-1, keepdim=True)[0].min(dim=-2, keepdim=True)[0]
+        max_ = x.max(dim=-1, keepdim=True)[0].max(dim=-2, keepdim=True)[0]
+
+
+        x = (x - min_) / (max_ - min_ + 1e-8)
+
+        return x
+
