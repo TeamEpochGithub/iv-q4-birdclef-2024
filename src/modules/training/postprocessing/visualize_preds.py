@@ -49,7 +49,7 @@ class VisualizePreds(VerboseTrainingBlock):
         :param pred_args: The prediction arguments.
         :return: The predictions
         """
-        # If on Kaggle, skip visualization
+        #If on Kaggle, skip visualization
         if not torch.cuda.is_available():
             return x
 
