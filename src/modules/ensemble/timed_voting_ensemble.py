@@ -53,12 +53,12 @@ class TimedVotingEnsemble(EnsemblePipeline, Logger):
                 timer.cancel()
                 break
             step_args = transform_args.get(step.__class__.__name__, {})
-            out_data[i] = cast(TrainType, step).predict(copy.deepcopy(data), **step_args)
+            out_data[i] = cast(TrainType, step).predict(copy.deepcopy(data), **step_args) * self.weights[i]
 
         if timer:
             timer.cancel()
 
-        curr_mean = np.nanmean(np.array(out_data), axis=0)
+        curr_mean = np.nanmean(np.array(out_data), axis=0) / np.sum(self.weights)
         if self.post_process:
             for el in self.post_process:
                 pred_args = transform_args.get("ModelPipeline", {}).get("train_sys", {}).get(el.__class__.__name__, {})

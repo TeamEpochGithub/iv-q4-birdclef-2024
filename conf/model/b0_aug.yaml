@@ -11,7 +11,7 @@ y_sys:
 train_sys:
   steps:
     - _target_: src.modules.training.main_trainer.MainTrainer
-      year: "kenya"
+      year: "2024"
       dataset_args:
         sampler:
           _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
@@ -34,8 +34,6 @@ train_sys:
         filter_:
           _target_: src.modules.training.datasets.filter.grade_threshold.GradeThreshold
           threshold: 0
-        process_delayed:
-          - _target_: src.modules.transformation.x.nan_to_zero.NanToZero
         aug_1d:
           _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
           x_transforms:
@@ -43,9 +41,7 @@ train_sys:
               p: 0.5
               shift_limit: 0.5
             - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomAmplitudeShift
-              p: 0.8
-              low: 1.8
-              high: 2
+              p: 0.5
           xy_transforms:
             - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.CutMix1D
               p: 0.5
@@ -56,17 +52,14 @@ train_sys:
           xy_transforms:
             - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.CutMix
               p: 0.5
-            - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.MixUp
-              p: 0.8
-
       dataloader_args:
-        num_workers: 16
-        prefetch_factor: 1
+        num_workers: 8
+        prefetch_factor: 2
         persistent_workers: false
-      n_folds: 3 # 0 for train full,
-      epochs: 1
-      patience: 14
-      batch_size: 128
+      n_folds: 0 # 0 for train full,
+      epochs: 50
+      patience: 15
+      batch_size: 64
       model:
         _target_: src.modules.training.models.timm.Timm #Ensure that activation is sigmoid for non Logits loss functions.
         in_channels: 1
@@ -78,7 +71,7 @@ train_sys:
         _args_:
           - _target_: hydra.utils.get_class
             path: timm.scheduler.cosine_lr.CosineLRScheduler
-        warmup_t: 0
+        warmup_t: 2
         warmup_lr_init: 1e-5
         t_initial: 50
         cycle_limit: 1
@@ -89,4 +82,4 @@ train_sys:
         _args_:
           - _target_: hydra.utils.get_class
             path: torch.optim.AdamW
-        lr: 4e-3
+        lr: 1e-3

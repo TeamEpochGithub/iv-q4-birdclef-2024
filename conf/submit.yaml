@@ -1,7 +1,7 @@
 defaults:
   - base_submit
   - hydra/logging
-  - model: eca-foundation # Add models or ensembles
+  - ensemble: final # Add models or ensembles
 
 # Use this when uploading to Kaggle
 
