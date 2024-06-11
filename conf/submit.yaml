@@ -1,7 +1,7 @@
 defaults:
   - base_submit
   - hydra/logging
-  - model: convnext-post #$ Add models or ensembles
+  - model: playful-monkey-752 # Add models or ensembles
 
 # Use this when uploading to Kaggle
 
@@ -13,9 +13,6 @@ defaults:
 
 
 # Local paths
-processed_path: data/processed
-raw_path: data/raw
-cache_path: data/cache
 data_path: data/raw/2024/test_soundscapes/
 species_path: data/raw/2024/train_audio/
 result_path: submission

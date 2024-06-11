@@ -19,8 +19,8 @@ from src.modules.logging.logger import Logger
 from src.modules.training.datasets.dask_dataset import DaskDataset
 from src.modules.training.datasets.sampler.submission import SubmissionSampler
 from src.modules.training.models.ensemble_model import EnsembleModel
-from src.modules.training.models.two_stage_model import TwoStageModel
 from src.modules.training.models.pretrained_model import PretrainedModel
+from src.modules.training.models.two_stage_model import TwoStageModel
 from src.typing.typing import XData, YData
 
 N_CLASSES: Final[int] = 182  # TODO(Jeffrey): Don't hardcode the number of bird species.
@@ -229,13 +229,11 @@ class MainTrainer(TorchTrainer, Logger):
 
         :raises FileNotFoundError: If the model is not found.
         """
-
         if isinstance(self.model, TwoStageModel) or (
             isinstance(self.model, torch.nn.DataParallel | torch.nn.parallel.DistributedDataParallel) and isinstance(self.model.module, TwoStageModel)
         ):
             self.log_to_terminal("Not loading two-stage model. Make sure to load the individual models.")
             return
-
 
         if isinstance(self.model, EnsembleModel) or (
             isinstance(self.model, torch.nn.DataParallel | torch.nn.parallel.DistributedDataParallel) and isinstance(self.model.module, EnsembleModel)

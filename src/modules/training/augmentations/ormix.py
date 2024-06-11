@@ -41,9 +41,9 @@ class OrMix:
         )
 
     def __call__(
-            self,
-            x: torch.Tensor,
-            y: torch.Tensor,
+        self,
+        x: torch.Tensor,
+        y: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         """Randomly patch the input with another sample."""
         dummy_labels = torch.arange(x.size(0))

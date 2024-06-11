@@ -9,11 +9,9 @@ from pathlib import Path
 from typing import Any
 
 import hydra
-import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
 import randomname
-import seaborn as sns
 import torch
 import wandb
 from epochalyst.logging.section_separator import print_section_separator
@@ -26,7 +24,7 @@ from src.config.cv_config import CVConfig
 from src.scoring.scorer import Scorer
 from src.setup.setup_data import setup_inference_data, setup_train_x_data, setup_train_y_data
 from src.setup.setup_pipeline import setup_pipeline
-from src.setup.setup_runtime_args import setup_pred_args, setup_train_args
+from src.setup.setup_runtime_args import setup_train_args
 from src.setup.setup_wandb import setup_wandb
 from src.typing.typing import XData, YData
 from src.utils.lock import Lock
@@ -238,8 +236,6 @@ def run_cv_cfg(cfg: DictConfig) -> None:
                     avg_score[year] = score[year] / len(scores)
         [wandb.log({f"Avg Score_{year}": avg_score[year]}) for year in avg_score] if isinstance(avg_score, dict) else wandb.log({"Avg Score": avg_score})
         wandb.log({"Score": avg_score["2024"]}) if isinstance(avg_score, dict) and "2024" in avg_score else None
-
-
 
     # logger.info(f"Avg Score: {avg_score}")
 

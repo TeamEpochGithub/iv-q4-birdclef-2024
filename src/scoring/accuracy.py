@@ -1,7 +1,7 @@
 """Abstract scorer class from which other scorers inherit from."""
 
 from dataclasses import dataclass
-from typing import Any, Mapping, Sequence, Iterable
+from typing import Any, Iterable, Mapping, Sequence
 
 import numpy.typing as npt
 from typing_extensions import override
@@ -46,20 +46,22 @@ class Accuracy(Scorer):
 
         # Save the confusion matrix and save to output dir as a png using seaborn
         from sklearn.metrics import confusion_matrix
+
         cm = confusion_matrix(y_true, y_pred)
-        import seaborn as sns
         import matplotlib.pyplot as plt
+        import seaborn as sns
 
         # Ensure no scientific notation in annot
-        sns.heatmap(cm, annot=True, fmt='d')
+        sns.heatmap(cm, annot=True, fmt="d")
 
         # Set x and y axis of heatmap
-        plt.xlabel('Predicted')
-        plt.ylabel('True')
-        plt.savefig(output_dir.as_posix() + '/confusion_matrix.png')
+        plt.xlabel("Predicted")
+        plt.ylabel("True")
+        plt.savefig(output_dir.as_posix() + "/confusion_matrix.png")
 
         # Calculate f1 score
         from sklearn.metrics import f1_score
+
         f1 = f1_score(y_true, y_pred)
         return f1
 

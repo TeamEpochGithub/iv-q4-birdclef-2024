@@ -3,7 +3,6 @@
 from typing import Final
 
 import torch
-from typing_extensions import override
 
 N_CLASSES: Final[int] = 182  # TODO(Jeffrey): Don't hardcode the number of bird species.
 
@@ -38,21 +37,20 @@ class TwoStageModel(torch.nn.Module):
         :return: The predictions of shape (48, 182)
         """
         # Start by feeding forward the first model
-        #Convert 48,C,H,W into 24,
+        # Convert 48,C,H,W into 24,
         preds = self.model1(x)
         preds2 = self.model2(x)
 
         return preds * preds2
 
-
         # Output of preds is now (48, 1)
         # We need to convert this to a binary classification to check if it is a call or not. Use the self.thresholdto determine if it is a call or not for every item in the batch
         calls = preds > self.threshold
 
-        #Get the indices of the calls
+        # Get the indices of the calls
         call_indices = calls.nonzero(as_tuple=True)[0]
 
-        #print(len(call_indices) / 24)
+        # print(len(call_indices) / 24)
 
         # Get the predictions of the second model
         preds = self.model2(x[call_indices])

@@ -91,7 +91,7 @@ class DaskDataset(Dataset[tuple[torch.Tensor, torch.Tensor]]):
         x_tensor = torch.from_numpy(x_batch)
         y_tensor = None
 
-        if self.y is not None and (isinstance(self.y[f"label_{self.year}"], pd.DataFrame) or isinstance(self.y[f"label_{self.year}"], pd.Series)):
+        if self.y is not None and (isinstance(self.y[f"label_{self.year}"], (pd.DataFrame, pd.Series))):
             y_batch = self.y[f"label_{self.year}"].iloc[indices]  # type: ignore[call-overload]
             y_tensor = torch.from_numpy(y_batch.to_numpy())
 
