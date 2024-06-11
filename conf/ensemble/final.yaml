@@ -1,9 +1,9 @@
 defaults:
-  - /model/old/convnext-post@steps.0
+#  - /model/old/convnext-post@steps.0
   - /model/b0_aug@steps.1
 
 weights:
-  - 2
+#  - 2
   - 1
 
 prediction_time: 6750  # Seconds = 115 Minutes

@@ -83,4 +83,4 @@ train_sys:
           - _target_: hydra.utils.get_class
             path: torch.optim.AdamW
         lr: 1e-3
-    - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
+#    - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
