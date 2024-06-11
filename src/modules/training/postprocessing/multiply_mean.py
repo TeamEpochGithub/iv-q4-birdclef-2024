@@ -42,7 +42,7 @@ class MultiplyMean(VerboseTrainingBlock):
             x_avg[i // 48] = (sliced**self.power).mean(axis=0) ** (1 / self.power)
 
         # Loop over all samples and apply the mean
-        for i in tqdm(range(x.shape[0]), desc="Smoothing predictions"):
+        for i in tqdm(range(x.shape[0]), desc="Multiply meaning predictions"):
             x[i] = x[i] * x_avg[i // 48]
 
         return x

@@ -1,0 +1,17 @@
+defaults:
+#  - /model/old/convnext-post@steps.0
+  - /model/b0_aug@steps.1
+
+weights:
+#  - 2
+  - 1
+
+prediction_time: 6750  # Seconds = 115 Minutes
+
+_target_: src.modules.ensemble.timed_voting_ensemble.TimedVotingEnsemble
+_convert_: partial
+
+post_process:
+  - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
+  - _target_: src.modules.training.postprocessing.multiply_mean.MultiplyMean
+

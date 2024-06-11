@@ -1,0 +1,98 @@
+_target_: epochalyst.pipeline.model.model.ModelPipeline
+_convert_: partial
+x_sys:
+  _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline
+  title: Preprocessing pipeline
+  steps:
+  - _target_: src.modules.transformation.x.nan_to_zero.NanToZero
+    years: ["2024","2024add","2023","2022","2021","2020","pam20","pam21","pam22","kenya"]
+y_sys: null
+train_sys:
+  _target_: src.modules.training.verbose_training_pipeline.VerboseTrainingPipeline
+  steps:
+  - _target_: src.modules.training.main_trainer.MainTrainer
+    year: "union_2024_2024add_2023_2022_2021_2020_pam20_pam21_pam22_kenya"
+    dataset_args:
+      sampler:
+        _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
+        length: 160000
+      to_2d:
+        _target_: src.modules.training.datasets.to_2d.spec.Spec
+        spec:
+          _target_: functools.partial
+          _args_:
+          - _target_: hydra.utils.get_class
+            path: torchaudio.transforms.MelSpectrogram
+        output_shape:
+        - 256
+        - 256
+        scale:
+          _target_: src.modules.training.datasets.to_2d.spec_normalize.SpecNormalize
+      labeler:
+        _target_: src.modules.training.datasets.labeler.psd_labeler.PSDLabeler
+      filter_:
+        _target_: src.modules.training.datasets.filter.grade_threshold.GradeThreshold
+        threshold: 0
+      aug_1d:
+        _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
+        x_transforms:
+        - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomPhaseShift
+          p: 0.5
+          shift_limit: 0.5
+        - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomAmplitudeShift
+          p: 0.5
+        xy_transforms:
+        - _target_: src.modules.training.augmentations.time_series_augmentations.EnergyCutmix
+          p: 0.8181849503196303
+      aug_2d:
+        _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
+        x_transforms:
+        - _target_: kornia.augmentation.RandomErasing
+          p: 0.9224610095221584
+        xy_transforms:
+        - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.MixUp
+          p: 0.9025840454489424
+        - _target_: epochalyst.pipeline.model.training.augmentation.image_augmentations.CutMix
+          p: 0.3798213307255385
+    dataloader_args:
+      num_workers: 16
+      prefetch_factor: 2
+      persistent_workers: false
+    n_folds: 5
+    epochs: 75
+    patience: 15
+    batch_size: 256
+    model:
+      _target_: src.modules.training.models.timm.Timm
+      in_channels: 1
+      out_channels: 1109
+      model_name: eca_nfnet_l0
+      activation: sigmoid
+      drop_path_rate: 0.2
+      drop_rate: 0.2
+    scheduler:
+      _target_: functools.partial
+      _args_:
+      - _target_: hydra.utils.get_class
+        path: timm.scheduler.cosine_lr.CosineLRScheduler
+      warmup_t: 3
+      warmup_lr_init: 1.0e-05
+      t_initial: 75
+      cycle_limit: 1
+    criterion:
+      _target_: src.modules.training.losses.focal_loss.FocalLossBCE
+      alpha: 2
+    optimizer:
+      _target_: functools.partial
+      _args_:
+      - _target_: hydra.utils.get_class
+        path: torch.optim.AdamW
+      lr: 5e-4
+  - _target_: src.modules.training.postprocessing.keep_2024_species.Keep2024Species
+  - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
+  - _target_: src.modules.training.postprocessing.multiply_mean.MultiplyMean
+pred_sys:
+  _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline
+  title: Postprocessing pipeline
+label_sys:
+  _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline

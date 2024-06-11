@@ -1,7 +1,7 @@
 defaults:
   - base_train
   - hydra/logging
-  - model: convnext-post-ormix  # Add models or ensembles
+  - model: atto-back  # Add models or ensembles
   - wandb: train
 
 ###############
@@ -11,22 +11,21 @@ defaults:
 ###############
 processed_path: data/processed/
 raw_path: data/raw/
-years: ["2024"]
+years: ["2024","2024add"]
 cache_path: data/cache
 
 data_path: data/raw/2024/train_audio/
 metadata_path: data/raw/2024/train_metadata.csv
 
 # Do this if you want train full.
-test_size: 0.2
+test_size: 0
 
 # Species cap
-#max_recordings_per_species: 500
+max_recordings_per_species: 500
 
 scorer:
   _target_: src.scoring.rocauc_years.ROCAUC # Add scorer
   name: rocauc
-  grade_threshold: 0
   only_primary: true
 
 #scorer:
@@ -39,8 +38,8 @@ splitter:
     _args_:
       - _target_: hydra.utils.get_class
         path: sklearn.model_selection.StratifiedKFold
-  n_splits: 5 # Set to 0 if you want train full.
+  n_splits: 0 # Set to 0 if you want train full.
   shuffle: true
   random_state: 42
-  years: ["2024"]
+  years: ["2024","2024add"]
 allow_multiple_instances: true
