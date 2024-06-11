@@ -1,7 +1,7 @@
 defaults:
   - base_train
   - hydra/logging
-  - model: eca-finetune-base  # Add models or ensembles
+  - model: atto-back  # Add models or ensembles
   - wandb: train
 
 ###############
