@@ -36,7 +36,7 @@ train_sys:
         threshold: 0
       process_delayed:
         - _target_: src.modules.transformation.x.rescale.Rescale
-       aug_1d:
+        aug_1d:
          _target_: epochalyst.pipeline.model.training.augmentation.utils.CustomSequential
          x_transforms:
          - _target_: epochalyst.pipeline.model.training.augmentation.time_series_augmentations.RandomPhaseShift

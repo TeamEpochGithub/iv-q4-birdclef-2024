@@ -35,7 +35,12 @@ class Spec:
         # Re-instantiate spec class with params for deisred output shape
         if self.spec.func is MelSpectrogram:
             self.instantiated_spec = self.spec(
-                n_fft=self.n_fft * 4, hop_length=self.hop_length, n_mels=self.output_shape[0], sample_rate=self.sample_rate, f_min=self.f_min, f_max=self.f_max,
+                n_fft=self.n_fft * 4,
+                hop_length=self.hop_length,
+                n_mels=self.output_shape[0],
+                sample_rate=self.sample_rate,
+                f_min=self.f_min,
+                f_max=self.f_max,
             )
         else:
             self.instantiated_spec = self.spec(n_fft=self.n_fft, hop_length=self.hop_length)

@@ -34,7 +34,9 @@ class Spec:
         self.hop_length = self.sequence_length // self.output_shape[1] + 1
         # Re-instantiate spec class with params for deisred output shape
         if self.spec.func is MelSpectrogram:
-            self.instantiated_spec = self.spec(n_fft=self.n_fft * 4, hop_length=self.hop_length, n_mels=self.output_shape[0], sample_rate=self.sample_rate, f_min=self.f_min, f_max=self.f_max)
+            self.instantiated_spec = self.spec(
+                n_fft=self.n_fft * 4, hop_length=self.hop_length, n_mels=self.output_shape[0], sample_rate=self.sample_rate, f_min=self.f_min, f_max=self.f_max,
+            )
         else:
             self.instantiated_spec = self.spec(n_fft=self.n_fft, hop_length=self.hop_length)
 
@@ -56,6 +58,5 @@ class Spec:
         max_ = spec_out.max(dim=-1, keepdim=True)[0].max(dim=-2, keepdim=True)[0]
 
         spec_out = (spec_out - min_) / (max_ - min_ + 10**-10)
-
 
         return torch.cat([spec_out, spec_out_median], dim=1)

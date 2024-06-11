@@ -85,7 +85,7 @@ class ROCAUC(Scorer):
                 # Also slice metadata
                 metadata = metadata[indices]
 
-            if self.only_primary and "secondary_labels" in metadata.columns and not year in ['kenya', 'pam20', 'pam21', 'pam22']:
+            if self.only_primary and "secondary_labels" in metadata.columns and year not in ["kenya", "pam20", "pam21", "pam22"]:
                 # Get the indices from the metadata where secondary label is an empty list as string
                 indices = metadata["secondary_labels"] == "[]"
 
