@@ -10,10 +10,9 @@
 
 This is Team Epoch IV's solution to the [BirdCLEF 2024](https://www.kaggle.com/competitions/birdclef-2024/) competition, placed 247/992.
 
-## Getting started
+## Reproducing Our Best Submission
 
-This section contains the steps that need to be taken to get started with our project and fully reproduce our best
-submission on the private leaderboard. The project was developed on Linux Ubuntu / Arch on Python 3.10.13.
+This section contains the steps that need to be taken to reproduce our best submission on the private leaderboard.
 
 ### Prerequisites
 
