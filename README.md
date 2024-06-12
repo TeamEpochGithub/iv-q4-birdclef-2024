@@ -60,7 +60,7 @@ Download the competition data [here](https://www.kaggle.com/competitions/birdcle
 kaggle competitions download -c birdclef-2024
 ```
 
-Then extract `birdclef-2024.zip` to `kaggle/input/birdclef-2024/`.
+Then extract `birdclef-2024.zip` to `data/raw/2024/`.
 
 ### 3. Train the model
 
