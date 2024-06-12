@@ -82,6 +82,7 @@ class AlternatingEnsembleModel(FusionEnsembleModel):
 
         return predictions
 
+
 class DoubleSpecEnsemble(FusionEnsembleModel):
     """Ensemble that averages the output of the models."""
 

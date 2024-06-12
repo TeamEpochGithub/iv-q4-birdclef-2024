@@ -44,7 +44,7 @@ class Splitter:
         for year in self.years:
             if year == "freefield":
                 year_splits = self.instantiated_splitter.split(data[f"meta_{year}"], data[f"meta_{year}"]["hasbird"])
-            else: #Normal years
+            else:  # Normal years
                 year_splits = self.instantiated_splitter.split(data[f"meta_{year}"], data[f"meta_{year}"]["primary_label"])
             for i, split in enumerate(year_splits):
                 splits[i][0][year] = split[0]

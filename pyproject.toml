@@ -1,6 +1,6 @@
 [project]
-name = "q4-bird-clef"
-version = "0.0.1"
+name = "iv-q4-bird-clef"
+version = "1.0.0"
 authors = [
     { name = "Emiel Witting", email = "emiel.witting@gmail.com"},
     { name = "Jeffrey Lim", email = "jeffrey-lim@outlook.com" },
@@ -8,7 +8,7 @@ authors = [
     { name = "Tolga Kopar", email = "cahittolgakopar@gmail.com" },
     { name = "Kristóf Sándor", email = "Emherk512@gmail.com" },
 ]
-description = "Team Epoch's solution to the BirdCLEF 2024 competition."
+description = "Team Epoch IV's solution to the BirdCLEF 2024 competition."
 license = { file = "LICENSE" }
 readme = "README.md"
 requires-python = ">=3.10"

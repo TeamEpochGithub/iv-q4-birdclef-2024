@@ -40,7 +40,8 @@ class AddUnlabeledBackground:
         """Apply the augmentation to the input tensor.
 
         :param x: torch.Tensor (B,C,H,W) spectrogram in log scale
-        :return torch.Tensor (B,C,H,W) spectrogram in log scale with background noise."""
+        :return torch.Tensor (B,C,H,W) spectrogram in log scale with background noise.
+        """
         if not self.enabled:
             raise ValueError("Background path does not exist.")
 
@@ -67,12 +68,10 @@ class AddUnlabeledBackground:
         x = x + torch.stack(noise) * random_apply
         x = torch.log(x)
 
-       # min max scale the output
+        # min max scale the output
         min_ = x.min(dim=-1, keepdim=True)[0].min(dim=-2, keepdim=True)[0]
         max_ = x.max(dim=-1, keepdim=True)[0].max(dim=-2, keepdim=True)[0]
-
 
         x = (x - min_) / (max_ - min_ + 1e-8)
 
         return x
-

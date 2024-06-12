@@ -1,4 +1,4 @@
-"""Train.py is the main script for training the model and will take in the raw data and output a trained model."""
+"""The main script for training the model. Take in the raw data and output a trained model."""
 
 import os
 import warnings
@@ -99,8 +99,6 @@ def run_train_cfg(cfg: DictConfig) -> None:
         logger.info("Using splitter to split data into train and test sets.")
         train_indices, test_indices = next(instantiate(cfg.splitter).split(y))
         fold = 0
-    # train_indices["kenya"] = []
-    # test_indices["kenya"] = []
     logger.info(f"Train/Test size: {[len(year_indices) for year_indices in train_indices.values()]}/{[len(year_indices) for year_indices in test_indices.values()]}")
     print_section_separator("Train model pipeline")
     train_args = setup_train_args(

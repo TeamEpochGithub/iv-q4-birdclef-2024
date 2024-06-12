@@ -1,4 +1,5 @@
-"""Computes loss for two outputs from a model"""
+"""Computes loss for two outputs from a model."""
+
 import numpy as np
 import torch
 
@@ -31,5 +32,3 @@ class FamilyLoss(torch.nn.Module):
         total_loss = torch.sum(weighted_loss)
 
         return total_loss
-
-

@@ -1,0 +1,23 @@
+# Source files
+# ============
+*.py     text diff=python
+*.pyi    text diff=python
+
+# Binary files
+# ============
+*.pkl    filter=lfs diff=lfs merge=lfs binary
+*.pickle filter=lfs diff=lfs merge=lfs binary
+
+# Jupyter notebook
+*.ipynb  text eol=lf
+
+# Data files
+# ==========
+*.pt        filter=lfs diff=lfs merge=lfs binary
+*.npy       filter=lfs diff=lfs merge=lfs binary
+*.npy_stack filter=lfs diff=lfs merge=lfs binary
+*.csv       text
+*.parquet   filter=lfs diff=lfs merge=lfs binary
+*.id2word   filter=lfs diff=lfs merge=lfs binary
+*.state     filter=lfs diff=lfs merge=lfs binary
+tm/*        filter=lfs diff=lfs merge=lfs binary

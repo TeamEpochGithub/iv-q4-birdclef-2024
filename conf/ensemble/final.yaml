@@ -14,4 +14,3 @@ _convert_: partial
 post_process:
   - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
   - _target_: src.modules.training.postprocessing.multiply_mean.MultiplyMean
-

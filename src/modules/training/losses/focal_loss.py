@@ -18,8 +18,7 @@ class FocalLoss(torch.nn.Module):
     gamma: float
     reduction: Literal["none", "mean", "sum"]
 
-    def __init__(self, alpha: float = 0.25, gamma: float = 2,
-                 reduction: Literal["none", "mean", "sum"] = "none") -> None:
+    def __init__(self, alpha: float = 0.25, gamma: float = 2, reduction: Literal["none", "mean", "sum"] = "none") -> None:
         """Initialize the focal loss.
 
         :param alpha: The alpha parameter.
@@ -78,13 +77,13 @@ class FocalLossBCEWithLogits(FocalLoss):
         bce_loss = self.bce(inputs, targets)
         probas = torch.sigmoid(inputs)
 
-        tmp = targets * self.alpha * (1. - probas) ** self.gamma * bce_loss
-        smp = (1. - targets) * probas ** self.gamma * bce_loss
+        tmp = targets * self.alpha * (1.0 - probas) ** self.gamma * bce_loss
+        smp = (1.0 - targets) * probas**self.gamma * bce_loss
 
         loss = tmp + smp
 
         if self.ignore_half_labels:
-            loss *= (targets != 0.5)
+            loss *= targets != 0.5
 
         loss = loss.mean()
         return loss
@@ -120,12 +119,12 @@ class FocalLossBCE(FocalLoss):
         bce_loss = self.bce(inputs, targets)
         probas = inputs
 
-        tmp = targets * self.alpha * (1. - probas) ** self.gamma * bce_loss
-        smp = (1. - targets) * probas ** self.gamma * bce_loss
+        tmp = targets * self.alpha * (1.0 - probas) ** self.gamma * bce_loss
+        smp = (1.0 - targets) * probas**self.gamma * bce_loss
         loss = tmp + smp
 
         if self.ignore_half_labels:
-            loss *= (targets != 0.5)
+            loss *= targets != 0.5
 
         loss = loss.mean()
         return loss

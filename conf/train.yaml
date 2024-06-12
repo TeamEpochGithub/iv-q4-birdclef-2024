@@ -1,8 +1,8 @@
 defaults:
   - base_train
   - hydra/logging
-  - model: atto-back  # Add models or ensembles
-  - wandb: train
+  - model: playful-monkey-752  # Add models or ensembles
+  - wandb: submit
 
 ###############
 #             #
@@ -11,26 +11,22 @@ defaults:
 ###############
 processed_path: data/processed/
 raw_path: data/raw/
-years: ["2024","2024add"]
 cache_path: data/cache
+years: ["2024"]
 
 data_path: data/raw/2024/train_audio/
 metadata_path: data/raw/2024/train_metadata.csv
 
-# Do this if you want train full.
+# Set to 0 if you want train full.
 test_size: 0
 
-# Species cap
-max_recordings_per_species: 500
+#max_recordings_per_species: 500
 
 scorer:
-  _target_: src.scoring.rocauc_years.ROCAUC # Add scorer
+  _target_: src.scoring.rocauc_years.ROCAUC
   name: rocauc
   only_primary: true
 
-#scorer:
-#  _target_: src.scoring.accuracy.Accuracy # Add scorer
-#  name: acc
 splitter:
   _target_: src.setup.splitter.Splitter
   splitter:
@@ -38,8 +34,8 @@ splitter:
     _args_:
       - _target_: hydra.utils.get_class
         path: sklearn.model_selection.StratifiedKFold
-  n_splits: 0 # Set to 0 if you want train full.
+  n_splits: 0  # Set to 0 if you want train full.
   shuffle: true
   random_state: 42
-  years: ["2024","2024add"]
+  years: ["2024"]
 allow_multiple_instances: true

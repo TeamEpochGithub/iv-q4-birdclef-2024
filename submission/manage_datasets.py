@@ -9,10 +9,9 @@ DEPENDENCIES_SAVE_PATH = Path('dependencies')
 SOURCE_CODE_SAVE_PATH = Path('source-code')
 SOURCE_CODE_PATH = Path('../')
 
-# You can specify tm hashes here to exclude them from the source code dataset.
+# You can specify tm hashes here to include them from the source code dataset.
 TM_HASH = [
-    "852eb2fabc8f6fb45c2c9b6c8dae56bb_0",
-    "1ae19a94670376d14cd2c4f0e8467ebf_5_f0"
+    "6b45c39afc2422ad60ea7ecb3b10a753_0"
 ]
 
 
@@ -22,7 +21,7 @@ def verify_config() -> None:
     try:
         import kaggle
     except OSError as e:
-        new_message = f"To install the Kaggle API key, go to your kaggle profile -> Settings -> Create New API Token."
+        new_message = "To install the Kaggle API key, go to your kaggle profile -> Settings -> Create New API Token."
         raise OSError(new_message) from e
 
     # Check if the config file is present and filled in

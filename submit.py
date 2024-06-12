@@ -1,4 +1,4 @@
-"""Submit.py is the main script for running inference on the test set and creating a submission."""
+"""The main script for running inference on the test set and creating a submission."""
 
 import os
 import warnings
