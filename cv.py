@@ -34,6 +34,7 @@ from src.utils.set_torch_seed import set_torch_seed
 warnings.filterwarnings("ignore", category=UserWarning)
 # Makes hydra give full error messages
 os.environ["HYDRA_FULL_ERROR"] = "1"
+os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
 # Set up the config store, necessary for type checking of config yaml
 cs = ConfigStore.instance()
 cs.store(name="base_cv", node=CVConfig)
@@ -221,13 +222,12 @@ def run_cv_cfg(cfg: DictConfig) -> None:
 
     print_section_separator("CV - Results")
 
-    if "freefield" in years:
+    if "freefield" in cfg.years:
         logger.info(f"Avg Score: {np.array(scores).mean()}")
         wandb.log({"Score": np.array(scores).mean()})
 
     else:
-        avg_score: dict[str, float]
-        avg_score = {}
+        avg_score: dict[str, float] = {}
         for score in scores:
             for year in score:
                 if avg_score.get(year) is not None:

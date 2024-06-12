@@ -302,10 +302,7 @@ outputs
 tm
 data/raw
 data/processed
-data/final
 notebooks/dataset
-
-conf/best
 
 plots
 tmbackup

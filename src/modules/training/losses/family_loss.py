@@ -1,4 +1,4 @@
-"""Computes loss for two outputs from a model"""
+"""Computes loss for two outputs from a model."""
 
 import numpy as np
 import torch

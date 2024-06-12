@@ -1,7 +1,7 @@
 defaults:
   - base_submit
   - hydra/logging
-  - model: playful-monkey-752 # Add models or ensembles
+  - model: playful-monkey-752  # Add models or ensembles
 
 # Use this when uploading to Kaggle
 

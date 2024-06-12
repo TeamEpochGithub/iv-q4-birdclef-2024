@@ -45,9 +45,6 @@ def setup_train_x_data(raw_path: str | os.PathLike[str], years: Iterable[str], m
         all_metadata = all_metadata.sample(frac=1, random_state=42)
         all_metadata: pd.DataFrame = all_metadata.groupby("primary_label").head(max_recordings_per_species).reset_index(drop=True)  # type: ignore[no-redef]
 
-    # select at most 12k samples per year
-    all_metadata = all_metadata.groupby("year").head(12000).reset_index(drop=True)
-
     for year in years:
         raw_year_path = Path(raw_path) / str(year)
         data_path = raw_year_path / "train_audio"
@@ -107,9 +104,6 @@ def setup_train_y_data(raw_path: str | os.PathLike[str], years: Iterable[str], m
     if max_recordings_per_species > -1:
         all_metadata = all_metadata.sample(frac=1, random_state=42)
         all_metadata: pd.DataFrame = all_metadata.groupby("primary_label").head(max_recordings_per_species).reset_index(drop=True)  # type: ignore[no-redef]
-
-    # select at most 12k samples per year
-    all_metadata = all_metadata.groupby("year").head(12000).reset_index(drop=True)
 
     for year in years:
         metadata = all_metadata[all_metadata["year"] == year]
