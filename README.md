@@ -6,7 +6,6 @@
 [![Rye](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/rye/main/artwork/badge.json)](https://rye-up.com)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/TeamEpochGithub/iv-q4-detect-bird/main.svg)](https://results.pre-commit.ci/latest/TeamEpochGithub/iv-q4-detect-bird/main)
 
 This is Team Epoch IV's solution to the [BirdCLEF 2024](https://www.kaggle.com/competitions/birdclef-2024/) competition, placed 247/992.
 
