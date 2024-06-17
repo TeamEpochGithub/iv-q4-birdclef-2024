@@ -13,9 +13,10 @@ train_sys:
       dataset_args:
         sampler:
           _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
-          length: 160000
+          length: 320000
         to_2d:
           _target_: src.modules.training.datasets.to_2d.spec.Spec
+          sequence_length: 320000
           spec:
            _target_: functools.partial
            _args_:
@@ -61,7 +62,7 @@ train_sys:
         num_workers: 16
         prefetch_factor: 2
         persistent_workers: false
-      n_folds: 0 # 0 for train full,
+      n_folds: 5 # 0 for train full,
       epochs: 50
       patience: 15
       batch_size: 64
@@ -88,5 +89,6 @@ train_sys:
           - _target_: hydra.utils.get_class
             path: torch.optim.AdamW
         lr: 1e-4
+    - _target_: src.modules.training.postprocessing.window_10s_to_5s.Window10sTo5s
     - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
     - _target_: src.modules.training.postprocessing.multiply_mean.MultiplyMean

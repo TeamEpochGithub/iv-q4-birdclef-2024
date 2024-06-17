@@ -41,7 +41,8 @@ class Scale(torch.nn.Module):
 
 @dataclass
 class EnergyCutmix(torch.nn.Module):
-    """Instead of taking the rightmost side from the donor sample, take the highests energy sample.
+    """Instead of taking the rightmost side from the donor sample, take the highest energy sample.
+
     Modified implementation of cutmix1d from epochalyst.
     """
 
@@ -49,7 +50,7 @@ class EnergyCutmix(torch.nn.Module):
     low: float = 0.25
     high: float = 0.75
 
-    def find_window(self, donor, receiver, window_size, stride):
+    def find_window(self, donor, receiver, window_size, stride) -> tuple[int, int, int, int]:
         """Extract the strongest window from donor and the weakest from th receiver. Return the indices for both windows."""
         donor_power = donor**2
         receiver_power = receiver**2
@@ -127,8 +128,8 @@ class SumMixUp(torch.nn.Module):
     p: float = 0.5
     mode: str = "hard"
 
-    def __call__(self, x: torch.Tensor, y: torch.Tensor):
-        """Appply MixUp to the batch of 1D signal.
+    def __call__(self, x: torch.Tensor, y: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        """Apply MixUp to the batch of 1D signal.
 
         :param x: Input features. (N,C,L)|(N,L)
         :param y: Input labels. (N,C)

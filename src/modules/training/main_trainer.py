@@ -1,5 +1,7 @@
 """Module for example training block."""
 
+import gc
+import os
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -34,6 +36,7 @@ class MainTrainer(TorchTrainer, Logger):
     :param year: The year to use for the dataset.
     :param dataloader_args: The arguments for the dataloader.
     :param weights_path: The path to the weights for the sampler.
+    :param ema_decay: The EMA decay for the model. Parameter of the default get_ema_multi_avg_fn multi_avg function. Set to None to disable EMA.
     """
 
     dataset_args: dict[str, Any] = field(default_factory=dict)
@@ -41,10 +44,20 @@ class MainTrainer(TorchTrainer, Logger):
     # Things like prefetch factor
     dataloader_args: dict[str, Any] = field(default_factory=dict, repr=False)
     # Weights for the sampler
-    weights_path: str | None = None
+    weights_path: str | os.PathLike[str] | None = None
+    # EMA (See https://pytorch.org/docs/stable/optim.html#weight-averaging-swa-and-ema).
+    ema_decay: float | None = None
     prediction_time: int | None = field(default=None, repr=False)
 
     model_has_timed_out: bool = field(default=False, init=False, repr=False)
+
+    _ema_model: torch.optim.swa_utils.AveragedModel | None = field(default=None, repr=False)
+
+    def __post_init__(self) -> None:
+        """Initialize the EMA model if used."""
+        super().__post_init__()
+        if self.ema_decay is not None:
+            self._ema_model = torch.optim.swa_utils.AveragedModel(self.model, multi_avg_fn=torch.optim.swa_utils.get_ema_multi_avg_fn(self.ema_decay), device=self.device)  # type: ignore[call-arg, attr-defined]
 
     def save_model_to_external(self) -> None:
         """Save the model to external storage."""
@@ -373,6 +386,81 @@ class MainTrainer(TorchTrainer, Logger):
 
         self.log_to_terminal(f"Model timer set for {seconds} seconds.")
         return timer
+
+    def _training_loop(
+        self,
+        train_loader: DataLoader[tuple[torch.Tensor, ...]],
+        test_loader: DataLoader[tuple[torch.Tensor, ...]],
+        train_losses: list[float],
+        val_losses: list[float],
+        fold: int = -1,
+    ) -> None:
+        """Training loop for the model.
+
+        Copied from the TorchTrainer class in Epochalyst.
+        Modified for the SWA and EMA support.
+
+        :param train_loader: Dataloader for the testing data.
+        :param test_loader: Dataloader for the training data. (can be empty)
+        :param train_losses: List of train losses.
+        :param val_losses: List of validation losses.
+        """
+        super()._training_loop(train_loader, test_loader, train_losses, val_losses, fold)
+
+        if self._ema_model is not None:
+            torch.optim.swa_utils.update_bn(train_loader, self._ema_model, device=self.device)
+
+    def _train_one_epoch(
+        self,
+        dataloader: DataLoader[tuple[torch.Tensor, ...]],
+        epoch: int,
+    ) -> float:
+        """Train the model for one epoch.
+
+        Copied from the TorchTrainer class in Epochalyst.
+        Modified for the EMA support.
+
+        :param dataloader: Dataloader for the training data.
+        :param epoch: Epoch number.
+        :return: Average loss for the epoch.
+        """
+        losses: list[float] = []
+        self.model.train()
+        pbar = tqdm(
+            dataloader,
+            unit="batch",
+            desc=f"Epoch {epoch} Train ({self.initialized_optimizer.param_groups[0]['lr']})",
+        )
+        for batch in pbar:
+            X_batch, y_batch = batch
+            X_batch = X_batch.to(self.device).float()
+            y_batch = y_batch.to(self.device).float()
+
+            y_pred = self.model(X_batch).squeeze(1)
+            loss = self.criterion(y_pred, y_batch)
+
+            # Backward pass
+            self.initialized_optimizer.zero_grad()
+            loss.backward()
+            self.initialized_optimizer.step()
+
+            # Update the EMA model
+            if self._ema_model is not None:
+                self._ema_model.update_parameters(self.model)
+
+            # Print tqdm
+            losses.append(loss.item())
+            pbar.set_postfix(loss=sum(losses) / len(losses))
+
+        # Step the scheduler
+        if self.initialized_scheduler is not None:
+            self.initialized_scheduler.step(epoch=epoch)
+
+        # Remove the cuda cache
+        torch.cuda.empty_cache()
+        gc.collect()
+
+        return sum(losses) / len(losses)
 
 
 def collate_fn(batch: tuple[torch.Tensor, ...]) -> tuple[torch.Tensor, ...]:

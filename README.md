@@ -52,7 +52,7 @@ and install the dependencies from `requirements-dev.lock` using `pip`:
 pip install -r requirements-dev.lock
 ```
 
-### 2. Set up the competition data
+### 2. Set up the training & testing data
 
 Download the competition data [here](https://www.kaggle.com/competitions/birdclef-2024/data) or use the following command:
 
@@ -62,6 +62,8 @@ kaggle competitions download -c birdclef-2024
 
 Then extract `birdclef-2024.zip` to `data/raw/2024/`.
 
+Place the sounds you want to make predictions on in `data/raw/2024/test_soundscapes/`.
+
 ### 3. Train the model
 
 `train.py` is used to train a model. `train.py` reads a configuration file from `conf/train.yaml`. This configuration file
@@ -70,7 +72,7 @@ The model selected in the `conf/train.yaml` can be found in the `conf/model/` fo
 When training is finished, the model is saved in `tm/` with a hash that depends on the specific preprocessing & pretraining steps, and model configuration.
 
 You can skip this step if you only want to run inference on the test data with the model from our best submission,
-as we already included this model in this repository as `tm/6b45c39afc2422ad60ea7ecb3b10a753_0.pt`.
+as we already included this model in this repository as `tm/cfd080d568b9341fa9b02decb0e59ae1_0.pt`.
 If you wish to retrain this model, ensure that the model in `conf/train.yaml` is set to `playful-monkey-752` and run `train.py`.
 
 ### 4. Run inference
@@ -80,7 +82,7 @@ It reads a configuration file from `conf/submit.yaml` which contains the model/e
 Model configs can be found in `conf/model/` and ensemble configs in `conf/ensemble`. `conf/ensemble`
 specifies the models (from `conf/model`) to use for the ensemble and the weights to use for each model.
 
-Ensure that the model in `conf/submit.yaml` is set to `playful-monkey-752` and run `submit.py` to generate the submission file `kaggle/working/submission.csv`.
+Ensure that the model in `conf/submit.yaml` is set to `playful-monkey-752` and run `submit.py` to generate the submission file `submission/submission.csv`.
 
 ## pre-commit
 

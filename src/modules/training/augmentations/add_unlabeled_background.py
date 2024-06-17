@@ -22,7 +22,7 @@ class AddUnlabeledBackground:
 
     enabled: bool = field(default=True, init=False, repr=False)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.files = glob.glob(f"{self.background_path}/*.npy")
 
         # check if path exists

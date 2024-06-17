@@ -33,14 +33,13 @@ class ROCAUC:
         scores: dict[str, float] = {}
         # separate the preds for the years
         year_preds: dict[str, float] = {}
-        start_idx = 0
         output_dir: str = kwargs.get("output_dir", "")
 
         # Create union metadata
         label_lookup = pd.concat([y_true[f"label_{year}"] for year in years]).fillna(0).reset_index(drop=True)
 
         # Do the year splitting the same way as in XData and YData
-        for i, year in enumerate(years):
+        for year in years:
             year_preds[str(year)] = y_pred  # type: ignore[arg-type, assignment]
 
         # Loop over the years

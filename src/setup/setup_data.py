@@ -9,6 +9,7 @@ import glob
 import os
 from collections.abc import Iterable
 from pathlib import Path
+from typing import Final
 
 import librosa
 import numpy as np
@@ -18,6 +19,11 @@ from dask import delayed
 
 from src.typing.typing import XData, YData
 from src.utils.logger import logger
+
+SAMPLING_RATE: Final[int] = 32000
+TRAIN_LOAD_DURATION: Final[int] = 5
+SUBMIT_SCALE: Final[float] = 1 / 100
+SECONDARY_LABEL_VALUE: Final[float] = 0.5
 
 
 def setup_train_x_data(raw_path: str | os.PathLike[str], years: Iterable[str], max_recordings_per_species: int | None = None) -> XData:
@@ -64,11 +70,7 @@ def load_audio_train(path: str | os.PathLike[str]) -> npt.NDArray[np.float32]:
     :param path: Path to the audio file
     :return: Audio data
     """
-    try:
-        return librosa.load(path, sr=32000, dtype=np.float32, duration=5.0)[0]
-    except FileNotFoundError:
-        logger.error(f"File not found: {path}")
-        return np.zeros(32000, dtype=np.float32)
+    return librosa.load(path, sr=SAMPLING_RATE, dtype=np.float32, duration=TRAIN_LOAD_DURATION)[0]
 
 
 @delayed
@@ -78,7 +80,7 @@ def load_audio_submit(path: str | os.PathLike[str]) -> npt.NDArray[np.float32]:
     :param path: Path to the audio file
     :return: Audio data
     """
-    return librosa.load(path, sr=32000, dtype=np.float32)[0] / 100
+    return librosa.load(path, sr=SAMPLING_RATE, dtype=np.float32)[0] * SUBMIT_SCALE
 
 
 def setup_train_y_data(raw_path: str | os.PathLike[str], years: Iterable[str], max_recordings_per_species: int = -1) -> YData:
@@ -143,7 +145,7 @@ def one_hot_primary_secondary(metadata: pd.DataFrame) -> pd.DataFrame:
             continue
         for secondary_label in ast.literal_eval(secondary_labels):
             try:
-                one_hot.iloc[i, primary_labels_dict[secondary_label]] = 0.5
+                one_hot.iloc[i, primary_labels_dict[secondary_label]] = SECONDARY_LABEL_VALUE
             except KeyError:  # noqa: PERF203
                 errors.append((i, secondary_label))
     logger.debug(f"Errors: {errors}")

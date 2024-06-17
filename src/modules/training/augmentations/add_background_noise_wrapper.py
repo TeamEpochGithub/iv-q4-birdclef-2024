@@ -14,7 +14,7 @@ class AddBackgroundNoiseWrapper:
     noise_transform: Any = audiomentations.PolarityInversion(p=0.5)
     aug: Any = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if torch.cuda.is_available():
             self.aug = audiomentations.AddBackgroundNoise(
                 p=self.p,
@@ -30,5 +30,4 @@ class AddBackgroundNoiseWrapper:
     def __call__(self, x, sr):
         if self.aug is not None:
             return self.aug(x, sr)
-        else:
-            return x
+        return x

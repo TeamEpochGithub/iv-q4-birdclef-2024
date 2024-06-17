@@ -69,8 +69,8 @@ class VisualizePreds(VerboseTrainingBlock):
 
         for i, sliced in tqdm(enumerate(range(0, min(x.shape[0], self.n * 48), 48)), desc="Creating Plots"):
             prediction = x[sliced : sliced + 48]
-            self.heatmap(prediction, classes=bird_classes + ["silent"], file_name=f"{file_list[i]}.png", output_dir=output_dir_heatmaps.as_posix())
-            self.top_n_lines(prediction, classes=bird_classes + ["silent"], file_name=f"{file_list[i]}.png", output_dir=output_dir_top_n_lines.as_posix())
+            self.heatmap(prediction, classes=[*bird_classes, "silent"], file_name=f"{file_list[i]}.png", output_dir=output_dir_heatmaps.as_posix())
+            self.top_n_lines(prediction, classes=[*bird_classes, "silent"], file_name=f"{file_list[i]}.png", output_dir=output_dir_top_n_lines.as_posix())
 
         return x
 

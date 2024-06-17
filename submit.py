@@ -14,6 +14,7 @@ from src.setup.setup_data import setup_inference_data
 from src.setup.setup_pipeline import setup_pipeline
 from src.setup.setup_runtime_args import setup_pred_args
 from src.utils.logger import logger
+from src.utils.set_torch_seed import set_torch_seed
 from src.utils.to_submission_format import to_submission_format
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -43,6 +44,8 @@ def run_submit(cfg: DictConfig) -> None:
         coloredlogs.install()
     except ImportError:
         """Coloredlogs is not installed."""
+
+    set_torch_seed()
 
     # Get output directory
     output_dir = Path(hydra.core.hydra_config.HydraConfig.get().runtime.output_dir)

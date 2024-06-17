@@ -29,6 +29,4 @@ class FamilyLoss(torch.nn.Module):
         weighted_loss = total_loss * target_family
 
         # Compute final loss
-        total_loss = torch.sum(weighted_loss)
-
-        return total_loss
+        return torch.sum(weighted_loss)

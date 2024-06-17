@@ -1,5 +1,5 @@
 [project]
-name = "iv-q4-bird-clef"
+name = "iv-q4-birdclef-2024"
 version = "1.0.0"
 authors = [
     { name = "Emiel Witting", email = "emiel.witting@gmail.com"},
@@ -17,7 +17,7 @@ dependencies = [
     "pandas>=2.1.4",
     "scikit-learn>=1.4.2",
     "tqdm>=4.60.0",
-    "epochalyst>=0.3.2",
+    "epochalyst==0.3.2",
     "seaborn>=0.13.0",
     "matplotlib>=3.8.2",
     "plotly>=5.18.0",
@@ -37,12 +37,19 @@ dependencies = [
     "onnxruntime>=1.17.3",
     "kornia>=0.7.2",
     "timm>=0.9.16",
+    "sparsemax>=0.1.9",
+    "scipy>=1.12.0",
 ]
 
 [project.scripts]
 train = "train:run_train"
 cv = "cv:run_cv"
 submit = "submit:run_submit"
+
+[project.urls]
+Homepage = "https://teamepoch.ai/competitions#Bird"
+Repository = "https://github.com/TeamEpochGithub/iv-q4-birdclef-2024.git"
+Issues = "https://github.com/TeamEpochGithub/iv-q4-birdclef-2024/issues"
 
 [tool.rye]
 managed = true
@@ -58,6 +65,7 @@ dev-dependencies = [
     "xeno-canto>=3.0",
     "tensorflow[and-cuda]>=2.8.0",
     "tensorflow-hub>=0.12.0",
+    "audiomentations>=0.36.0",
 ]
 
 [[tool.rye.sources]]

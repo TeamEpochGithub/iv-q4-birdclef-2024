@@ -16,9 +16,10 @@ train_sys:
     dataset_args:
       sampler:
         _target_: src.modules.training.datasets.sampler.crop_or_pad.CropOrPad
-        length: 160000
+        length: 320000
       to_2d:
         _target_: src.modules.training.datasets.to_2d.spec.Spec
+        sequence_length: 320000
         spec:
           _target_: functools.partial
           _args_:
@@ -58,7 +59,7 @@ train_sys:
       persistent_workers: false
     n_folds: 5
     epochs: 50
-    patience: 166
+    patience: 15
     batch_size: 64
     model:
       _target_: src.modules.training.models.timm.Timm
@@ -83,9 +84,9 @@ train_sys:
       - _target_: hydra.utils.get_class
         path: torch.optim.AdamW
       lr: 0.0005
+  - _target_: src.modules.training.postprocessing.window_10s_to_5s.Window10sTo5s
   - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
   - _target_: src.modules.training.postprocessing.multiply_mean.MultiplyMean
-  - _target_: src.modules.training.postprocessing.window_5s_to_10s.Window5sTo10s
 pred_sys:
   _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline
   title: Postprocessing pipeline

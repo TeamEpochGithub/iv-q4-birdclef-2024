@@ -37,3 +37,4 @@ class CVConfig:
     allow_multiple_instances: bool = False
     save_folds: bool = True
     corr_weight: float = 0.5
+    seed: int = 42

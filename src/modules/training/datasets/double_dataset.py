@@ -17,7 +17,7 @@ class DoubleDataset(Dataset):
     task_dataset: DaskDataset
     discriminator_dataset: DaskDataset
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Get the length of the dataset."""
         return len(self.task_dataset)
 

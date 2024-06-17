@@ -1,14 +1,15 @@
 # Some codes are adopted from https://github.com/DCASE-REPO/DESED_task
+from collections.abc import Sequence
+
 import torch
 import torch.nn.functional as F
-from torch import nn
 
 
-class GLU(nn.Module):
-    def __init__(self, in_dim):
-        super(GLU, self).__init__()
-        self.sigmoid = nn.Sigmoid()
-        self.linear = nn.Linear(in_dim, in_dim)
+class GLU(torch.nn.Module):
+    def __init__(self, in_dim: int) -> None:
+        super().__init__()
+        self.sigmoid = torch.nn.Sigmoid()
+        self.linear = torch.nn.Linear(in_dim, in_dim)
 
     def forward(self, x):  # x size = [batch, chan, freq, frame]
         lin = self.linear(x.permute(0, 2, 3, 1))  # x size = [batch, freq, frame, chan]
@@ -18,12 +19,12 @@ class GLU(nn.Module):
         return res
 
 
-class ContextGating(nn.Module):
-    def __init__(self, in_dim):
-        super(ContextGating, self).__init__()
-        self.sigmoid = nn.Sigmoid()
-        self.sigmoid = nn.Sigmoid()
-        self.linear = nn.Linear(in_dim, in_dim)
+class ContextGating(torch.nn.Module):
+    def __init__(self, in_dim: int) -> None:
+        super().__init__()
+        self.sigmoid = torch.nn.Sigmoid()
+        self.sigmoid = torch.nn.Sigmoid()
+        self.linear = torch.nn.Linear(in_dim, in_dim)
 
     def forward(self, x):  # x size = [batch, chan, freq, frame]
         lin = self.linear(x.permute(0, 2, 3, 1))  # x size = [batch, freq, frame, chan]
@@ -33,9 +34,9 @@ class ContextGating(nn.Module):
         return res
 
 
-class Dynamic_conv2d(nn.Module):
-    def __init__(self, in_planes, out_planes, kernel_size, stride=1, padding=0, bias=False, n_basis_kernels=4, temperature=31, pool_dim="freq"):
-        super(Dynamic_conv2d, self).__init__()
+class Dynamic_conv2d(torch.nn.Module):
+    def __init__(self, in_planes, out_planes, kernel_size, stride=1, padding=0, bias=False, n_basis_kernels=4, temperature=31, pool_dim="freq") -> None:
+        super().__init__()
 
         self.in_planes = in_planes
         self.out_planes = out_planes
@@ -47,15 +48,15 @@ class Dynamic_conv2d(nn.Module):
         self.n_basis_kernels = n_basis_kernels
         self.attention = attention2d(in_planes, self.kernel_size, self.stride, self.padding, n_basis_kernels, temperature, pool_dim)
 
-        self.weight = nn.Parameter(torch.randn(n_basis_kernels, out_planes, in_planes, self.kernel_size, self.kernel_size), requires_grad=True)
+        self.weight = torch.nn.Parameter(torch.randn(n_basis_kernels, out_planes, in_planes, self.kernel_size, self.kernel_size), requires_grad=True)
 
         if bias:
-            self.bias = nn.Parameter(torch.Tensor(n_basis_kernels, out_planes))
+            self.bias = torch.nn.Parameter(torch.Tensor(n_basis_kernels, out_planes))
         else:
             self.bias = None
 
         for i in range(self.n_basis_kernels):
-            nn.init.kaiming_normal_(self.weight[i])
+            torch.nn.init.kaiming_normal_(self.weight[i])
 
     def forward(self, x):  # x size : [bs, in_chan, frames, freqs]
         if self.pool_dim in ["freq", "chan"]:
@@ -89,9 +90,9 @@ class Dynamic_conv2d(nn.Module):
         return output
 
 
-class attention2d(nn.Module):
-    def __init__(self, in_planes, kernel_size, stride, padding, n_basis_kernels, temperature, pool_dim):
-        super(attention2d, self).__init__()
+class attention2d(torch.nn.Module):
+    def __init__(self, in_planes, kernel_size, stride, padding, n_basis_kernels, temperature, pool_dim) -> None:
+        super().__init__()
         self.pool_dim = pool_dim
         self.temperature = temperature
 
@@ -101,22 +102,22 @@ class attention2d(nn.Module):
             hidden_planes = 4
 
         if pool_dim != "both":
-            self.conv1d1 = nn.Conv1d(in_planes, hidden_planes, kernel_size, stride=stride, padding=padding, bias=False)
-            self.bn = nn.BatchNorm1d(hidden_planes)
-            self.relu = nn.ReLU(inplace=True)
-            self.conv1d2 = nn.Conv1d(hidden_planes, n_basis_kernels, 1, bias=True)
+            self.conv1d1 = torch.nn.Conv1d(in_planes, hidden_planes, kernel_size, stride=stride, padding=padding, bias=False)
+            self.bn = torch.nn.BatchNorm1d(hidden_planes)
+            self.relu = torch.nn.ReLU(inplace=True)
+            self.conv1d2 = torch.nn.Conv1d(hidden_planes, n_basis_kernels, 1, bias=True)
             for m in self.modules():
-                if isinstance(m, nn.Conv1d):
-                    nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
+                if isinstance(m, torch.nn.Conv1d):
+                    torch.nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
                     if m.bias is not None:
-                        nn.init.constant_(m.bias, 0)
-                if isinstance(m, nn.BatchNorm1d):
-                    nn.init.constant_(m.weight, 1)
-                    nn.init.constant_(m.bias, 0)
+                        torch.nn.init.constant_(m.bias, 0)
+                if isinstance(m, torch.nn.BatchNorm1d):
+                    torch.nn.init.constant_(m.weight, 1)
+                    torch.nn.init.constant_(m.bias, 0)
         else:
-            self.fc1 = nn.Linear(in_planes, hidden_planes)
-            self.relu = nn.ReLU(inplace=True)
-            self.fc2 = nn.Linear(hidden_planes, n_basis_kernels)
+            self.fc1 = torch.nn.Linear(in_planes, hidden_planes)
+            self.relu = torch.nn.ReLU(inplace=True)
+            self.fc2 = torch.nn.Linear(hidden_planes, n_basis_kernels)
 
     def forward(self, x):  # x size : [bs, chan, frames, freqs]
         if self.pool_dim == "freq":
@@ -142,29 +143,29 @@ class attention2d(nn.Module):
         return F.softmax(x / self.temperature, 1)
 
 
-class CNN(nn.Module):
+class CNN(torch.nn.Module):
     def __init__(
         self,
-        n_input_ch,
-        activation="Relu",
-        conv_dropout=0,
-        kernel=[3, 3, 3],
-        pad=[1, 1, 1],
-        stride=[1, 1, 1],
-        n_filt=[64, 64, 64],
-        pooling=[(1, 4), (1, 4), (1, 4)],
-        normalization="batch",
-        n_basis_kernels=4,
-        DY_layers=[0, 1, 1, 1, 1, 1, 1],
-        temperature=31,
-        pool_dim="freq",
-    ):
-        super(CNN, self).__init__()
+        n_input_ch: int,
+        activation: str = "Relu",
+        conv_dropout: float = 0,
+        kernel: Sequence[int] = [3, 3, 3],
+        pad: Sequence[int] = [1, 1, 1],
+        stride: Sequence[int] = [1, 1, 1],
+        n_filt: Sequence[int] = [64, 64, 64],
+        pooling: Sequence[int | tuple[int, int]] = [(1, 4), (1, 4), (1, 4)],
+        normalization: str = "batch",
+        n_basis_kernels: int = 4,
+        DY_layers: Sequence[int] = [0, 1, 1, 1, 1, 1, 1],
+        temperature: int = 31,
+        pool_dim: str = "freq",
+    ) -> None:
+        super().__init__()
         self.n_filt = n_filt
         self.n_filt_last = n_filt[-1]
-        cnn = nn.Sequential()
+        cnn = torch.nn.Sequential()
 
-        def conv(i, normalization="batch", dropout=None, activ="relu"):
+        def conv(i: int, normalization: str = "batch", dropout: float | None = None, activ: str = "relu") -> None:
             in_dim = n_input_ch if i == 0 else n_filt[i - 1]
             out_dim = n_filt[i]
             if DY_layers[i] == 1:
@@ -173,38 +174,37 @@ class CNN(nn.Module):
                     Dynamic_conv2d(in_dim, out_dim, kernel[i], stride[i], pad[i], n_basis_kernels=n_basis_kernels, temperature=temperature, pool_dim=pool_dim),
                 )
             else:
-                cnn.add_module(f"conv{i}", nn.Conv2d(in_dim, out_dim, kernel[i], stride[i], pad[i]))
+                cnn.add_module(f"conv{i}", torch.nn.Conv2d(in_dim, out_dim, kernel[i], stride[i], pad[i]))
             if normalization == "batch":
-                cnn.add_module(f"batchnorm{i}", nn.BatchNorm2d(out_dim, eps=0.001, momentum=0.99))
+                cnn.add_module(f"batchnorm{i}", torch.nn.BatchNorm2d(out_dim, eps=0.001, momentum=0.99))
             elif normalization == "layer":
-                cnn.add_module(f"layernorm{i}", nn.GroupNorm(1, out_dim))
+                cnn.add_module(f"layernorm{i}", torch.nn.GroupNorm(1, out_dim))
 
             if activ.lower() == "leakyrelu":
-                cnn.add_module(f"Relu{i}", nn.LeakyReLu(0.2))
+                cnn.add_module(f"Relu{i}", torch.nn.LeakyReLu(0.2))
             elif activ.lower() == "relu":
-                cnn.add_module(f"Relu{i}", nn.ReLu())
+                cnn.add_module(f"Relu{i}", torch.nn.ReLu())
             elif activ.lower() == "glu":
                 cnn.add_module(f"glu{i}", GLU(out_dim))
             elif activ.lower() == "cg":
                 cnn.add_module(f"cg{i}", ContextGating(out_dim))
 
             if dropout is not None:
-                cnn.add_module(f"dropout{i}", nn.Dropout(dropout))
+                cnn.add_module(f"dropout{i}", torch.nn.Dropout(dropout))
 
         for i in range(len(n_filt)):
             conv(i, normalization=normalization, dropout=conv_dropout, activ=activation)
-            cnn.add_module(f"pooling{i}", nn.AvgPool2d(pooling[i]))
+            cnn.add_module(f"pooling{i}", torch.nn.AvgPool2d(pooling[i]))
         self.cnn = cnn
 
-    def forward(self, x):  # x size : [bs, chan, frames, freqs]
-        x = self.cnn(x)
-        return x
+    def forward(self, x: torch.Tensor) -> torch.Tensor:  # x size : [bs, chan, frames, freqs]
+        return self.cnn(x)
 
 
-class BiGRU(nn.Module):
-    def __init__(self, n_in, n_hidden, dropout=0, num_layers=1):
-        super(BiGRU, self).__init__()
-        self.rnn = nn.GRU(n_in, n_hidden, bidirectional=True, dropout=dropout, batch_first=True, num_layers=num_layers)
+class BiGRU(torch.nn.Module):
+    def __init__(self, n_in, n_hidden, dropout=0, num_layers=1) -> None:
+        super().__init__()
+        self.rnn = torch.nn.GRU(n_in, n_hidden, bidirectional=True, dropout=dropout, batch_first=True, num_layers=num_layers)
 
     def forward(self, x):
         # self.rnn.flatten_parameters()
@@ -212,9 +212,9 @@ class BiGRU(nn.Module):
         return x
 
 
-class CRNN(nn.Module):
-    def __init__(self, n_input_ch, n_class=10, activation="glu", conv_dropout=0.5, n_RNN_cell=128, n_RNN_layer=2, rec_dropout=0, attention=True, **convkwargs):
-        super(CRNN, self).__init__()
+class CRNN(torch.nn.Module):
+    def __init__(self, n_input_ch, n_class=10, activation="glu", conv_dropout=0.5, n_RNN_cell=128, n_RNN_layer=2, rec_dropout=0, attention=True, **convkwargs) -> None:
+        super().__init__()
         self.n_input_ch = n_input_ch
         self.attention = attention
         self.n_class = n_class
@@ -222,24 +222,24 @@ class CRNN(nn.Module):
         self.cnn = CNN(n_input_ch=n_input_ch, activation=activation, conv_dropout=conv_dropout, **convkwargs)
         self.rnn = BiGRU(n_in=self.cnn.n_filt[-1], n_hidden=n_RNN_cell, dropout=rec_dropout, num_layers=n_RNN_layer)
 
-        self.dropout = nn.Dropout(conv_dropout)
-        self.sigmoid = nn.Sigmoid()
-        self.dense = nn.Linear(n_RNN_cell * 2, 10)
+        self.dropout = torch.nn.Dropout(conv_dropout)
+        self.sigmoid = torch.nn.Sigmoid()
+        self.dense = torch.nn.Linear(n_RNN_cell * 2, 10)
 
         if self.attention:
-            self.dense_softmax = nn.Linear(n_RNN_cell * 2, 10)
+            self.dense_softmax = torch.nn.Linear(n_RNN_cell * 2, 10)
             if self.attention == "time":
-                self.softmax = nn.Softmax(dim=1)  # softmax on time dimension
+                self.softmax = torch.nn.Softmax(dim=1)  # softmax on time dimension
             elif self.attention == "class":
-                self.softmax = nn.Softmax(dim=-1)  # softmax on class dimension
+                self.softmax = torch.nn.Softmax(dim=-1)  # softmax on class dimension
         # Load the pre-trained weights
         if torch.cuda.is_available():
             pretrained = torch.load("/home/tolga/Downloads/best_student.pt")
             self.load_state_dict(pretrained)
         # Now update the last layers to use the proper output classes
-        self.dense = nn.Linear(n_RNN_cell * 2, n_class)
+        self.dense = torch.nn.Linear(n_RNN_cell * 2, n_class)
         if self.attention:
-            self.dense_softmax = nn.Linear(n_RNN_cell * 2, n_class)
+            self.dense_softmax = torch.nn.Linear(n_RNN_cell * 2, n_class)
 
     def forward(self, x):  # input size : [bs, freqs, frames]
         if len(x.shape) == 4:

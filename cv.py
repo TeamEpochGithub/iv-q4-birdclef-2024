@@ -9,9 +9,11 @@ from pathlib import Path
 from typing import Any
 
 import hydra
+import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
 import randomname
+import seaborn as sns
 import torch
 import wandb
 from epochalyst.logging.section_separator import print_section_separator
@@ -21,10 +23,11 @@ from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
 from src.config.cv_config import CVConfig
+from src.modules.training.main_trainer import MainTrainer
 from src.scoring.scorer import Scorer
 from src.setup.setup_data import setup_inference_data, setup_train_x_data, setup_train_y_data
 from src.setup.setup_pipeline import setup_pipeline
-from src.setup.setup_runtime_args import setup_train_args
+from src.setup.setup_runtime_args import setup_pred_args, setup_train_args
 from src.setup.setup_wandb import setup_wandb
 from src.typing.typing import XData, YData
 from src.utils.lock import Lock
@@ -62,9 +65,10 @@ def collate_fn(batch: tuple[torch.Tensor, ...]) -> tuple[torch.Tensor, ...]:
     return X, y
 
 
-def custom_predict(self, x: Any, **pred_args: Any) -> npt.NDArray[np.float32]:  # noqa: ANN401
+def custom_predict(self: MainTrainer, x: Any, **pred_args: Any) -> npt.NDArray[np.float32]:  # noqa: ANN401
     """Predict on the test data.
 
+    :param self: The MainTrainer object.
     :param x: The input to the system.
     :return: The output of the system.
     """
@@ -106,8 +110,7 @@ def custom_predict(self, x: Any, **pred_args: Any) -> npt.NDArray[np.float32]:  
         predictions.append(self.predict_on_loader(pred_dataloader))
 
     # Average the predictions using numpy
-    test_predictions = np.array(predictions)
-    return test_predictions
+    return np.array(predictions)
 
 
 def run_cv_cfg(cfg: DictConfig) -> None:
@@ -122,7 +125,7 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     coloredlogs.install()
 
     # Set seed
-    set_torch_seed()
+    set_torch_seed(cfg.seed)
 
     # Get output directory
     output_dir = Path(hydra.core.hydra_config.HydraConfig.get().runtime.output_dir)
@@ -185,40 +188,40 @@ def run_cv_cfg(cfg: DictConfig) -> None:
     X_unlabeled["bird_2024"] = X_unlabeled["bird_2024"][:1000]
     # Get output directory
     output_dir = Path(hydra.core.hydra_config.HydraConfig.get().runtime.output_dir)
-    # pred_args = setup_pred_args(pipeline=model_pipeline, output_dir=output_dir.as_posix(), data_dir=data_path, species_dir="data/raw/2024/train_audio/")
-    #
-    # logger.info("Making predictions on unlabeled soundscapes")
-    # predictions = model_pipeline.predict(X_unlabeled, **pred_args)
-    # fold_preds = predictions
-    # print(fold_preds.shape)
+    pred_args = setup_pred_args(pipeline=model_pipeline, output_dir=output_dir.as_posix(), data_dir=data_path, species_dir="data/raw/2024/train_audio/")
 
-    # # Find the pairs
-    # pairs = []
-    # for i in range(fold_no + 1):
-    #     pairs.extend(tuple(zip([i] * len(list(range(i + 1, fold_no + 1))), list(range(i + 1, fold_no + 1)))))
-    #
-    # print(pairs)
-    # corrs = {}
-    # # Find the pairwise correlation between all the arrays
-    # # make directory for output plots
-    # os.makedirs(output_dir / Path("fold_correlations"))
-    # for pair in pairs:
-    #     corr = np.corrcoef(x=fold_preds[pair[0]], y=fold_preds[pair[1]], rowvar=False)
-    #     corrs[pair] = corr[:182, 182:364]
-    #     plt.figure(figsize=(12, 12))
-    #     sns.heatmap(corrs[pair])
-    #     diag_corr = sum([corrs[pair][i, i] for i in range(corrs[pair].shape[0])]) / 182
-    #     corrs[pair] = diag_corr
-    #     plt.title(f"pair {pair} diag_corr:{diag_corr}")
-    #     plt.savefig(output_dir / Path("fold_correlations") / Path(f"{pair}.png"))
-    #
-    # mean_corr = 0
-    # for pair in corrs:
-    #     mean_corr += corrs[pair]
-    # if len(corrs) == 0:
-    #     mean_corr = 0
-    # else:
-    #     mean_corr /= len(corrs)
+    logger.info("Making predictions on unlabeled soundscapes")
+    predictions = model_pipeline.predict(X_unlabeled, **pred_args)
+    fold_preds = predictions
+    print(fold_preds.shape)
+
+    # Find the pairs
+    pairs = []
+    for i in range(fold_no + 1):
+        pairs.extend(tuple(zip([i] * len(list(range(i + 1, fold_no + 1))), list(range(i + 1, fold_no + 1)))))
+
+    print(pairs)
+    corrs = {}
+    # Find the pairwise correlation between all the arrays
+    # make directory for output plots
+    os.makedirs(output_dir / Path("fold_correlations"))
+    for pair in pairs:
+        corr = np.corrcoef(x=fold_preds[pair[0]], y=fold_preds[pair[1]], rowvar=False)
+        corrs[pair] = corr[:182, 182:364]
+        plt.figure(figsize=(12, 12))
+        sns.heatmap(corrs[pair])
+        diag_corr = sum([corrs[pair][i, i] for i in range(corrs[pair].shape[0])]) / 182
+        corrs[pair] = diag_corr
+        plt.title(f"pair {pair} diag_corr:{diag_corr}")
+        plt.savefig(output_dir / Path("fold_correlations") / Path(f"{pair}.png"))
+
+    mean_corr = 0
+    for pair in corrs:
+        mean_corr += corrs[pair]
+    if len(corrs) == 0:
+        mean_corr = 0
+    else:
+        mean_corr /= len(corrs)
 
     print_section_separator("CV - Results")
 
@@ -237,14 +240,14 @@ def run_cv_cfg(cfg: DictConfig) -> None:
         [wandb.log({f"Avg Score_{year}": avg_score[year]}) for year in avg_score] if isinstance(avg_score, dict) else wandb.log({"Avg Score": avg_score})
         wandb.log({"Score": avg_score["2024"]}) if isinstance(avg_score, dict) and "2024" in avg_score else None
 
-    # logger.info(f"Avg Score: {avg_score}")
+    logger.info(f"Avg Score: {avg_score}")
 
-    # wandb.log({"Fold correlations": str(corrs)})
-    # wandb.log({"Mean corr": mean_corr})
-    #
-    # # sweep score is score 2024 + weight* mean_corr
-    # sweep_score = avg_score["2024"] + cfg.corr_weight * mean_corr
-    # wandb.log({"Sweepscore": sweep_score})
+    wandb.log({"Fold correlations": str(corrs)})
+    wandb.log({"Mean corr": mean_corr})
+
+    # sweep score is score 2024 + weight* mean_corr
+    sweep_score = avg_score["2024"] + cfg.corr_weight * mean_corr
+    wandb.log({"Sweepscore": sweep_score})
 
     logger.info("Finishing wandb run")
     wandb.finish()

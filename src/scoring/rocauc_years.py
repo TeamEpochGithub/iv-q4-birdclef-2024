@@ -51,7 +51,6 @@ class ROCAUC(Scorer):
         # Retrieve the necessary keyword arguments
         test_indices: Mapping[str, Sequence[int]] = kwargs["test_indices"]
         years: Iterable[str] = kwargs["years"]
-        output_dir: str = kwargs.get("output_dir", "")
 
         # Create union metadata
         label_lookup = pd.concat([y_true[f"label_{year}"] for year in years]).fillna(0).reset_index(drop=True)

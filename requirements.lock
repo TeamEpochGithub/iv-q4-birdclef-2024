@@ -13,14 +13,14 @@
 -e file:.
 agogos==0.4
     # via epochalyst
-annotated-types==0.6.0
-    # via q4-bird-clef
+annotated-types==0.7.0
+    # via iv-q4-birdclef-2024
 antlr4-python3-runtime==4.9.3
     # via hydra-core
     # via omegaconf
 audioread==3.0.1
     # via librosa
-certifi==2024.2.2
+certifi==2024.6.2
     # via requests
     # via sentry-sdk
 cffi==1.16.0
@@ -33,24 +33,24 @@ click==8.1.7
 cloudpickle==3.0.0
     # via dask
 coloredlogs==15.0.1
+    # via iv-q4-birdclef-2024
     # via onnxruntime
-    # via q4-bird-clef
 contourpy==1.2.1
     # via matplotlib
 cycler==0.12.1
     # via matplotlib
-dask==2024.5.0
+dask==2024.6.0
     # via dask-expr
-    # via q4-bird-clef
-dask-expr==1.1.0
-    # via q4-bird-clef
+    # via iv-q4-birdclef-2024
+dask-expr==1.1.3
+    # via iv-q4-birdclef-2024
 decorator==5.1.1
     # via librosa
 docker-pycreds==0.4.0
     # via wandb
 epochalyst==0.3.2
-    # via q4-bird-clef
-filelock==3.14.0
+    # via iv-q4-birdclef-2024
+filelock==3.15.1
     # via huggingface-hub
     # via torch
     # via triton
@@ -58,9 +58,9 @@ fire==0.6.0
     # via randomname
 flatbuffers==24.3.25
     # via onnxruntime
-fonttools==4.51.0
+fonttools==4.53.0
     # via matplotlib
-fsspec==2024.3.1
+fsspec==2024.6.0
     # via dask
     # via huggingface-hub
     # via torch
@@ -68,12 +68,12 @@ gitdb==4.0.11
     # via gitpython
 gitpython==3.1.43
     # via wandb
-huggingface-hub==0.23.0
+huggingface-hub==0.23.4
     # via timm
 humanfriendly==10.0
     # via coloredlogs
 hydra-core==1.3.2
-    # via q4-bird-clef
+    # via iv-q4-birdclef-2024
 idna==3.7
     # via requests
 importlib-metadata==7.1.0
@@ -87,21 +87,21 @@ joblib==1.4.2
 kiwisolver==1.4.5
     # via matplotlib
 kornia==0.7.2
-    # via q4-bird-clef
+    # via iv-q4-birdclef-2024
 kornia-rs==0.1.3
     # via kornia
 lazy-loader==0.4
     # via librosa
-librosa==0.10.2
-    # via q4-bird-clef
-llvmlite==0.42.0
+librosa==0.10.2.post1
+    # via iv-q4-birdclef-2024
+llvmlite==0.43.0
     # via numba
 locket==1.0.0
     # via partd
 markupsafe==2.1.5
     # via jinja2
-matplotlib==3.8.4
-    # via q4-bird-clef
+matplotlib==3.9.0
+    # via iv-q4-birdclef-2024
     # via seaborn
 mpmath==1.3.0
     # via sympy
@@ -109,11 +109,12 @@ msgpack==1.0.8
     # via librosa
 networkx==3.3
     # via torch
-numba==0.59.1
+numba==0.60.0
     # via librosa
-numpy==1.26.4
+numpy==2.0.0
     # via contourpy
     # via epochalyst
+    # via iv-q4-birdclef-2024
     # via librosa
     # via matplotlib
     # via numba
@@ -121,7 +122,6 @@ numpy==1.26.4
     # via onnxruntime
     # via pandas
     # via pyarrow
-    # via q4-bird-clef
     # via scikit-learn
     # via scipy
     # via seaborn
@@ -150,18 +150,18 @@ nvidia-cusparse-cu12==12.1.0.106
     # via torch
 nvidia-nccl-cu12==2.19.3
     # via torch
-nvidia-nvjitlink-cu12==12.4.127
+nvidia-nvjitlink-cu12==12.5.40
     # via nvidia-cusolver-cu12
     # via nvidia-cusparse-cu12
 nvidia-nvtx-cu12==12.1.105
     # via torch
 omegaconf==2.3.0
     # via hydra-core
-onnx==1.16.0
-    # via q4-bird-clef
-onnxruntime==1.17.3
-    # via q4-bird-clef
-packaging==24.0
+onnx==1.16.1
+    # via iv-q4-birdclef-2024
+onnxruntime==1.18.0
+    # via iv-q4-birdclef-2024
+packaging==24.1
     # via dask
     # via huggingface-hub
     # via hydra-core
@@ -173,27 +173,27 @@ packaging==24.0
     # via pooch
 pandas==2.2.2
     # via dask-expr
-    # via q4-bird-clef
+    # via iv-q4-birdclef-2024
     # via seaborn
 partd==1.4.2
     # via dask
 pillow==10.3.0
     # via matplotlib
     # via torchvision
-platformdirs==4.2.1
+platformdirs==4.2.2
     # via pooch
     # via wandb
 plotly==5.22.0
-    # via q4-bird-clef
-pooch==1.8.1
+    # via iv-q4-birdclef-2024
+pooch==1.8.2
     # via librosa
-protobuf==4.25.3
+protobuf==5.27.1
     # via onnx
     # via onnxruntime
     # via wandb
 psutil==5.9.8
     # via wandb
-pyarrow==16.0.0
+pyarrow==16.1.0
     # via dask-expr
 pycparser==2.22
     # via cffi
@@ -211,26 +211,27 @@ pyyaml==6.0.1
     # via timm
     # via wandb
 randomname==0.2.1
-    # via q4-bird-clef
-requests==2.31.0
+    # via iv-q4-birdclef-2024
+requests==2.32.3
     # via huggingface-hub
     # via pooch
     # via wandb
 safetensors==0.4.3
     # via timm
-scikit-learn==1.4.2
+scikit-learn==1.5.0
+    # via iv-q4-birdclef-2024
     # via librosa
-    # via q4-bird-clef
-scipy==1.13.0
+scipy==1.13.1
+    # via iv-q4-birdclef-2024
     # via librosa
     # via scikit-learn
 seaborn==0.13.2
-    # via q4-bird-clef
-sentry-sdk==2.1.1
+    # via iv-q4-birdclef-2024
+sentry-sdk==2.5.1
     # via wandb
 setproctitle==1.3.3
     # via wandb
-setuptools==69.5.1
+setuptools==70.0.0
     # via wandb
 six==1.16.0
     # via docker-pycreds
@@ -242,48 +243,51 @@ soundfile==0.12.1
     # via librosa
 soxr==0.3.7
     # via librosa
-sympy==1.12
+sparsemax==0.1.9
+    # via iv-q4-birdclef-2024
+sympy==1.12.1
     # via onnxruntime
     # via torch
-tenacity==8.3.0
+tenacity==8.4.0
     # via plotly
 termcolor==2.4.0
     # via fire
 threadpoolctl==3.5.0
     # via scikit-learn
-timm==0.9.16
-    # via q4-bird-clef
+timm==1.0.3
+    # via iv-q4-birdclef-2024
 toolz==0.12.1
     # via dask
     # via partd
 torch==2.2.2+cu121
     # via epochalyst
+    # via iv-q4-birdclef-2024
     # via kornia
-    # via q4-bird-clef
+    # via sparsemax
     # via timm
     # via torchaudio
     # via torchvision
 torchaudio==2.2.2+cu121
-    # via q4-bird-clef
+    # via iv-q4-birdclef-2024
 torchvision==0.17.2+cu121
-    # via q4-bird-clef
+    # via iv-q4-birdclef-2024
     # via timm
 tqdm==4.66.4
     # via huggingface-hub
-    # via q4-bird-clef
+    # via iv-q4-birdclef-2024
 triton==2.2.0
     # via torch
-typing-extensions==4.11.0
+typing-extensions==4.12.2
     # via huggingface-hub
+    # via iv-q4-birdclef-2024
     # via librosa
-    # via q4-bird-clef
     # via torch
 tzdata==2024.1
     # via pandas
 urllib3==2.2.1
     # via requests
     # via sentry-sdk
-wandb==0.17.0
-    # via q4-bird-clef
-zipp==3.18.1
+wandb==0.17.1
+    # via iv-q4-birdclef-2024
+zipp==3.19.2
     # via importlib-metadata

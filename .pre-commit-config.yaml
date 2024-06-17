@@ -32,9 +32,13 @@ repos:
         args: [ "--pytest-test-first" ]
       - id: trailing-whitespace
   - repo: https://github.com/abravalheri/validate-pyproject
-    rev: v0.17
+    rev: v0.18
     hooks:
       - id: validate-pyproject
+  - repo: https://github.com/citation-file-format/cffconvert
+    rev: b6045d78aac9e02b039703b030588d54d53262ac
+    hooks:
+      - id: validate-cff
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
     hooks:
@@ -44,7 +48,7 @@ repos:
       - id: python-no-log-warn
       - id: python-use-type-annotations
   - repo: https://github.com/jackdewinter/pymarkdown
-    rev: v0.9.19
+    rev: v0.9.20
     hooks:
       - id: pymarkdown
         args:
@@ -52,7 +56,7 @@ repos:
           - "md013, MD041"  # Line length, First line in file should be a top level heading
           - "scan"
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.4
+    rev: v0.4.8
     hooks:
       - id: ruff-format
       - id: ruff

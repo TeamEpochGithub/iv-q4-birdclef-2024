@@ -62,8 +62,7 @@ class Accuracy(Scorer):
         # Calculate f1 score
         from sklearn.metrics import f1_score
 
-        f1 = f1_score(y_true, y_pred)
-        return f1
+        return f1_score(y_true, y_pred)
 
     def __str__(self) -> str:
         """Return the name of the scorer.

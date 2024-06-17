@@ -58,7 +58,7 @@ train_sys:
       persistent_workers: false
     n_folds: 5
     epochs: 50
-    patience: 166
+    patience: 14
     batch_size: 64
     model:
       _target_: src.modules.training.models.timm.Timm
@@ -83,9 +83,7 @@ train_sys:
       - _target_: hydra.utils.get_class
         path: torch.optim.AdamW
       lr: 0.0005
-  - _target_: src.modules.training.postprocessing.visualize_preds.VisualizePreds
-  - _target_: src.modules.training.postprocessing.multiply_mean.MultiplyMean
-  - _target_: src.modules.training.postprocessing.window_5s_to_10s.Window5sTo10s
+    ema_decay: 0.999
 pred_sys:
   _target_: src.modules.transformation.verbose_transformation_pipeline.VerboseTransformationPipeline
   title: Postprocessing pipeline

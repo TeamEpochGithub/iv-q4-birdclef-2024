@@ -1,8 +1,10 @@
 """Timm model for 2D image classification."""
 
-from typing import Any, Literal
+from typing import Any, Callable, Literal
 
 import torch
+from sparsemax import Sparsemax
+from torch import Tensor
 
 from src.utils.logger import logger
 
@@ -18,10 +20,10 @@ class Timm(torch.nn.Module):
 
     in_channels: int
     out_channels: int
-    activation: Literal["sigmoid"] | None
+    activation: Callable[[Tensor], Tensor]
     model: torch.nn.Module
 
-    def __init__(self, in_channels: int, out_channels: int, model_name: str, activation: Literal["sigmoid"] | None = None, **kwargs: Any) -> None:
+    def __init__(self, in_channels: int, out_channels: int, model_name: str, activation: Literal["sigmoid", "sparsemax"] | None = None, **kwargs: Any) -> None:
         """Initialize the Timm model.
 
         :param in_channels: The number of input channels.
@@ -39,7 +41,10 @@ class Timm(torch.nn.Module):
         super(Timm, self).__init__()  # noqa: UP008
         self.in_channels = in_channels
         self.out_channels = out_channels
-        self.activation = activation
+        if activation == "sparsemax":
+            self.activation = Sparsemax()
+        else:
+            self.activation = torch.sigmoid
 
         # Check if cuda is available
         if torch.cuda.is_available():
@@ -63,7 +68,5 @@ class Timm(torch.nn.Module):
         :return: The output data.
         """
         x = self.model(x)
-        # Apply a sigmoid
-        if self.activation == "sigmoid":
-            return torch.sigmoid(x)
+        x = self.activation(x)
         return x

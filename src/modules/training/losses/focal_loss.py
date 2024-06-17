@@ -85,8 +85,7 @@ class FocalLossBCEWithLogits(FocalLoss):
         if self.ignore_half_labels:
             loss *= targets != 0.5
 
-        loss = loss.mean()
-        return loss
+        return loss.mean()
 
 
 class FocalLossBCE(FocalLoss):
@@ -126,5 +125,4 @@ class FocalLossBCE(FocalLoss):
         if self.ignore_half_labels:
             loss *= targets != 0.5
 
-        loss = loss.mean()
-        return loss
+        return loss.mean()

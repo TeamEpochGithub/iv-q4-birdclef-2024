@@ -1,16 +1,15 @@
 """Wrapper class for a model that is meant to predict to things."""
 
 import torch
-from torch import nn
 
 
-class DoubleModel(nn.Module):
-    def __init__(self, model):
+class DoubleModel(torch.nn.Module):
+    def __init__(self, model: torch.nn.Module) -> None:
         """Initialize the model"""
         super().__init__()
         self.model = model
 
-    def forward(self, x: torch.Tensor):
+    def forward(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """Call forward ofthe original model"""
         # Assume the last output of the model is the call nocall pred
         preds = self.model(x)

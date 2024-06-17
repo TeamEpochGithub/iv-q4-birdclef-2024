@@ -1,8 +1,12 @@
 """A recursive repr method for classes that contain memory addresses in their repr."""
 
 
-def recursive_repr(obj):
-    """A recursive repr method for classes that contain memory addresses in their repr."""
+def recursive_repr(obj: object) -> str:
+    """Create a repr for objects that contain memory addresses in their repr.
+
+    :param obj: The object to create a repr for.
+    :return: The repr string.
+    """
     if hasattr(obj, "__dict__"):
         # Start constructing the representation string based on the class name
         repr_str = f"{obj.__class__.__name__}("
@@ -23,6 +27,5 @@ def recursive_repr(obj):
                 repr_str += f"{key}={value}"
         repr_str += ")"
         return repr_str
-    else:
-        # If no __dict__, return the default __repr__
-        return repr(obj)
+    # If no __dict__, return the default __repr__
+    return repr(obj)
