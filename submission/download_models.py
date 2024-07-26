@@ -41,7 +41,7 @@ def download_models() -> None:
             break
 
     if not is_sweep_run:
-        # Download the raw, human readable config file
+        # Download the raw, human-readable config file
         for file in config_artefact.files():
             if file.name not in ["config.yaml", "cv.yaml", "train.yaml"]:
                 print(f"Downloading {file.name} from {config_artefact.name}")

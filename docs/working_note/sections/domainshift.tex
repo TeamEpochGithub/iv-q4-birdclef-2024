@@ -1,0 +1,140 @@
+\section{Domain shift} \label{domain-shift}
+% \begin{itemize}
+%     \item Talk about CV vs LB observations.
+%     \item Why does our model suck at LB?!
+%         \item Noisier
+%         \item More birds at the same time more often instead of clear nearby recordings of a single bird species (Xeno canto)
+%         \item Difference in recording equipment
+%         \item More environmental noises (crickets, frogs)
+%         \item Regional call dialect shifts (Xeno canto also contains data outside the Western Ghats). / distribution shift
+%     \item Visualizing the shifts using TSNE Model embeddings (source vs target)
+%     \item Refer to the experimental setup and how that changed over the ablation study
+%     \item mention / 100  for inference to align contrasts of model trained on Xeno that does inference on the soundscapes
+% \end{itemize}
+The training data for this competition was sourced from a different domain than the test set for which the models are intended. This poses a problem that is highly relevant in non-competition settings, where (labelled) test data is not always available. The impact quickly becomes obvious, when observing that models can achieve above $0.99$ AUROC on held-out training data, but score below $0.70$ AUROC on the test set. In this section, we will hypothesize components of the discrepancy, guided by statistical analysis, knowledge about the data source, and visual inspection. Furthermore, we attempt to quantify the domain shift and measure the impact of techniques to mitigate the shift.
+
+\subsection{Mapping the datasets}
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/baseline/umap.png}
+        \caption{Distribution shift}
+        \label{fig:umap:shift}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/baseline/umap_labels.png}
+        \caption{Top-20 known labels}
+        \label{fig:umap:cls}
+    \end{subfigure}
+    \caption{UMAP Projection of activations of the last hidden layer, for 1000 train audio samples, and 1000 unlabeled soundscapes. Uses only the first five seconds per recording. (a) Shows all samples, coloured blue for train and red for test data. (b) Training samples for the 20 most common classes, coloured by class. This confirms that the embedding can achieve class separation for train audio.}
+    \label{fig:umap}
+\end{figure}
+We explored the train dataset and looked for differences with the unlabeled soundscapes, by making a visual overview. To ensure that we organize the audio in the way our model perceives it, we compared the activations of the last hidden layer of a baseline model, instead of the raw input. For both domains, the first five seconds of one thousand unique recordings were fed through the model. The activations were then projected using UMAP\cite{umap} onto $\mathcal{R}^2$. This shows that there is partial overlap between the domains, and part of the test domain seems completely outside of the training distribution (Figure \ref{fig:umap:shift}). 
+
+We then plotted the corresponding spectrograms at the positions of their UMAP embedding. This allowed us to understand and identify the different regions of the dataset manually, as shown in Figure \ref{fig:quadrants}. Quadrants I and II contain mostly no-calls. It makes sense for these to be outside of the training distribution, which should only have labelled bird calls. The difference appears to be that II is fully quiet, or at least has uniform noise, whereas I has noisy recordings with sounds other than birds. Most bird calls appear in  III and IV. III Contains mostly training data, which seems to be characterized by low-noise, high-contrast bird call recordings. Towards region IV there is a gradient of increasing amounts of test data. This seems characterized by high background-noise images with less contrast (the background looks consistently brighter) and horizontal stripes. We assume the horizontal stripes are likely insects, such as cicadas. Note that there are in fact some training samples that fit into this distribution, as can be seen in both Figure \ref{fig:umap:shift} and in the bottom right of \ref{fig:quadrants}.
+
+\begin{figure}[ht]
+    \centering
+    \begin{minipage}[t]{0.495\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/baseline/quadrants.png}
+    \end{minipage}%
+    \begin{minipage}[t]{0.495\linewidth}
+        \centering
+        \vspace{-\linewidth}
+        \subfloat{\includegraphics[width=0.5\linewidth]{images/baseline/II.png}}
+        \subfloat{\includegraphics[width=0.5\linewidth]{images/baseline/I.png}}\\
+        \subfloat{\includegraphics[width=0.5\linewidth]{images/baseline/III.png}}
+        \subfloat{\includegraphics[width=0.5\linewidth]{images/baseline/IV.png}}
+    \end{minipage}
+    \caption{The same UMAP projection as in Figure \ref{fig:umap}, where the samples are shown using their spectrograms. Blue outlines indicate train audio, and red outlines indicate unlabeled soundscapes. Training audio is annotated with the label. (left) The four quadrants we can divide the data into. (right) Zoomed-in sections of each quadrant.}
+    \label{fig:quadrants}
+\end{figure}
+
+\subsection{Shift causes}
+It is important to be cautious about assuming the nature of the problem. High train performance and low test performance on another domain seem to warrant (unsupervised) domain adaptation, to solve the apparent problem of domain shift. Well-documented forms include covariate shift, prior shift, or concept shift \cite{MORENOTORRES2012521}. These might be approached with feature-based sample weighting, class-based sample weighting, and deep domain adaptation methods respectively. However, all of these forms rely on the assumption that there is only one type of shift at a time and that some other factor remains constant. Furthermore, it is possible that generalisation is not an issue, and that the drop in score can be explained solely by the fact that the test domain is just uniformly more difficult and ambiguous. 
+
+With this caution in mind, we hypothesized three main contributors for the drop in score:
+\begin{enumerate}
+    \item The models underperform on no-call audio, which the Xeno-Canto training data does not contain.
+    \item The PAM test data are inherently more difficult and ambiguous to classify, even for models trained on it.
+    \item The PAM test data is shifted into feature distributions that our model has not encountered or generalized to properly during training.
+\end{enumerate}
+
+We exclude prior shift, or label balance, as a root cause. This is because the scoring metric is mostly class-balance invariant.
+
+Hypothesis 1 was confirmed by measuring the predictions on test samples from regions I and II that we confirmed to be no-calls. We observed that our model was consistently making predictions at around $0.5 \sim 0.6$ confidence. Those false positives occur across a handful of species. Mostly \texttt{browowl1}, \texttt{comior1} and \texttt{comkin1} for region I, and \texttt{woosan} for region II. We estimate this partly being due to a random bias, and correlated background noise. We have seen false \texttt{browowl1} positives for several models, possibly due to those samples being recorded for a nocturnal species with mostly quiet recordings and sometimes insects.
+
+Hypothesis 2 allows the possibility that test-like data is in fact represented in the train data, but at lower proportions. We might approximate the difficulty for the PAM-like samples, by measuring train scores in region IV. This resulted in a class-mean AUROC of $0.985$. This is clearly significantly higher than the leaderboard test score, also when regarding the small sample size (154 samples with 75 unique species). This evidence contradicts hypothesis 2. A reason for not rejecting it fully is that those train samples might not be representative of test data, and that they differ along a dimension that is not captured by UMAP. 
+
+Hypothesis 3 is the standard problem of models not generalizing to data that is outside of the training distribution. The main differences we noticed visually were the decreased contrast (low signal-to-noise ratio) and horizontal stripes from possibly insects. Furthermore, we observed more overlapping bird calls in the test soundscapes than in train audio. A participant in BirdCLEF 2023 mentioned reverb \cite{LASSECK2023}. This might also be the case, although we have not had the opportunity to verify this or test reverb augmentations.
+
+
+\subsection{Shift mitigation}
+
+\subsubsection{Call or no call classification}
+To mitigate the fact that our model underperforms on no-call audio, a two-stage pipeline was introduced. The first stage consists of training a model on the \texttt{Freefield1010} \cite{freefield} dataset to perform a binary classification task for every 5-second window to predict if there is a call or no call from birds, a f1-score of 0.810 was achieved for stage one.  If the first stage predicted that there was a no call in a 5-second window of a soundscape, all predictions were set to 0 and the second stage for this window was skipped, also saving important inference time. After empirical visual inspection of the soundscapes, the two-stage appear to be correct for silent soundscapes with an example in Figure \ref{fig:silentpreds} and \ref{fig:silent} illustrating predictions of our best submission compared to our two-stage approach on a silent soundscape. Interestingly, against our expectations, our public scores did not improve by submitting our two-stage approach. Further investigation with the labels of the test soundscapes is recommended to detect where our two-stage model is making its mistakes. 
+
+\subsubsection{Test Audio Scaling}
+In order to remove the shift between distributions as mentioned in hypothesis three, we tried two techniques. The first is to scale down the test audio during inference. Because we min-max scaled our spectrograms, this is analogous to increasing $\epsilon$ in the logarithmic scaling $\log({x + \epsilon})$ that we applied to spectrograms. We scale the audio down by a factor of $1/100$, which we found through empirical experimentation. The effect is an increased contrast, which visually makes the test data look more similar to the train data. We consistently achieved higher scores for both the public and private leaderboards as a result. 
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/division_factors/1527167div1.png}
+        \caption{Factor 1}
+        \label{fig:division_factor=1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/division_factors/1527167div100.png}
+        \caption{Factor 1/100}
+        \label{fig:division_factor=100}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/division_factors/1527167div500.png}
+        \caption{Factor 1/500}
+        \label{fig:division_factor=500}
+    \end{subfigure}
+    \caption{Scaling Effect on the first 5 seconds from \texttt{unlabeled\_soundscapes/1527167.ogg}}
+    \label{fig:division_factor}
+\end{figure}
+
+
+\subsubsection{Frequency-based noise removal}
+The second technique aims to remove ambient noise. It treats the audio as a sum of infrequent (bird) noises, and background noise that is stronger in some frequencies than others, but is constant over time. Visually, this means removing all horizontal stripes from spectrograms.
+
+To obtain a robust estimate of the background noise level per frequency, the quantile $q=0.25$ was used per row of the spectrogram. This implictly assumes that a bird call does not occupy the same frequency for more than three-quarters of the sample. If that assumption is true, the value will not be impacted by outliers from bird calls, which the mean would be sensitive to. This is then subtracted from the original image, an example is shown in figure \ref{fig:mednorm}.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/mednorm/pict.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.1\textwidth}
+        \centering
+        \includegraphics[width=0.1\textwidth]{images/mednorm/medwide.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \includegraphics[width=0.8\textwidth]{images/mednorm/pict-norm.png}
+    \end{subfigure}
+    \caption{(left) Original sample. (middle) The q=0.25 quantile per frequency, one dimensional. (right) after subtracting the quantile.}
+    \label{fig:mednorm}
+\end{figure}
+
+\subsubsection{Domain distance}\label{sec:dist}
+To quantify to which extent the two domains were becoming more similar, we used a modified Frechet Inception Distance \cite{heusel2018gans}. FID compares distributions of the activations of the last hidden layer of an Inception-v3 network between two datasets. We use the activations of our best-selected submission model instead. Because the goal was not to remove the discrepancy between call and no-call, that separation needed to be preserved, only regions III and I were used. We hypothesised that this could be used to estimate the impact of a shift mitigation technique, before training a model and evaluating it with test labels.
+
+\subsubsection{Deep Domain Adaptation}
+Some methods are developed specifically to mitigate the domain shift while training a deep learning model. Examples are DANN \cite{sicilia2022domain} and MDD \cite{Li_2021}. They take labelled train data and unlabeled test samples. We did not have success with these techniques, however. In part, this was due to the difficulty of tuning hyperparameters for the adversarial networks that they contain, which are prone to instability. An argument for why these techniques might not be suitable at all without modification is that their objective includes removing as much differences between train and test as possible. This could cause issues when a major difference is the existence of no-calls only in test. This might mean that optimising the objective requires removing the ability to tell bird calls from silence. 
+
+% This gives a baseline distance within III and IV of 48.378 between train (823 samples) and test (478 samples).

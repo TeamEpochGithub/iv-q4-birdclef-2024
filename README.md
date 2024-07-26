@@ -7,7 +7,12 @@
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
 
+# BirdCLEF 2024 - Best Working Note 🏆
+
 This is Team Epoch IV's solution to the [BirdCLEF 2024](https://www.kaggle.com/competitions/birdclef-2024/) competition, placed 247/992.
+
+The award-winning working note, [Addressing the Challenges of Domain Shift in Bird Call
+Classification for BirdCLEF 2024](./docs/working_note/Addressing_the_Challenges_of_Domain_Shift_in_Bird_Call_Classification_for_BirdCLEF_2024.pdf), is included in this repository at `./docs/working_note/`.
 
 ## Reproducing Our Best Submission
 
@@ -20,7 +25,7 @@ Models were trained on machines with the following specifications:
 - CPU: AMD Ryzen Threadripper Pro 3945WX 12-Core Processor / AMD Ryzen 9 7950X 16-Core Processor
 - GPU: NVIDIA RTX A5000 / NVIDIA RTX Quadro 6000 / NVIDIA RTX A6000
 - RAM: 96GB / 128GB
-- OS: Linux Ubuntu 23.10 / Arch Linux 2024.04.10
+- OS: Ubuntu 23.10 / Arch Linux 2024.04.10
 - Python: 3.10.13
 
 Estimated training time: 1-3 hours per model on these machines.

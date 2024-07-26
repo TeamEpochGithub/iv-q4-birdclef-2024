@@ -1,0 +1,135 @@
+\appendix
+
+\pagebreak
+\section{Extra visualizations}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{images/silences.png}
+    \caption{Predictions on \texttt{unlabelled\_soundscapes/969749.ogg}. Above is our best submission, below is our no-call two-stage config trained on \texttt{freefield1010}.}
+    \label{fig:silentpreds}
+\end{figure}
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.4\textwidth]{images/silentsoundscape.png}
+    \caption{Melspectrogram of \texttt{unlabelled\_soundscapes/969749.ogg}.}
+    \label{fig:silent}
+\end{figure}
+
+\pagebreak
+\section{Results}
+
+This section contains additional raw results from our experiments. 
+
+\subsection{Seed Stability}
+\begin{table}[h!]
+\caption{Public and private scores of our seed stability experiments referring to section \ref{seed}.}
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+Seed                       & Fold & Local              & Public LB & Private LB \\ \hline
+\multirow{5}{*}{4}         & 0    & 0.9725029805290062 & 0.664600  & 0.632564   \\ \cline{2-5} 
+                           & 1    & 0.9721286820877476 & 0.668787  & 0.643774   \\ \cline{2-5} 
+                           & 2    & 0.977704551531352  & 0.683795  & 0.640266   \\ \cline{2-5} 
+                           & 3    & 0.9681365574407902 & 0.660968  & 0.609359   \\ \cline{2-5} 
+                           & 4    & 0.9710765974889252 & 0.675150  & 0.626007   \\ \hline
+\multirow{5}{*}{1111}      & 0    & 0.9696436449770318 & 0.664878  & 0.628754   \\ \cline{2-5} 
+                           & 1    & 0.9769452863312144 & 0.662820  & 0.627614   \\ \cline{2-5} 
+                           & 2    & 0.9751090021447962 & 0.629374  & 0.626460   \\ \cline{2-5} 
+                           & 3    & 0.971353063769448  & 0.661280  & 0.642945   \\ \cline{2-5} 
+                           & 4    & 0.97246352665961   & 0.655700  & 0.618778   \\ \hline
+\multirow{5}{*}{789234}    & 0    & 0.9711130756503932 & 0.684964  & 0.633027   \\ \cline{2-5} 
+                           & 1    & 0.9779123620481512 & 0.666920  & 0.622572   \\ \cline{2-5} 
+                           & 2    & 0.9718111096006832 & 0.649368  & 0.632342   \\ \cline{2-5} 
+                           & 3    & 0.9753510191654698 & 0.649850  & 0.634721   \\ \cline{2-5} 
+                           & 4    & 0.974674509187293  & 0.669299  & 0.617909   \\ \hline
+\multirow{5}{*}{923948484} & 0    & 0.972626292971828  & 0.671356  & 0.633187   \\ \cline{2-5} 
+                           & 1    & 0.9726160377881716 & 0.658814  & 0.644254   \\ \cline{2-5} 
+                           & 2    & 0.9756232466898276 & 0.664013  & 0.639876   \\ \cline{2-5} 
+                           & 3    & 0.971870530276624  & 0.653071  & 0.639465   \\ \cline{2-5} 
+                           & 4    & 0.9724243997642767 & 0.668238  & 0.634289   \\ \hline
+\multirow{5}{*}{923948485} & 4    & 0.9750817450565112 & 0.677104  & 0.644832   \\ \cline{2-5} 
+                           & 1    & 0.9735544201342272 & 0.652362  & 0.625589   \\ \cline{2-5} 
+                           & 2    & 0.9752181693908796 & 0.671951  & 0.629559   \\ \cline{2-5} 
+                           & 3    & 0.9721216597194158 & 0.664733  & 0.651040   \\ \cline{2-5} 
+                           & 4    & 0.9679696078489052 & 0.651850  & 0.607342   \\ \hline
+\end{tabular}
+\label{tab:seed-stability-experiment-result}
+\end{table}
+
+% \begin{table}[h]
+% \begin{tabular}{|l|l|l|l|l|l|l|}
+% \hline
+% Seed                       & Fold & Corr\_F0 & Corr\_F1 & Corr\_F2 & Corr\_F3 & Corr\_F4 \\ \hline
+% \multirow{5}{*}{4}         & 0    & --       & 0.484741 & 0.491352 & 0.49825  & 0.483089 \\ \cline{2-7} 
+%                            & 1    & 0.484741 & --       & 0.479375 & 0.494769 & 0.478736 \\ \cline{2-7} 
+%                            & 2    & 0.491352 & 0.479375 & --       & 0.483274 & 0.465057 \\ \cline{2-7} 
+%                            & 3    & 0.49825  & 0.494769 & 0.483274 & --       & 0.471917 \\ \cline{2-7} 
+%                            & 4    & 0.483089 & 0.478736 & 0.465057 & 0.471917 & --       \\ \hline
+% \multirow{5}{*}{1111}      & 0    & --       & 0.48589  & 0.476252 & 0.479414 & 0.467333 \\ \cline{2-7} 
+%                            & 1    & 0.48589  & --       & 0.485687 & 0.475818 & 0.476457 \\ \cline{2-7} 
+%                            & 2    & 0.476252 & 0.485687 & --       & 0.466457 & 0.465462 \\ \cline{2-7} 
+%                            & 3    & 0.479414 & 0.475818 & 0.466457 & --       & 0.447328 \\ \cline{2-7} 
+%                            & 4    & 0.467333 & 0.476457 & 0.465462 & 0.447328 & --       \\ \hline
+% \multirow{5}{*}{789234}    & 0    & --       & 0.496422 & 0.492075 & 0.504809 & 0.489902 \\ \cline{2-7} 
+%                            & 1    & 0.496422 & --       & 0.492318 & 0.494613 & 0.476365 \\ \cline{2-7} 
+%                            & 2    & 0.492075 & 0.492318 & --       & 0.48877  & 0.486402 \\ \cline{2-7} 
+%                            & 3    & 0.504809 & 0.494613 & 0.48877  & --       & 0.472357 \\ \cline{2-7} 
+%                            & 4    & 0.489902 & 0.476365 & 0.486402 & 0.472357 & --       \\ \hline
+% \multirow{5}{*}{923948484} & 0    & --       & 0.481849 & 0.48681  & 0.474463 & 0.478495 \\ \cline{2-7} 
+%                            & 1    & 0.481849 & --       & 0.490853 & 0.490831 & 0.48038  \\ \cline{2-7} 
+%                            & 2    & 0.48681  & 0.490853 & --       & 0.495473 & 0.479763 \\ \cline{2-7} 
+%                            & 3    & 0.474463 & 0.490831 & 0.495473 & --       & 0.482297 \\ \cline{2-7} 
+%                            & 4    & 0.478495 & 0.48038  & 0.479763 & 0.482297 & --       \\ \hline
+% \multirow{5}{*}{923948485} & 0    & --       & 0.485434 & 0.462706 & 0.488537 & 0.479122 \\ \cline{2-7} 
+%                            & 1    & 0.485434 & --       & 0.46723  & 0.484814 & 0.483753 \\ \cline{2-7} 
+%                            & 2    & 0.462706 & 0.46723  & --       & 0.475796 & 0.476652 \\ \cline{2-7} 
+%                            & 3    & 0.488537 & 0.484814 & 0.475796 & --       & 0.483661 \\ \cline{2-7} 
+%                            & 4    & 0.479122 & 0.483753 & 0.476652 & 0.483661 & --       \\ \hline
+% \end{tabular}
+% \caption{Fold Correlation Matrices}
+% \label{tab:fold-correlation-matrices}
+% \end{table}
+
+\pagebreak
+\subsection{Ablation study}
+\begin{table}[h!]
+\caption{Public and private scores of the augmentation ablation study performed in section \ref{abl}.}
+\begin{tabular}{|l|l|l|l|}
+\hline
+Ablation                   & Fold & Public LB & Private LB \\ \hline
+\multirow{5}{*}{No Augmentations} & 0    & 0.635002  & 0.611164   \\ \cline{2-4} 
+                           & 1    & 0.610959  & 0.610434   \\ \cline{2-4} 
+                           & 2    & 0.630144  & 0.600282   \\ \cline{2-4} 
+                           & 3    & 0.620723  & 0.596746   \\ \cline{2-4} 
+                           & 4    & 0.598396  & 0.589628   \\ \hline
+\multirow{5}{*}{+ PhaseShift}   & 0    & 0.626281  & 0.595057   \\ \cline{2-4} 
+& 1    & 0.605735  & 0.588839   \\ \cline{2-4} 
+& 2    & 0.613994  & 0.597562   \\ \cline{2-4} 
+& 3    & 0.611792  & 0.606357   \\ \cline{2-4} 
+& 4    & 0.634171  & 0.607367   \\ \hline
+\multirow{5}{*}{+ AmplitudeShift}   & 0    & 0.629907  & 0.597048   \\ \cline{2-4} 
+                           & 1    & 0.590896  & 0.57918    \\ \cline{2-4} 
+                           & 2    & 0.627677  & 0.61518    \\ \cline{2-4} 
+                           & 3    & 0.631077  & 0.592303   \\ \cline{2-4} 
+                           & 4    & 0.627975  & 0.608342   \\ \hline
+\multirow{5}{*}{+ CutMix1D}     & 0    & 0.650119  & 0.616519   \\ \cline{2-4} 
+                           & 1    & 0.626682  & 0.601974   \\ \cline{2-4} 
+                           & 2    & 0.633204  & 0.595274   \\ \cline{2-4} 
+                           & 3    & 0.636626  & 0.590721   \\ \cline{2-4} 
+                           & 4    & 0.629955  & 0.605772   \\ \hline
+\multirow{5}{*}{+ MixUp1D} & 0    & 0.644002  & 0.604525   \\ \cline{2-4} 
+                           & 1    & 0.659341  & 0.631091   \\ \cline{2-4} 
+                           & 2    & 0.665605  & 0.642062   \\ \cline{2-4} 
+                           & 3    & 0.675107  & 0.645645   \\ \cline{2-4} 
+                           & 4    & 0.683710  & 0.630741   \\ \hline
+\multirow{5}{*}{+ CutMix2D}      & 0    & 0.657769  & 0.617192   \\ \cline{2-4} 
+                           & 1    & 0.659733  & 0.635748   \\ \cline{2-4} 
+                           & 2    & 0.648198  & 0.630082   \\ \cline{2-4} 
+                           & 3    & 0.659187  & 0.635762   \\ \cline{2-4} 
+                           & 4    & 0.66703   & 0.625469   \\ \hline
+
+\end{tabular}
+\label{tab:ablation-experiment-result}
+\end{table}

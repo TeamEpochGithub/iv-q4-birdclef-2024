@@ -1,0 +1,257 @@
+%% The first command in your LaTeX source must be the \documentclass command.
+%%
+%% Options:
+%% twocolumn : Two column layout.
+%% hf: enable header and footer.
+\documentclass[
+% twocolumn,
+% hf,
+]{ceurart}
+
+%%
+%% One can fix some overfulls
+\sloppy
+
+%%
+%% Minted listings support 
+%% Need pygment <http://pygments.org/> <http://pypi.python.org/pypi/Pygments>
+\usepackage{listings}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+%% auto break lines
+\lstset{breaklines=true}
+
+\begin{document}
+
+\copyrightyear{2024}
+\copyrightclause{Copyright for this paper by its authors.
+  Use permitted under Creative Commons License Attribution 4.0
+  International (CC BY 4.0).}
+
+\conference{CLEF 2024: Conference and Labs of the Evaluation Forum, September 09–12, 2024, Grenoble, France}
+
+\title{Addressing the Challenges of Domain Shift in Bird Call Classification for BirdCLEF 2024}
+
+\address[1]{TU Delft Dream Team Epoch | Dream Hall, Stevinweg 4, 2628 CN Delft, The Netherlands}
+
+\author[1]{Emiel Witting}[
+email=emiel.witting@gmail.com,
+url=https://github.com/EWitting,
+]
+ % (updated to match easychair author order)
+\author[1]{Hugo de Heer}[
+email=hugodeheer1234@gmail.com,
+url=https://github.com/hjdeheer,
+]
+
+\author[1]{Jeffrey Lim}[
+email=Jeffrey-Lim@outlook.com,
+url=https://github.com/Jeffrey-Lim,
+]
+
+\author[1]{Cahit Tolga Kopar}[
+email=cahittolgakopar@gmail.com,
+url=https://github.com/tolgakopar,
+]
+
+\author[1]{Kristóf Sándor}[
+email=Emherk512@gmail.com,
+url=https://github.com/emherk,
+]
+
+\fntext[1]{These authors contributed equally.}
+
+\begin{abstract}
+  This paper presents Team Epoch IV's solution to the BirdCLEF 2024 competition, which focuses on developing machine learning models for bird call recognition. The primary challenge in this competition is the significant domain shift between the Xeno-Canto recordings used for training and the passive acoustic monitoring (PAM) soundscapes used for testing. This shift poses difficulties due to differences in recording equipment, recording conditions, and background noise, which complicates accurate species identification. We delve into the specifics of this domain shift, quantifying its impact on model performance, and we propose methods to mitigate its effects. Our approach includes a comprehensive set of data augmentations and pre- and postprocessing techniques to enhance model robustness and generalization. We performed extensive experiments to verify the effectiveness of these methods. Our findings provide a foundation for future work in addressing domain shift challenges in bioacoustic monitoring, contributing to more accurate and reliable biodiversity assessments.
+\end{abstract}
+
+\begin{keywords}
+  Bird Species Classification \sep
+  Domain Shift \sep
+  Domain Adaptation \sep
+  Convolutional Neural Networks \sep
+  Deep Learning \sep
+  Passive Acoustic Monitoring \sep
+  Kaggle Competition
+\end{keywords}
+
+\maketitle
+
+\section{Introduction} \label{introduction}
+
+BirdCLEF 2024 \cite{birdclef2024} is a Kaggle competition aimed at advancing machine-learning solutions for bird call recognition, as part of LifeCLEF \cite{lifeclef2024}. The primary task involves developing data processing techniques and models to identify bird species from continuous audio recordings, specifically targeting under-studied Indian bird species in the Western Ghats. This competition holds value for biodiversity monitoring, as it leverages PAM to facilitate extensive and temporally detailed surveys, contributing to conservation efforts. 
+
+Participants face several notable challenges, primarily centred around the domain shift between the training data and test soundscapes. One of the main hurdles is the difference between the Xeno-Canto recordings used for training and the PAM soundscapes used for testing. This shift is exacerbated by the fact that Xeno-Canto recordings are not expert-labelled and do not provide labels for each five-second segment, but rather for the entire file. This lack of precise labelling makes it challenging to handle secondary labels accurately. The absence of PAM data in the training set poses a significant obstacle. Participants must develop models without having access to the same type of labelled data on which their models will be evaluated, which necessitates innovative approaches to generalize effectively. Additionally, the competition imposes a strict inference time limit of two hours on a CPU, requiring efficient algorithmic implementations.
+
+This paper presents Team Epoch IV's solution \cite{epoch2024identifying} to the BirdCLEF 2024 competition, with a primary focus on analyzing and addressing the domain shift challenge. We delve into the specifics of this shift and examine its impact on the discrepancy between local cross-validation scores and the public and private leaderboard scores. Our approach includes a detailed exploration of methods to mitigate these differences and enhance model performance across varied data domains.
+
+The paper is structured as follows: Section 2 describes our implementation strategy, including environmental setup, data preprocessing, data augmentation, model selection, and postprocessing techniques. Section 3 discusses the domain shift between training and test data. Section 4 presents our experiments and results, including an ablation study and seed stability analysis. Section 5 discusses our findings, and Section 6 concludes with future work and acknowledgements.
+
+\section{Implementation} \label{implementation} %Max 1.5 page
+In this section, we detail our implementation strategy employed for our participation in the BirdCLEF 2024 competition. Our approach encompasses environmental and training setup, data preprocessing, data augmentation, model selection, and postprocessing techniques.
+
+\subsection{Environmental setup} \label{environmental-setup}
+During the competition, we collaborated as a team. Instead of working in notebooks, which does not allow for streamlined collaboration, we developed and used our machine learning framework Epochalyst \cite{epoch2024epochalyst}. This package contains many modules and classes extracted from previous Epoch \cite{TeamEpoch} competition experience to start new competitions quickly. Epochalyst makes use of hydra to load in configuration \texttt{.yaml} files that specify full training or ensemble runs and instantiate elements directly into Python objects for efficient development. We used Rye \cite{ronacher2024rye} for project \& package management and designed a custom lazy loading multiprocessing pipeline for loading audio using Dask \cite{dask2024} and Librosa \cite{librosa}. PyTorch \cite{pytorch} was utilized as the main framework for training, with additional libraries such as Timm \cite{timm} for using various 2D Convolutional Neural Network architectures. Additionally, for an extra \textasciitilde 2× inference speed up, ONNX \cite{onnx} and OpenVINO \cite{openvino} were used to maximise performance. Models were trained on on-site hardware running Linux \cite{ubuntu}, specifically on PCs running AMD Ryzen 9 7950X 16-Core Processor (96GB RAM) with an NVIDIA RTX A5000 GPU using Python 3.10.13. Model training and run artefacts were logged on Weights \& Biases \cite{wandb} to keep a clear overview of all of our experiments.
+
+\subsection{Data Preprocessing} \label{data-preprocessing}
+The BirdCLEF 2024 training dataset consists of 24459 audio \texttt{.ogg} files uploaded by users of Xeno-Canto \cite{xeno}, consisting of 182 different bird species. All the training audio has been resampled to 32 kHz to match the test soundscape sampling rate. We did not obtain improved results pretraining on more data from previous BirdCLEF competitions, therefore we only used this year's data for our final submission. For training, we used a 5-fold CV with a stratified split based on the primary label of the audio file. This ensures that the species are equally represented in each fold. Taking the first 5 seconds of each audio file seemed to be optimal since the bird calls of the recordings had a higher probability of appearing early in the uploaded recordings. Some Xeno-Canto files also contained secondary labels of bird species that appeared in addition to the primary bird. For these, we set the secondary labels to $0.5$ and the primary labels to $1$, because the primary birds were consistently more audible in the audio files compared to the secondary birds.
+
+
+%\begin{itemize}
+%    \item MelSpec 224 × 224
+%    \item First 5 seconds
+%    \item Secondary labels to 0.5 
+%\end{itemize}
+    
+\subsection{Data Augmentation} \label{data-augmentation}
+We have implemented several data augmentation techniques to increase the robustness of our models and to address the domain shift between the training data and the test soundscapes. Our full augmentation pipeline can be seen below. Some of the augmentations are 1D, which means they are applied to the raw audio signal. Afterwards, we converted the signal to Mel spectrograms of $256\times256$ pixels, with a frequency range of 1Hz to 16kHz, which are then further normalized so that all values are in the range of 0 to 1. As a last step in our custom dataset, some 2D augmentations are applied. 
+
+\subsubsection*{1D-Augmentations}
+\begin{itemize}
+    \item Randomly shifting the phase of each frequency component of the signal with $p=0.5$ and a shift\_limit $=0.5$.\footnote{This does not influence the magnitude spectrum taken over the whole recording, but when windowed magnitude spectra are extracted it has the effect seen in Figure \ref{fig:augmentations}}\footnote{shift\_limit in the range [0,1] corresponds to a phase shift of [0,2$\pi$]}
+    \item Randomly shifting the amplitude of each frequency component of the signal with $p=0.5$.
+    \item MixUp \cite{zhang2018mixup}\ with $p=0.5$: \\
+    Linearly interpolating both features and labels of two samples, with random weights.
+    \item CutMix \cite{yun2019cutmix} with $p=0.5$:\\
+    Randomly cropping and replacing part of a sample with another sample. The labels are averaged linearly with weights proportional to the length/area of each sample.
+\end{itemize}
+\subsubsection*{2D-Augmentations}
+\begin{itemize}
+    \item CutMix with $p=0.5$.
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{images/augmentations.png}
+    \caption{Example of our augmentation pipeline applied to a training image. (Left to right, top to bottom)}
+    \label{fig:augmentations}
+\end{figure}
+Figure \ref{fig:augmentations} above visualizes our augmentation pipeline. The phase shift aims to simulate background noise in bird regions, in an effort to reduce the shift between the clear training examples and the noisy soundscapes. Amplitude shift amplifies different frequencies in the signal domain to enhance robustness against bird volume variance, since there are birds in the soundscapes that are in close proximity to the recording location whilst others might be located further away. Afterwards, the CutMix1D and MixUp1D are applied in the signal domain to improve learning when there are multiple birds in the same audio file, which is a common occurrence for the soundscapes. Finally, a CutMix2D is applied after converting the previous pipeline to a Mel spectrogram. An ablation study of these augmentations can be found in section \ref{abl}.
+
+\subsection{Models} \label{models}
+We mainly used Timm \cite{timm} for straightforward model development where we experimented with various architectures. Some of the best encoders that we have found were: \texttt{convnext\_tiny} and \texttt{eca\_nfnet\_l0}. The \texttt{convnext\_tiny} model got the highest public leaderboard score of $0.701$ while we observed it being more unstable over multiple submitted training runs. \texttt{eca\_nfnet\_l0}, on the other hand, had a slightly lower public score of $0.688$ but we found it to be a more stable model during experimentation. We decided to submit these two models: the more stable one and the less stable one but with a higher public score. During training for 50 epochs total with an initial learning rate of $1e{-4}$, Binary Cross-Entropy \cite{bce} loss was used with an AdamW \cite{adam} optimizer. A single cycle \texttt{CosineAnnealing} learning rate scheduler was employed with a slight warmup of 2 epochs to ensure initial stability. Furthermore, models had a sigmoid activation function to ensure that the logits ranged between 0 and 1. Local evaluation was done on every 5 seconds of each file, using the AUROC \cite{rocauc} metric where we observed a significant shift between our local scores and public scores. We were able to optimize our local scores to \textasciitilde $0.995$ AUROC, by adding dropout, training on multiple datasets from previous BirdCLEF \footnote{BirdCLEF 2020, 2021,2022 and 2023 Xeno-Canto and labelled soundscape data retrieved from Zenodo.} competitions and including additional augmentations. However, any optimization above \textasciitilde $0.98$ local, caused the public score to drop significantly. Therefore observing an overfitting pattern on Xeno-Canto data while reducing the performance on the soundscapes, proposing us to focus on minimizing the shift and not optimizing on training data.
+
+\subsection{Postprocessing}
+The test soundscapes are 4 minutes long, where we have to predict for each 5-second window resulting in 48 predictions per soundscape. We calculate the mean bird species probability per soundscape over the 48 windows and multiply each individual prediction by the mean of the soundscape it is in. The reasoning behind this was that we saw that birds usually appear multiple times per recording, so the mean should be high for birds that are truly in the audio. This improved our scores consistently with \textasciitilde $0.02$ on public and private.
+
+\input{sections/domainshift}
+
+\section {Experiments} \label{results}
+
+This section contains experiments regarding our ablation study in section \ref{abl} and seed stability experiments in section \ref{seed}. To verify the significance of improvements in the ablation study, we also investigated the effect of randomness on the leaderboard performance. For this, experiments with the same configuration but with various seeds that affect the data split, augmentations, and model weight initialization the stability of our models have been trained and evaluated. 
+
+
+% \begin{itemize}
+%     \item 3 Experiments: Ablation study + seed stability + fold correlation 
+%     \item Model used, all runs explained (remove 1 Aug at the time) 5 CV fold it, submit each fold.
+%     \item Preprocessing steps explained
+%     \item Chosen model + motivation
+%     \item Evaluation metric for source - target domain shift
+%     \item Log public / private + std + public-private difference
+% \end{itemize}
+
+\subsection{Ablation Study} \label{abl}
+In our ablation study, we aim to analyse the effect of our augmentations. We performed 6 training runs of our best submission model with 5-fold CV, where we added one augmentation at a time. We submitted each fold individually, resulting in 30 total submissions. From Figure \ref{fig:ablstudy} we can observe a very high score variance within folds and a positive correlation of $0.85$ between public and private. The \textit{Leaderboard} group in the boxplot contains a weighted average of the public and private score and is calculated as follows: 35\% Public Score + 65\% Private Score. MixUp1D resulted in the most significant improvement of \textasciitilde $0.03$ on the Kaggle leaderboard.
+
+\begin{figure}[h!]
+    \centering
+    \hspace*{-1cm}
+    \includegraphics[width=1.1\textwidth]{images/ablation.png}
+    \caption{Ablation study of augmentations (left) and Public and Private correlation (right)}
+    \label{fig:ablstudy}
+\end{figure}
+
+
+\subsection{Seed Stability} \label{seed}
+
+For our seed stability experiment, we used the model pipeline from our best submission and retrained that model 5 times with different seeds for 5-fold CV each. We made late submissions on Kaggle for each fold, resulting in a total of 25 variations of the same model. The public and private leaderboard scores of these models are shown in figures \ref{fig:seed-stability-lb-scores} and \ref{fig:seed-stability-lb-corr}.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.39\textwidth}
+        \centering
+        \includegraphics[width=0.6\textwidth]{images/seed_stability/public_private_boxplots.png}
+        \caption{Distribution of Public \& Private LB Scores}
+        \label{fig:seed-stability-lb-scores}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.6\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/seed_stability/public_private_correlation.png}
+        \caption{Correlation between Public \& Private LB Scores: \texttt{0.25}}
+        \label{fig:seed-stability-lb-corr}
+    \end{subfigure}
+    \caption{Seed Stability: Public and Private Leaderboard Score}
+    \label{fig:seed-stability}
+\end{figure}
+
+There is a significant variance for both the public and private leaderboard scores with the same model. More specifically, the public leaderboard scores have a standard deviation of $0.01197$ and the private leaderboard scores have a standard deviation of $0.01091$. Furthermore, we can observe a slight correlation of $0.25$ between public and private leaderboard scores by only varying the seed of the run configuration.
+
+It is worth noting that while various assembling techniques can be used to stabilize models, this is not always possible due to the strict CPU inference time limit.
+
+\subsection{Shift mitigation}
+To evaluate the effect of shift mitigation using the test-time scaling and frequency-based filter, 5 submissions were made for each, along with a baseline. For the frequency normalized the model was trained again with the filter applied, but the test scaling was performed at inference time with the original model weights. Again, these 5 submissions are the results of training on a different fold. The results are shown in \ref{fig:shiftresults}, the score is calculated as 35\% Public Score + 65\% Private Score. Both methods improve the baseline, audio scaling most significantly.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{images/shiftresults.png}
+    \caption{Combined leaderboard scores across five folds of the same model. Comparing the baseline against test-time audio rescaling and the frequency-based filter.}
+    \label{fig:shiftresults}
+\end{figure}
+
+% mention 3 distances
+For these three techniques, we measure the distance between train and test distributions as described in section \ref{sec:dist}. This was measured only for data that was in regions III and IV in the original UMAP projection, with the same model that generated figure \ref{fig:umap}. For the baseline, the modified FID was $41.4$, by applying the frequency-based filter to all data, the distance shrank to $37.6$. When instead rescaling only the test audio by $1/100$, it increased to $46.7$.
+
+\section{Discussion} \label{discussion}
+
+\subsection*{Augmentations}
+From our ablation study in section \ref{abl} we found that MixUp1D was one of the best-performing augmentations. We suppose this is due to the soundscapes consisting of more birds simultaneously compared to our training data. MixUp increases the models' capability of learning different birds at the same time. The CutMix augmentations did not result in a significant improvement, after further analysis we observed that CutMix often cuts out a bird call and replaces it with a silent section of another bird audio fragment, therefore confusing the model with learning it to annotate a silence with a bird call. We consider that the PhaseShift augmentation was set to be too extreme, therefore adding too much noise and reducing the models' capacity to learn the visual bird call patterns. On the contrary, the AmplitudeShift performance was inconclusive and we suggest tuning it to higher intensity to have more effect.
+
+\subsection*{Seed stability}
+An interesting observation was that we found that our models were in general quite unstable. During our experimentation we did not find any way of locally evaluating our models, therefore we relied on the public leaderboard. In our experiments specified in section \ref{seed}, we perceived that the same model configuration trained on a different seed could significantly change the public and private leaderboard performance. Therefore, indicating that randomness was highly involved during our experimentation phase. During this phase, we implemented novel ideas and the only way we found to evaluate the idea was by making a submission. However, we might have discarded ideas that got an 'unlucky' low public score due to the elevated randomness, which was better if we had analysed the average over multiple submissions. Furthermore, it is also interesting to note that the public and private scores have a slight correlation on submitting different seeds, which could indicate that optimizing the seed on the public leaderboard could also transfer to a higher private score.
+
+\subsection*{Shift mitigation}
+Visualizing and interacting with the datasets helped us understand the differences between train and test. This guided us towards two techniques that visually removed the shift and also improved scores on the test set. However, we are not certain about the impact of the no-call segments. While it seemed that there were many false positives, the two-stage approach did not solve this problem. This might be caused by not optimizing the two-stage model sufficiently, but it is also surprising that out of the top 5 solutions for BirdCLEF 2024, nobody seemed to get consistent improvements by using a call/no-call model, even though it has been used successfully in other editions. Furthermore, it is not clear what proportion of the score drop is caused by the shift in regions III and IV as in figure \ref{fig:quadrants}, or false positives. We are not able to confirm this without access to the labels.
+
+Unfortunately, decreasing the FID distance between domains does not guarantee an improved test score and vice-versa. While the distance only increased for scaling and decreased for the filter, the score improved for both. The distance change might be explained by the fact that scaling was only applied to the test data, which introduces a synthetic shift that can be measured but does not negatively impact the model. The frequency-based noise filter was applied on both datasets instead of only one and removed shift distance as intended.
+
+\section{Conclusion} \label{conclusion}
+In this paper, we presented our solution for the BirdCLEF 2024 competition, focusing on the challenge of domain shift between the training and test datasets. Our approach includes shift mitigation through data augmentation and preprocessing. We evaluated the stochasticity of the results and performed experiments with thorough 5-fold validation. 
+
+We found that:
+\begin{itemize}
+    \item Domain Shift Mitigation: Applying frequency-based noise removal and scaling test samples, as guided by exploratory data analysis, proved successful. This introduces a novel filter that could be applicable to other PAM audio classification problems and generally highlights the importance of investigating the aspects of domain shift.
+    \item Data Augmentation: MixUp1D applied to audio is a particularly effective technique. This is likely due to the presence of multiple bird calls per recording in the test soundscapes. Other augmentations such as CutMix and PhaseShift did not yield improvements, these might need to be adapted or excluded in similar experiments.
+    \item Seed stability: Our seed stability experiments revealed substantial variance in public and private leaderboard scores, emphasizing the impact of randomness in model training. This underscores the importance of averaging results over multiple seeds to obtain a reliable performance estimate. It also implies that conclusions based on the competition outcome should be drawn with caution if scores are close.
+    \item Call/No Call Classification: Implementing a two-stage pipeline for call/no call classification did not result in the expected score improvements. This suggests that our current implementation may need refinement or that the issue of false positives might be more complex than anticipated.
+\end{itemize}
+
+Overall, our findings indicate that addressing domain shift is crucial for achieving robust performance in bird call classification tasks. Our methods provide a foundation for future work, including further refinement of data augmentation techniques, deeper analysis of domain shift, and more sophisticated model evaluation strategies.
+
+In conclusion, while we achieved notable improvements, the BirdCLEF 2024 competition highlighted the ongoing challenges in developing models that generalize well across different acoustic environments. Our results underscore the need for continuous innovation and experimentation in tackling domain shift and enhancing model robustness.
+
+\subsection{Future work} \label{future-work}
+Looking ahead, several avenues for future research and experimentation emerge from our findings. First of all, during our experimentation phase, we might have discarded ideas because they were based on a single submission. Due to the observed impact of randomness on the scores, several ideas that were initially discarded are worth investigating again, including:
+\begin{itemize}
+    \item Alternating Ensemble: For every 4-minute soundscape, corresponding to 48 windows, let $n$ different models predict the windows alternately, followed by averaging neighbouring window predictions. In this way, we are able to ensemble without increasing inference time.
+    \item Pretraining on previous years: Rerun experiments where we append BirdCLEF data including soundscape PAM data from Zenodo.
+    \item Two-stage refinement: Refining the two-stage pipeline approach and incorporating more sophisticated methods for distinguishing between bird calls and background noise in addition to the freefield1010 dataset.
+    \item Longer Window Models: Experimenting with models that process longer audio windows (e.g., 10 seconds) could provide more context and improve classification accuracy.
+    \item Multi-Channel Spectrograms: Investigating the use of multi-channel spectrograms to capture richer audio information.
+\end{itemize}
+Secondly, obtaining and analyzing the labels of the test soundscapes would allow us to validate our hypotheses about domain shift and the effectiveness of our mitigation techniques.
+Finally, we encourage the competition hosts to analyze the best solutions to the competition again. It could be very insightful to measure the score when excluding no-calls, or excluding overlapping bird calls, to isolate the effects.
+
+
+\begin{acknowledgments}
+We would like to thank the organizers of the BirdCLEF 2024 competition and all involved institutions. We extend our thanks to all the participants of the BirdCLEF 2024 competition who were active in the Kaggle discussion forums for their ongoing efforts in advancing the field of bioacoustics and biodiversity monitoring. Your dedication and collaboration are instrumental in driving forward conservation efforts worldwide.
+\end{acknowledgments}
+
+\bibliography{bibliography}
+
+\input{sections/appendix}
+
+\end{document}

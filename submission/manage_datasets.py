@@ -17,7 +17,7 @@ TM_HASH = [
 
 def verify_config() -> None:
     print_section_separator("Verify the config files.")
-    # Check if kaggle API is setup and installed
+    # Check if kaggle API is set up and installed
     try:
         import kaggle
     except OSError as e:
@@ -33,7 +33,7 @@ def verify_config() -> None:
     source_config = json.load(open(source_path))
     dependencies_config = json.load(open(dependencies_path))
 
-    # Check if dependencies is setup
+    # Check if dependencies is set up
     if source_config["title"] == ".placeholder":
         print("You have not setup the title of the source.json file. Let's do that now.")
         title = input("  - Enter the title of the dataset: ")
